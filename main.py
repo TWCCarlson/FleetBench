@@ -4,12 +4,16 @@ from modules import toolBar
 from config import appearanceValues
 from modules import mainView
 from modules import contextView
+from modules import mapDataClass
 
 class App(tk.Tk):
     def __init__(self):
         # Main window config
         tk.Tk.__init__(self)
         self.title("Warehousing Simulator")
+
+        # Map information class
+        self.mapData = mapDataClass(self)
 
         # Window components
         # Appearance

@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import messagebox
+
 
 class commandBar(tk.Menu):
     def __init__(self, parent):
@@ -13,6 +15,8 @@ class FileCommands(tk.Menu):
         tk.Menu.__init__(self, parent, tearoff=0)
         # Establish structure
         self.parent = parent
+        self.refMainApp = parent.parent
+        self.refMapData = parent.parent.mapData
 
         # Add menu functions
         # Pass the function as a callback instead of calling it
@@ -25,12 +29,27 @@ class FileCommands(tk.Menu):
         self.parent.add_cascade(label="File", menu=self)
 
     def newSession(self):
+        # Prompt save
+        self.promptSave()
         # Create a new session
+        self.promptLoadMap()
         print("New Session")
+
+    def promptLoadMap(self):
+        messageBox = tk.messagebox.askquestion(title = "New Session",
+            message="Load a map? This will close the current session.")
+        if messageBox=="yes":
+            print("Load new map")
+            self.refMapData.ingestMapFromJSON()
 
     def openSession(self):
         # Open a saved session
+        self.promptSave()
         print("Open Session")
+
+    def promptSave(self):
+        # Create a message box asking to save the current session
+        print("Save?")
 
     def saveSession(self):
         # Save a session
