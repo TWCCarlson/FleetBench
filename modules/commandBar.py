@@ -46,6 +46,7 @@ class FileCommands(tk.Menu):
         # Open a saved session
         self.promptSave()
         print("Open Session")
+        self.refMapData.debugMap()
 
     def promptSave(self):
         # Create a message box asking to save the current session

@@ -27,6 +27,9 @@ class App(tk.Tk):
         # Right pane contains contextual information pane
         self.contextView = contextView(self)
 
+        # Build cross-class references
+        self.mapData.buildReferences()
+
         # Render the app
         self.mainloop()
 

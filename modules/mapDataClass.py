@@ -16,9 +16,18 @@ class mapDataClass:
         # Create the graph object
         self.mapGraph = nx.Graph()
 
+    def debugMap(self):
+        path = "./test_cases/compass_test.txt"
+        mapData = json.load(open(path, "r"))
+        self.loadMapToNetworkX(mapData)
+
+    def buildReferences(self):
+        self.mainView = self.parent.mainView
+
     def ingestMapFromJSON(self):
         # Choose map data file to load
         path = tk.filedialog.askopenfile(title="Load Map JSON", filetypes = [("Text", ".txt")])
+        print(path)
         if path != None:
             mapData = json.load(path)
             # pp.pprint(mapData)
@@ -49,7 +58,7 @@ class mapDataClass:
             # Add nodes to the graph with name
             self.mapGraph.add_node(nodeName, pos=nodePosition, type=nodeType, edgeDirs=nodeEdges)
         
-        print(self.mapGraph.nodes.data())
+        # print(self.mapGraph.nodes.data())
         # Add edges based on the nodelist
         for node in self.mapGraph.nodes.data():
             # Generate nodes it should be connected to
@@ -58,17 +67,17 @@ class mapDataClass:
             # Take the base position
             nodePosition = (nodeData['pos']['X'], nodeData['pos']['Y'])
             # Calculate candidates based on edges
-            print(node[0])
-            print(nodeData)
+            # print(node[0])
+            # print(nodeData)
 
             if nodeData['edgeDirs']['N'] == 1:
                 candidateN = str((nodePosition[0], nodePosition[1]-1)).replace(" ", "")
-                print(candidateN)
+                # print(candidateN)
                 # Check if the candidate node exists
                 if candidateN in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
                     if self.mapGraph.nodes.data()[candidateN]['edgeDirs']['S'] == 1:
-                        print("exists:" + str(candidateN) + "->" + str(node[0]))
+                        # print("exists:" + str(candidateN) + "->" + str(node[0]))
                         self.mapGraph.add_edge(node[0], candidateN)
 
             if nodeData['edgeDirs']['W'] == 1:
@@ -77,7 +86,7 @@ class mapDataClass:
                 if candidateW in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
                     if self.mapGraph.nodes.data()[candidateW]['edgeDirs']['E'] == 1:
-                        print("exists:" + str(candidateW) + "->" + str(node[0]))
+                        # print("exists:" + str(candidateW) + "->" + str(node[0]))
                         self.mapGraph.add_edge(node[0], candidateW)
 
             if nodeData['edgeDirs']['S'] == 1:
@@ -86,7 +95,7 @@ class mapDataClass:
                 if candidateS in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
                     if self.mapGraph.nodes.data()[candidateS]['edgeDirs']['N'] == 1:
-                        print("exists:" + str(candidateS) + "->" + str(node[0]))
+                        # print("exists:" + str(candidateS) + "->" + str(node[0]))
                         self.mapGraph.add_edge(node[0], candidateS)
 
             if nodeData['edgeDirs']['E'] == 1:
@@ -95,21 +104,23 @@ class mapDataClass:
                 if candidateE in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
                     if self.mapGraph.nodes.data()[candidateE]['edgeDirs']['W'] == 1:
-                        print("exists:" + str(candidateE) + "->" + str(node[0]))
+                        # print("exists:" + str(candidateE) + "->" + str(node[0]))
                         self.mapGraph.add_edge(node[0], candidateE)
         
         try:
             pos = {node: eval(node) for node in self.mapGraph}
-            tsm = TSM(self.mapGraph, pos)
-            tsm.display()
-            plt.subplot(111)
-            nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
-            plt.show()
+            # tsm = TSM(self.mapGraph, pos)
+            # tsm.display()
+            # plt.subplot(111)
+            # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
+            # plt.show()
+            self.mainView.mainCanvas.renderGraphState(self.mapGraph)
         except:
             tk.messagebox.showwarning(title="Failed to load map", message="Map's graph is invalid. Verify there are no unconnected nodes...")
-            plt.subplot(111)
-            nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
-            plt.show()
+            # plt.subplot(111)
+            # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
+            # plt.show()
+            self.mainView.mainCanvas.renderGraphState(self.mapGraph)
 
         
         # for node in self.mapGraph:
