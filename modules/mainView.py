@@ -9,6 +9,9 @@ class mainView(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
 
+        # Map data reference
+        self.mapData = self.parent.mapData.mapGraph
+
         # Fetch styling
         self.appearanceValues = self.parent.appearance
         frameHeight = self.appearanceValues.mainViewHeight
@@ -191,12 +194,10 @@ class mainCanvas(tk.Canvas):
         for node in graphData.nodes.data():
             # Break out the data
             nodeName = node[0]
-            pp.pprint(node[1])
             nodeData = node[1]
             nodePosX = nodeData["pos"]["X"]
             nodePosY = nodeData["pos"]["Y"]
             nodeEdges = nodeData["edgeDirs"]
-            print(nodeEdges["E"] == 1)
             # If the node has an edge in a direction
             if nodeEdges["N"] == 1:
                 # Calculate what the node it is trying to connect to should be
@@ -220,9 +221,7 @@ class mainCanvas(tk.Canvas):
                     )
             if nodeEdges["E"] == 1:
                 # Calculate what the node it is trying to connect to should be
-                print("====")
                 edgeTarget = "(" + str(nodePosX+1) + "," + str(nodePosY) + ")"
-                print(str(nodeData["pos"])+ " " + str(edgeTarget))
                 # Check that node is not connected to target by a real edge
                 if graphData.has_edge(nodeName, edgeTarget):
                     pass
@@ -277,5 +276,15 @@ class mainCanvas(tk.Canvas):
                         width=3,
                         tags=["danglingEdge"]
                     )
-
-            
+        self.sortCanvasLayers()
+        
+    def sortCanvasLayers(self):
+        # Orders the stuff on the canvas to a default order
+        # Find all objects with each tag
+        # Pull them to the front in the right order
+        
+        # Node icons on top
+        objs = self.find_withtag("nodes")
+        for obj in objs:
+            self.lift(obj)
+        print("sort canvas")
