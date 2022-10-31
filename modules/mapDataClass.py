@@ -16,12 +16,8 @@ class mapDataClass:
         # Create the graph object
         self.mapGraph = nx.Graph()
 
-    def debugMap(self):
-        path = "./test_cases/compass_test.txt"
-        mapData = json.load(open(path, "r"))
-        self.loadMapToNetworkX(mapData)
-
     def buildReferences(self):
+        # print("==")
         self.mainView = self.parent.mainView
 
     def ingestMapFromJSON(self):
