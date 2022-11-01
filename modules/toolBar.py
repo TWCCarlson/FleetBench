@@ -15,4 +15,4 @@ class toolBar(tk.Frame):
             borderwidth=frameBorderWidth, 
             relief=frameRelief)
         # Render frame
-        self.grid(row=0, column=0)
+        self.grid(row=0, column=0, rowspan=2, sticky=tk.N)

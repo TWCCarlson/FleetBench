@@ -5,6 +5,7 @@ from config import appearanceValues
 from modules import mainView
 from modules import contextView
 from modules import mapDataClass
+from modules import infoBox
 
 class App(tk.Tk):
     def __init__(self):
@@ -22,6 +23,8 @@ class App(tk.Tk):
         self.commandBar = commandBar(self)
         # Left pane contains choices and buttons
         self.toolBar = toolBar(self)
+        # Central pane info box
+        self.infoBox = infoBox(self)
         # Central pane contains the graph display
         self.mainView = mainView(self)
         # Right pane contains contextual information pane

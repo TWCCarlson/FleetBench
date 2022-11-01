@@ -1,14 +1,26 @@
+import tkinter as tk
 from tkinter import RIDGE
 
 class appearanceValues():
     def __init__(self, parent):
+        self.parent = parent
+        # Get screen dimensions for fractional measurements
+        screen_width = self.parent.winfo_screenwidth()
+        screen_height = self.parent.winfo_screenheight()
+        self.parent.state('zoomed')
+        window_unusable = screen_height * 0.04
+
         # Toolbar style
-        self.toolBarHeight = 1030
-        self.toolBarWidth = 325
+        self.toolBarHeight = screen_height - window_unusable
+        self.toolBarWidth = 0.15 * screen_width
+
+        # Infobox style
+        self.infoBoxHeight = 0.04 * screen_height
+        self.infoBoxWidth = 0.7 * screen_width
 
         # Mainview style
-        self.mainViewHeight = 1030
-        self.mainViewWidth = 1250
+        self.mainViewHeight = screen_height - self.infoBoxHeight - window_unusable
+        self.mainViewWidth = 0.7 * screen_width
         self.canvasBackgroundColor = "light gray"
         self.canvasDefaultWidth = 2000
         self.canvasDefaultHeight = 2000
@@ -17,8 +29,8 @@ class appearanceValues():
         self.canvasGridlineColor = "black"
 
         # Contextview style
-        self.contextViewHeight = 1030
-        self.contextViewWidth = 335
+        self.contextViewHeight = screen_height - window_unusable
+        self.contextViewWidth = 0.15 * screen_width
 
         # Frame style
         self.frameBorderWidth = 5

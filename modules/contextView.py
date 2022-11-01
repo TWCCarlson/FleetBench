@@ -15,4 +15,4 @@ class contextView(tk.Frame):
             borderwidth=frameBorderWidth, 
             relief=frameRelief)
         # Render frame
-        self.grid(row=0, column=2)
+        self.grid(row=0, column=2, rowspan=2, sticky=tk.N)

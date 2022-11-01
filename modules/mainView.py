@@ -28,7 +28,7 @@ class mainView(tk.Frame):
 
         # Render frame within the app window context
         self.grid_propagate(False)
-        self.grid(row=0, column=1)
+        self.grid(row=1, column=1, sticky=tk.N)
         
         # Build the canvas containing the display information
         self.mainCanvas = mainCanvas(self, self.appearanceValues)
