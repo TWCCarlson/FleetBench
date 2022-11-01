@@ -7,15 +7,16 @@ class appearanceValues():
         # Get screen dimensions for fractional measurements
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
-        self.parent.state('zoomed')
         window_unusable = screen_height * 0.04
+        # Set app to maximized
+        self.parent.state('zoomed')
 
         # Toolbar style
         self.toolBarHeight = screen_height - window_unusable
         self.toolBarWidth = 0.15 * screen_width
 
         # Infobox style
-        self.infoBoxHeight = 0.04 * screen_height
+        self.infoBoxHeight = 0.032 * screen_height
         self.infoBoxWidth = 0.7 * screen_width
 
         # Mainview style

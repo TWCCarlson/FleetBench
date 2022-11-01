@@ -137,19 +137,19 @@ class mainCanvas(tk.Canvas):
             # Set the node style
             if nodeType == "edge":
                 fillColor = "light blue"
-                tags = ["nodes", "openNode"]
+                tags = ["node", "openNode"]
             elif nodeType == "charge":
                 fillColor = "yellow"
-                tags = ["nodes", "chargeNode"]
+                tags = ["node", "chargeNode"]
             elif nodeType == "deposit":
                 fillColor = "light green"
-                tags = ["nodes", "depositNode"]
+                tags = ["node", "depositNode"]
             elif nodeType == "pickup":
                 fillColor = "light blue"
-                tags = ["nodes", "pickupNode"]
+                tags = ["node", "pickupNode"]
             elif nodeType == "rest":
                 fillColor = "brown"
-                tags = ["nodes", "restNode"]
+                tags = ["node", "restNode"]
 
             # Draw the node
             self.create_oval(
@@ -276,6 +276,8 @@ class mainCanvas(tk.Canvas):
                         width=3,
                         tags=["danglingEdge"]
                     )
+
+            self.setAllLayersVisible()
         self.sortCanvasLayers()
         
     def sortCanvasLayers(self):
@@ -284,7 +286,59 @@ class mainCanvas(tk.Canvas):
         # Pull them to the front in the right order
         
         # Node icons on top
-        objs = self.find_withtag("nodes")
+        objs = self.find_withtag("node")
         for obj in objs:
             self.lift(obj)
         print("sort canvas")
+        self.setAllLayersVisible()
+
+    def setAllLayersVisible(self):
+        # Mark layer states
+        self.danglingEdgeVisibility = True
+        self.edgeVisibility = True
+        self.nodeVisibility = True
+
+        # Update the checkboxes
+        self.infoBoxButtons = self.parent.parent.infoBox.infoBoxFrame
+        self.infoBoxButtons.danglingEdgeTick.select()
+        self.infoBoxButtons.edgeTick.select()
+        self.infoBoxButtons.nodeTick.select()
+
+    def toggleDanglingEdgeVisibility(self):
+        # Find all objects tagged as "danglingEdge"
+        objs = self.find_withtag("danglingEdge")
+        # Invert their state
+        if self.danglingEdgeVisibility == True:
+            self.danglingEdgeVisibility = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            self.danglingEdgeVisibility = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+
+    def toggleEdgeVisibility(self):
+        # # Find all objects tagged as "edge"
+        objs = self.find_withtag("edge")
+        # # Invert their state
+        if self.edgeVisibility == True:
+            self.edgeVisibility = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            self.edgeVisibility = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+
+    def toggleNodeVisibility(self):
+        # Find all objects tagged as "node"
+        objs = self.find_withtag("node")
+        # Invert their state
+        if self.nodeVisibility == True:
+            self.nodeVisibility = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            self.nodeVisibility = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
