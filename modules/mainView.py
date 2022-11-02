@@ -160,7 +160,7 @@ class mainCanvas(tk.Canvas):
                 tags = ["node", "restNode"]
 
             # Draw the node
-            nodeImage = self.create_oval(
+            self.create_oval(
                 nodePosGraphX - nodeSizeRatio * tileSize,
                 nodePosGraphY - nodeSizeRatio * tileSize,
                 nodePosGraphX + nodeSizeRatio * tileSize,
@@ -171,7 +171,6 @@ class mainCanvas(tk.Canvas):
 
     def renderEdges(self, graphData):
         # Display connected edges
-        print(graphData.edges())
         for edge in graphData.edges():
             # Break the edge into its 2 nodes
             firstPoint = edge[0]

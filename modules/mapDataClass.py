@@ -23,7 +23,6 @@ class mapDataClass:
     def ingestMapFromJSON(self):
         # Choose map data file to load
         path = tk.filedialog.askopenfile(title="Load Map JSON", filetypes = [("Text", ".txt")])
-        print(path)
         if path != None:
             mapData = json.load(path)
             # pp.pprint(mapData)
