@@ -45,7 +45,7 @@ class mapDataClass:
             # nodePositionList.append(node['nodePosition'])
             # nodeTypeList.append(node['nodeType'])
             # nodeEdgeList.append(node['nodeEdges'])
-            nodeName = "(" + str(node['nodePosition']['X']) + "," + str(node['nodePosition']['Y']) + ")"
+            nodeName = "(" + str(node['nodePosition']['X']) + ", " + str(node['nodePosition']['Y']) + ")"
             nodePosition = node['nodePosition']
             nodeType = node['nodeType']
             nodeEdges = node['nodeEdges']

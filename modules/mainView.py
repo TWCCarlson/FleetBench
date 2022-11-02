@@ -1,7 +1,6 @@
 import tkinter as tk
 import math
 import pprint
-import json
 pp = pprint.PrettyPrinter(indent=4)
 from config.appearanceValues import appearanceValues
 
@@ -93,7 +92,7 @@ class mainCanvas(tk.Canvas):
         self.parent.rowconfigure(0, weight=1)
         self.grid(column=0, row=0, sticky=tk.N+tk.S+tk.E+tk.W)
 
-        # Draw gridlines, mostly for debug
+        # Draw gridlines
         self.drawGridlines()
 
     def drawGridlines(self):
@@ -121,8 +120,15 @@ class mainCanvas(tk.Canvas):
         tileSize = self.appearanceValues.canvasTileSize
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
         # Draw nodes, being sure to tag them for ordering and overlaying
-        # pp.pprint(graphData)
-        # pp.pprint(graphData.nodes.data())
+        self.renderNodes(graphData, tileSize, nodeSizeRatio)
+        self.renderEdges(graphData, tileSize)
+        self.renderDanglingEdges(graphData, tileSize)
+        self.generateHoverInfo(graphData)
+        self.setAllLayersVisible()
+        self.sortCanvasLayers()
+        
+    def renderNodes(self, graphData, tileSize, nodeSizeRatio):
+        # Display nodes in graph
         for node in graphData.nodes.data():
             # Break down the data
             nodeData = node[1]
@@ -152,7 +158,7 @@ class mainCanvas(tk.Canvas):
                 tags = ["node", "restNode"]
 
             # Draw the node
-            self.create_oval(
+            nodeImage = self.create_oval(
                 nodePosGraphX - nodeSizeRatio * tileSize,
                 nodePosGraphY - nodeSizeRatio * tileSize,
                 nodePosGraphX + nodeSizeRatio * tileSize,
@@ -160,7 +166,8 @@ class mainCanvas(tk.Canvas):
                 fill = fillColor,
                 tags=tags
             )
-        
+
+    def renderEdges(self, graphData, tileSize):
         # Display connected edges
         for edge in graphData.edges():
             # Break the edge into its 2 nodes
@@ -190,6 +197,7 @@ class mainCanvas(tk.Canvas):
                 tags=["edge"]
             )
 
+    def renderDanglingEdges(self, graphData, tileSize):
         # Display dangling edges
         for node in graphData.nodes.data():
             # Break out the data
@@ -277,9 +285,12 @@ class mainCanvas(tk.Canvas):
                         tags=["danglingEdge"]
                     )
 
-            self.setAllLayersVisible()
-        self.sortCanvasLayers()
-        
+    def generateHoverInfo(self, graphData):
+        # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
+        # Place one in each cell of the grid that contains a node
+        for node in graphData.nodes.data():
+            print(node)
+
     def sortCanvasLayers(self):
         # Orders the stuff on the canvas to a default order
         # Find all objects with each tag
