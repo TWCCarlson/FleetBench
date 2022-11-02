@@ -18,6 +18,7 @@ class appearanceValues():
         # Infobox style
         self.infoBoxHeight = 0.032 * screen_height
         self.infoBoxWidth = 0.7 * screen_width
+        self.infoBoxFont = ('Segoe UI', 11, 'bold')
 
         # Mainview style
         self.mainViewHeight = screen_height - self.infoBoxHeight - window_unusable

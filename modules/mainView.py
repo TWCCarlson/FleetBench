@@ -1,6 +1,8 @@
 import tkinter as tk
 import math
 import pprint
+from functools import partial
+from PIL import Image, ImageDraw, ImageTk
 pp = pprint.PrettyPrinter(indent=4)
 from config.appearanceValues import appearanceValues
 
@@ -121,9 +123,9 @@ class mainCanvas(tk.Canvas):
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
         # Draw nodes, being sure to tag them for ordering and overlaying
         self.renderNodes(graphData, tileSize, nodeSizeRatio)
-        self.renderEdges(graphData, tileSize)
+        self.renderEdges(graphData)
         self.renderDanglingEdges(graphData, tileSize)
-        self.generateHoverInfo(graphData)
+        self.generateHoverInfo(graphData, tileSize)
         self.setAllLayersVisible()
         self.sortCanvasLayers()
         
@@ -142,7 +144,7 @@ class mainCanvas(tk.Canvas):
             
             # Set the node style
             if nodeType == "edge":
-                fillColor = "light blue"
+                fillColor = "blue"
                 tags = ["node", "openNode"]
             elif nodeType == "charge":
                 fillColor = "yellow"
@@ -167,8 +169,9 @@ class mainCanvas(tk.Canvas):
                 tags=tags
             )
 
-    def renderEdges(self, graphData, tileSize):
+    def renderEdges(self, graphData):
         # Display connected edges
+        print(graphData.edges())
         for edge in graphData.edges():
             # Break the edge into its 2 nodes
             firstPoint = edge[0]
@@ -209,7 +212,7 @@ class mainCanvas(tk.Canvas):
             # If the node has an edge in a direction
             if nodeEdges["N"] == 1:
                 # Calculate what the node it is trying to connect to should be
-                edgeTarget = "(" + str(nodePosX) + "," + str(nodePosY-1) + ")"
+                edgeTarget = "(" + str(nodePosX) + ", " + str(nodePosY-1) + ")"
                 # Check that node is not connected to target by a real edge
                 if graphData.has_edge(nodeName, edgeTarget):
                 # if edgeTarget in graphData.neighbors(nodeName):
@@ -229,7 +232,7 @@ class mainCanvas(tk.Canvas):
                     )
             if nodeEdges["E"] == 1:
                 # Calculate what the node it is trying to connect to should be
-                edgeTarget = "(" + str(nodePosX+1) + "," + str(nodePosY) + ")"
+                edgeTarget = "(" + str(nodePosX+1) + ", " + str(nodePosY) + ")"
                 # Check that node is not connected to target by a real edge
                 if graphData.has_edge(nodeName, edgeTarget):
                     pass
@@ -248,7 +251,7 @@ class mainCanvas(tk.Canvas):
                     )
             if nodeEdges["W"] == 1:
                 # Calculate what the node it is trying to connect to should be
-                edgeTarget = "(" + str(nodePosX-1) + "," + str(nodePosY) + ")"
+                edgeTarget = "(" + str(nodePosX-1) + ", " + str(nodePosY) + ")"
                 # Check that node is not connected to target by a real edge
                 if edgeTarget in graphData.neighbors(nodeName):
                     pass
@@ -267,7 +270,7 @@ class mainCanvas(tk.Canvas):
                     )
             if nodeEdges["S"] == 1:
                 # Calculate what the node it is trying to connect to should be
-                edgeTarget = "(" + str(nodePosX) + "," + str(nodePosY+1) + ")"
+                edgeTarget = "(" + str(nodePosX) + ", " + str(nodePosY+1) + ")"
                 # Check that node is not connected to target by a real edge
                 if edgeTarget in graphData.neighbors(nodeName):
                     pass
@@ -285,11 +288,35 @@ class mainCanvas(tk.Canvas):
                         tags=["danglingEdge"]
                     )
 
-    def generateHoverInfo(self, graphData):
+    def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
         # Place one in each cell of the grid that contains a node
         for node in graphData.nodes.data():
-            print(node)
+            # Break down the data
+            nodeData = node[1]
+            nodePosX = nodeData["pos"]["X"]
+            nodePosY = nodeData["pos"]["Y"]
+            nodeType = nodeData["type"]
+            # Create the transparent object
+            # Use PIL workaround to create a transparent image, tk.Canvas does not support alpha channels (????)
+            tileImage = Image.new('RGBA', (tileSize, tileSize), (255, 255, 255, 0))
+            tileImage = ImageTk.PhotoImage(tileImage)
+            tileObject = self.create_image(
+                nodePosX * tileSize,
+                nodePosY * tileSize,
+                image=tileImage,
+                anchor=tk.NW,
+                tags=["infoTile"]
+            )
+            # Assign the mouseover event to it
+            # Tkinter automatically passes the event object to the handler
+            self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
+            self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, str(node[0])+": "+nodeType.capitalize()))
+            
+
+    def infoHoverEnter(self, nodeName, event):
+        self.infoBoxFrame = self.parent.parent.infoBox.infoBoxFrame
+        self.infoBoxFrame.hoverInfoText.set(nodeName)
 
     def sortCanvasLayers(self):
         # Orders the stuff on the canvas to a default order
@@ -298,6 +325,10 @@ class mainCanvas(tk.Canvas):
         
         # Node icons on top
         objs = self.find_withtag("node")
+        for obj in objs:
+            self.lift(obj)
+        # Invisible infoTile layer
+        objs = self.find_withtag("infoTile")
         for obj in objs:
             self.lift(obj)
         print("sort canvas")

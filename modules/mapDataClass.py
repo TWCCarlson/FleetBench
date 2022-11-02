@@ -67,7 +67,7 @@ class mapDataClass:
             # print(nodeData)
 
             if nodeData['edgeDirs']['N'] == 1:
-                candidateN = str((nodePosition[0], nodePosition[1]-1)).replace(" ", "")
+                candidateN = str((nodePosition[0], nodePosition[1]-1))
                 # print(candidateN)
                 # Check if the candidate node exists
                 if candidateN in self.mapGraph.nodes:
@@ -77,7 +77,7 @@ class mapDataClass:
                         self.mapGraph.add_edge(node[0], candidateN)
 
             if nodeData['edgeDirs']['W'] == 1:
-                candidateW = str((nodePosition[0]-1, nodePosition[1])).replace(" ", "")
+                candidateW = str((nodePosition[0]-1, nodePosition[1]))
                 # Check if the candidate node exists
                 if candidateW in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
@@ -86,7 +86,7 @@ class mapDataClass:
                         self.mapGraph.add_edge(node[0], candidateW)
 
             if nodeData['edgeDirs']['S'] == 1:
-                candidateS = str((nodePosition[0], nodePosition[1]+1)).replace(" ", "")
+                candidateS = str((nodePosition[0], nodePosition[1]+1))
                 # Check if the candidate node exists
                 if candidateS in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
@@ -95,7 +95,7 @@ class mapDataClass:
                         self.mapGraph.add_edge(node[0], candidateS)
 
             if nodeData['edgeDirs']['E'] == 1:
-                candidateE = str((nodePosition[0]+1, nodePosition[1])).replace(" ", "")
+                candidateE = str((nodePosition[0]+1, nodePosition[1]))
                 # Check if the candidate node exists
                 if candidateE in self.mapGraph.nodes:
                     # Check if the candidate node has an edge in this direction
