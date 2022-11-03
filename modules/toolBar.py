@@ -60,11 +60,23 @@ class toolBar(tk.Frame):
 
         # Coordinate Entry boxes and labels
         self.entryXValue = tk.StringVar()
-        self.entryYValue = tk.StringVar()
         self.entryXLabel = tk.Label(self.agentDataFrame, text="X Position: ", width=8)
-        self.entryX = tk.Entry(self.agentDataFrame, width=10, textvariable=self.entryXValue)
+        self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
+        self.entryX = tk.Entry(self.agentDataFrame, 
+            width=10, 
+            textvariable=self.entryXValue,
+            validate='all',
+            validatecommand=(self.highlightXPos, '%P')
+            )
+        self.entryYValue = tk.StringVar()
         self.entryYLabel = tk.Label(self.agentDataFrame, text="Y Position: ", width=8)
-        self.entryY = tk.Entry(self.agentDataFrame, width=10, textvariable=self.entryYValue)
+        self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
+        self.entryY = tk.Entry(self.agentDataFrame, 
+            width=10, 
+            textvariable=self.entryYValue,
+            validate='all',
+            validatecommand=(self.highlightYPos, '%P')
+            )
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
         self.entryYLabel.grid(row=2, column=0, sticky=tk.E)
@@ -96,6 +108,39 @@ class toolBar(tk.Frame):
             self.agentFrame.rowconfigure(row, weight=0)
         for col in range(self.agentFrame.grid_size()[1]):
             self.agentFrame.columnconfigure(col, weight=0)
+
+    def highlightTargetXPos(self, xPos):
+        print("set highlight x")
+        # xPos = self.entryXValue.get()
+        print("X: " + str(xPos.isnumeric()))
+        if xPos.isnumeric():
+            self.highlightTargetTile(xPos, None)
+            return True
+        else:
+            print("x NaN")
+            return False
+
+    def highlightTargetYPos(self, yPos):
+        print("set highlight y")
+        # yPos = self.entryYValue.get()
+        print("Y: " + str(yPos.isnumeric()))
+        if yPos.isnumeric():
+            self.highlightTargetTile(None, yPos)
+            return True
+        else:
+            print("y NaN")
+            return False
+
+    def highlightTargetTile(self, xPos, yPos):
+        print("highlight cell")
+        # If an input is Nonetype, fetch it from its entry variable
+        if xPos == None:
+            xPos = self.entryXValue.get()
+        elif yPos == None:
+            yPos = self.entryYValue.get()
+        # If both inputs are numeric, try to render the cell highlight
+        if xPos.isnumeric() and yPos.isnumeric():
+            print("cell highlighted: (" + xPos + ", " + yPos + ")")
 
     def placeholder(self):
         print(self.entryXValue.get() + ", " + self.entryYValue.get())
