@@ -13,21 +13,21 @@ class appearanceValues():
 
         # Toolbar style
         self.toolBarHeight = screen_height - window_unusable
-        self.toolBarWidth = 0.15 * screen_width
+        self.toolBarWidth = 0.2 * screen_width
 
         # Infobox style
         self.infoBoxHeight = 0.032 * screen_height
-        self.infoBoxWidth = 0.7 * screen_width
+        self.infoBoxWidth = 0.65 * screen_width
         self.infoBoxFont = ('Segoe UI', 11, 'bold')
 
         # Mainview style
         self.mainViewHeight = screen_height - self.infoBoxHeight - window_unusable
-        self.mainViewWidth = 0.7 * screen_width
+        self.mainViewWidth = 0.65 * screen_width
         self.canvasBackgroundColor = "light gray"
         self.canvasDefaultWidth = 2000
         self.canvasDefaultHeight = 2000
         self.canvasTileSize = 48
-        self.canvasTileCircleRatio = 0.25
+        self.canvasTileCircleRatio = 0.3
         self.canvasGridlineColor = "black"
 
         # Contextview style

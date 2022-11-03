@@ -1,7 +1,5 @@
 import tkinter as tk
 
-from config.appearanceValues import appearanceValues
-
 class infoBox(tk.Frame):
     def __init__(self, parent):
         self.parent = parent

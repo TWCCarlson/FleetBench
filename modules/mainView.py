@@ -4,7 +4,7 @@ import pprint
 from functools import partial
 from PIL import Image, ImageDraw, ImageTk
 pp = pprint.PrettyPrinter(indent=4)
-from config.appearanceValues import appearanceValues
+import networkx as nx
 
 class mainView(tk.Frame):
     def __init__(self, parent):
@@ -132,11 +132,23 @@ class mainCanvas(tk.Canvas):
     def renderNodes(self, graphData, tileSize, nodeSizeRatio):
         # Display nodes in graph
         for node in graphData.nodes.data():
+            # print(nx.get_node_attributes(graphData, node))
+            # print(node)
             # Break down the data
             nodeData = node[1]
             nodePosX = nodeData["pos"]["X"]
             nodePosY = nodeData["pos"]["Y"]
             nodeType = nodeData["type"]
+
+            print("=========")
+            print(node[1])
+            # nx.set_node_attributes(graphData, ' ', node[0])
+            attr = {node[0]: {'agent': 'exists'}}
+            # node[1]['agent'] = 'exists'
+            nx.set_node_attributes(graphData, attr)
+            pp.pprint(graphData.nodes.data())
+            del graphData.nodes[node[0]]['agent']
+            pp.pprint(graphData.nodes.data())
 
             # Identify the center of the canvas tile
             nodePosGraphX = self.graphCoordToCanvas(nodePosX)
