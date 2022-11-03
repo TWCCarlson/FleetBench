@@ -324,7 +324,6 @@ class mainCanvas(tk.Canvas):
             self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
             self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, str(node[0])+": "+nodeType.capitalize()))
             
-
     def infoHoverEnter(self, nodeName, event):
         self.infoBoxFrame = self.parent.parent.infoBox.infoBoxFrame
         self.infoBoxFrame.hoverInfoText.set(nodeName)
@@ -395,3 +394,39 @@ class mainCanvas(tk.Canvas):
             self.nodeVisibility = True
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
+
+    def highlightTile(self, tileIDX, tileIDY):
+        # Clear the old highlights before drawing this singular highlight
+        self.clearHighlight()
+        
+        # Draw a translucent highlight over the indicated cell for user guidance
+        # tileSize = self.appearanceValues.canvasTileSize
+        tileSize = self.appearanceValues.canvasTileSize
+        self.images = []
+        tileObject = self.create_rect(
+            eval(tileIDX) * tileSize,
+            eval(tileIDY) * tileSize,
+            eval(tileIDX) * tileSize + tileSize,
+            eval(tileIDY) * tileSize + tileSize,
+            anchor=tk.NW,
+            fill='red',
+            alpha=0.1,
+            tags=["infoTile"]
+        )
+
+    def clearHighlight(self):
+        objs = self.find_withtag("highlight")
+        for obj in objs:
+            obj.destroy()
+
+    def create_rect(self, x1, y1, x2, y2, **kwargs):
+        if 'alpha' in kwargs:
+            alpha = int(kwargs.pop('alpha') * 255)
+            fill = kwargs.pop('fill')
+            anchor = kwargs.pop('anchor')
+            tags = kwargs.pop('tags')
+            fill = self.parent.parent.winfo_rgb(fill) + (alpha,)
+            image = Image.new('RGBA', (x2-x1, y2-y1), fill)
+            self.images.append(ImageTk.PhotoImage(image))
+            self.create_image(x1, y1, image=self.images[-1], anchor=anchor, tags=tags)
+        self.create_rectangle(x1, y1, x2, y2, **kwargs)

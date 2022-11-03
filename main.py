@@ -33,6 +33,7 @@ class App(tk.Tk):
         # Build cross-class references
         self.mapData.buildReferences()
         self.infoBox.buildReferences()
+        self.toolBar.buildReferences()
 
         # Render the app
         self.mainloop()

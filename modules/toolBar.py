@@ -22,6 +22,9 @@ class toolBar(tk.Frame):
         # Establish buttons and inputs
         self.initUI()
 
+    def buildReferences(self):
+        self.mainView = self.parent.mainView
+
     def initUI(self):
         print("Create toolbar ui elements")
         # Create a labeled container
@@ -110,29 +113,28 @@ class toolBar(tk.Frame):
             self.agentFrame.columnconfigure(col, weight=0)
 
     def highlightTargetXPos(self, xPos):
-        print("set highlight x")
-        # xPos = self.entryXValue.get()
-        print("X: " + str(xPos.isnumeric()))
+        # If input is a number, pass it to the highlight draw function
         if xPos.isnumeric():
             self.highlightTargetTile(xPos, None)
             return True
+        elif len(xPos) == 0:
+            # Allow the box to be empty
+            return True
         else:
-            print("x NaN")
             return False
 
     def highlightTargetYPos(self, yPos):
-        print("set highlight y")
-        # yPos = self.entryYValue.get()
-        print("Y: " + str(yPos.isnumeric()))
+        # If input is a number, pass it to the highlight draw function
         if yPos.isnumeric():
             self.highlightTargetTile(None, yPos)
             return True
+        elif len(yPos) == 0:
+            # Allow the box to be empty
+            return True
         else:
-            print("y NaN")
             return False
 
     def highlightTargetTile(self, xPos, yPos):
-        print("highlight cell")
         # If an input is Nonetype, fetch it from its entry variable
         if xPos == None:
             xPos = self.entryXValue.get()
@@ -140,7 +142,9 @@ class toolBar(tk.Frame):
             yPos = self.entryYValue.get()
         # If both inputs are numeric, try to render the cell highlight
         if xPos.isnumeric() and yPos.isnumeric():
-            print("cell highlighted: (" + xPos + ", " + yPos + ")")
+            self.mainView.mainCanvas.highlightTile(xPos, yPos)
+        else:
+            self.mainView.mainCanvas.clearHighlight()
 
     def placeholder(self):
         print(self.entryXValue.get() + ", " + self.entryYValue.get())
