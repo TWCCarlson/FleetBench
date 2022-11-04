@@ -371,8 +371,8 @@ class mainCanvas(tk.Canvas):
             )
             # Assign the mouseover event to it
             # Tkinter automatically passes the event object to the handler
-            if "agent" in nodeData:
-                nodeAgentID = nodeData["agentData"]["agentID"]
+            if node[0] in self.parent.parent.agentManager.agentPositionList:
+                nodeAgentID = self.parent.parent.agentManager.agentPositionList[node[0]]
                 hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent ID: "+str(nodeAgentID)
             else:
                 hoverString = str(node[0])+": "+nodeType.capitalize()

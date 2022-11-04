@@ -9,25 +9,31 @@ class agentManager:
 
         # Create a non-gui interface for generating and accessing all agents in the system
         self.agentList = {}
+        self.agentPositionList = {}
         print(type(self.agentList))
 
     def createNewAgent(self, **kwargs):
-        # Create a new agent and add it to the manager's list
-        self.latestAgent = agentClass(self, **kwargs)
         # The length of a dict is always 1 higher than the numeric id
         self.dictLength = len(self.agentList)
+        # Create a new agent and add it to the manager's list
+        self.latestAgent = agentClass(self, **kwargs, ID=self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
 
         print(self.agentList)
+        print(self.agentPositionList)
 
 class agentClass:
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create agent")
-
+        self.ID = kwargs.pop("ID")
         self.position = kwargs.pop("position")
+        self.parent.agentPositionList[str(self.position)] = self.ID
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
+
+        # Push some data into the map graph attributes for fast referencing elsewhere
+
         
         # Collect specification values for this agent
         # - position, orientation, energy, etc

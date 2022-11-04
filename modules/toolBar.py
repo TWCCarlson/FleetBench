@@ -160,8 +160,8 @@ class toolBar(tk.Frame):
         # Create the agent, place it
         # https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html
         # Note that if the dictionary contains nodes that are not in G, the values are silently ignored:
-        xPos = eval(self.entryXValue.get())-1
-        yPos = eval(self.entryYValue.get())-1
+        xPos = eval(self.entryXValue.get())
+        yPos = eval(self.entryYValue.get())
         targetNode = (xPos, yPos)
         agentOrientation = "N"
         self.agentManager.createNewAgent(
