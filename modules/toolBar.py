@@ -26,6 +26,7 @@ class toolBar(tk.Frame):
     def buildReferences(self):
         self.mainView = self.parent.mainView
         self.mapData = self.parent.mapData
+        self.agentManager = self.parent.agentManager
 
     def initUI(self):
         print("Create toolbar ui elements")
@@ -174,5 +175,6 @@ class toolBar(tk.Frame):
         print(graphData.nodes.data())
         # Re-render the map state
         self.mainView.mainCanvas.renderGraphState()
+        self.agentManager.createNewAgent(targetNode, agentOrientation, self.agentClass.get())
         # Close agent generator
         self.agentCreationPrompt()
