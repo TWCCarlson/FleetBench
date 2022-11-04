@@ -5,6 +5,7 @@ from modules.mainView import mainView
 from modules.contextView import contextView
 from modules.mapDataClass import mapDataClass
 from modules.infoBox import infoBox
+from modules.agentManagerClass import agentManagerClass
 from config.appearanceValues import appearanceValues
 
 class App(tk.Tk):
@@ -15,6 +16,8 @@ class App(tk.Tk):
 
         # Map information class
         self.mapData = mapDataClass(self)
+        # Agent information manager class
+        self.agentManager = agentManagerClass
 
         # Window components
         # Appearance
