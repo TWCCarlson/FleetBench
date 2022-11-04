@@ -11,10 +11,9 @@ class agentManager:
         self.agentList = {}
         print(type(self.agentList))
 
-    def createNewAgent(self, *args):
+    def createNewAgent(self, **kwargs):
         # Create a new agent and add it to the manager's list
-        print(*args)
-        self.latestAgent = agentClass(self)
+        self.latestAgent = agentClass(self, **kwargs)
         # The length of a dict is always 1 higher than the numeric id
         self.dictLength = len(self.agentList)
         self.agentList[self.dictLength] = self.latestAgent
@@ -22,9 +21,13 @@ class agentManager:
         print(self.agentList)
 
 class agentClass:
-    def __init__(self, parent, ):
+    def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create agent")
+
+        self.position = kwargs.pop("position")
+        self.orientation = kwargs.pop("orientation")
+        self.className = kwargs.pop("className")
         
         # Collect specification values for this agent
         # - position, orientation, energy, etc

@@ -306,49 +306,48 @@ class mainCanvas(tk.Canvas):
     def renderAgents(self, graphData, tileSize):
         # Renders agent positions and orientations
         print("render agents")
-        # Find all nodes containing an agent
-        for node in graphData.nodes.data():
-            nodeData = node[1]
-            if "agent" in nodeData:
-                # Find the center of the tile and place a diamond
-                nodePosX = nodeData["pos"]["X"]
-                centerPosX = nodePosX * tileSize + 0.5 * tileSize
-                nodePosY = nodeData["pos"]["Y"]
-                centerPosY = nodePosY * tileSize + 0.5 * tileSize
-                agentID = nodeData["agentData"]["agentID"]
-                agentOrientation = nodeData["agentData"]["agentOrientation"]
-                tag = ["agent" + str(agentID), "agent"]
-                dirDict = {
-                    "N": (centerPosX, centerPosY - 0.4 * tileSize),
-                    "W": (centerPosX - 0.4 * tileSize, centerPosY),
-                    "S": (centerPosX, centerPosY + 0.4 * tileSize),
-                    "E": (centerPosX + 0.4 * tileSize, centerPosY)
-                }
-                self.create_polygon(
-                    dirDict["N"][0],
-                    dirDict["N"][1],
-                    dirDict["W"][0],
-                    dirDict["W"][1],
-                    dirDict["S"][0],
-                    dirDict["S"][1],
-                    dirDict["E"][0],
-                    dirDict["E"][1],
-                    outline='black',
-                    width = 2,
-                    fill='orange',
-                    tags=tag
-                )
-                tag.append("agentOrientation")
-                self.create_line(
-                    dirDict[agentOrientation][0],
-                    dirDict[agentOrientation][1],
-                    centerPosX,
-                    centerPosY,
-                    arrow = tk.FIRST,
-                    tags=tag,
-                    fill='white',
-                    width=4
-                )
+        # Access the agent manager to find all agents which need to be rendered
+        self.agentManager = self.parent.parent.agentManager
+        for agentID in self.agentManager.agentList:
+            agentData = self.agentManager.agentList[agentID]
+            # Find the center of the tile and place a diamond
+            nodePosX = agentData.position[0]
+            centerPosX = nodePosX * tileSize + 0.5 * tileSize
+            nodePosY = agentData.position[1]
+            centerPosY = nodePosY * tileSize + 0.5 * tileSize
+            agentOrientation = agentData.orientation
+            tag = ["agent" + str(agentID), "agent"]
+            dirDict = {
+                "N": (centerPosX, centerPosY - 0.4 * tileSize),
+                "W": (centerPosX - 0.4 * tileSize, centerPosY),
+                "S": (centerPosX, centerPosY + 0.4 * tileSize),
+                "E": (centerPosX + 0.4 * tileSize, centerPosY)
+            }
+            self.create_polygon(
+                dirDict["N"][0],
+                dirDict["N"][1],
+                dirDict["W"][0],
+                dirDict["W"][1],
+                dirDict["S"][0],
+                dirDict["S"][1],
+                dirDict["E"][0],
+                dirDict["E"][1],
+                outline='black',
+                width = 2,
+                fill='orange',
+                tags=tag
+            )
+            tag.append("agentOrientation")
+            self.create_line(
+                dirDict[agentOrientation][0],
+                dirDict[agentOrientation][1],
+                centerPosX,
+                centerPosY,
+                arrow = tk.FIRST,
+                tags=tag,
+                fill='white',
+                width=4
+            )
 
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile

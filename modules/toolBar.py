@@ -160,21 +160,16 @@ class toolBar(tk.Frame):
         # Create the agent, place it
         # https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html
         # Note that if the dictionary contains nodes that are not in G, the values are silently ignored:
-        graphData = self.mapData.mapGraph
         xPos = eval(self.entryXValue.get())-1
         yPos = eval(self.entryYValue.get())-1
-        targetNode = "(" + str(xPos) + ", " + str(yPos) + ")"
-        agentID = 0
+        targetNode = (xPos, yPos)
         agentOrientation = "N"
-        attr = {targetNode: {'agent': True, 
-            'agentData': {'agentID' :agentID, 
-                'agentType': self.agentClass.get(), 
-                'agentOrientation': agentOrientation
-                }}}
-        nx.set_node_attributes(graphData, attr)
-        print(graphData.nodes.data())
+        self.agentManager.createNewAgent(
+            position=targetNode, 
+            orientation=agentOrientation, 
+            className=self.agentClass.get()
+            )
         # Re-render the map state
         self.mainView.mainCanvas.renderGraphState()
-        self.agentManager.createNewAgent(targetNode, agentOrientation, self.agentClass.get())
         # Close agent generator
         self.agentCreationPrompt()
