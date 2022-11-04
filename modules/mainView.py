@@ -372,12 +372,18 @@ class mainCanvas(tk.Canvas):
             )
             # Assign the mouseover event to it
             # Tkinter automatically passes the event object to the handler
-            self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
-            self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, str(node[0])+": "+nodeType.capitalize()))
+            if "agent" in nodeData:
+                nodeAgentID = nodeData["agentData"]["agentID"]
+                hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent ID: "+str(nodeAgentID)
+            else:
+                hoverString = str(node[0])+": "+nodeType.capitalize()
             
-    def infoHoverEnter(self, nodeName, event):
+            self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
+            self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, hoverString))
+            
+    def infoHoverEnter(self, hoverString, event):
         self.infoBoxFrame = self.parent.parent.infoBox.infoBoxFrame
-        self.infoBoxFrame.hoverInfoText.set(nodeName)
+        self.infoBoxFrame.hoverInfoText.set(hoverString)
 
     def sortCanvasLayers(self):
         # Orders the stuff on the canvas to a default order
