@@ -30,10 +30,6 @@ class mapDataClass:
         
     def loadMapToNetworkX(self, mapData):
         self.mapGraph.clear()
-        nodeNameList = []
-        nodePositionList = []
-        nodeTypeList = []
-        nodeEdgeList = []
         for node in mapData:
             if 'mapDimensions' in node:
                 # Skip this line, its for the other program
@@ -48,7 +44,6 @@ class mapDataClass:
             nodePosition = node['nodePosition']
             nodeType = node['nodeType']
             nodeEdges = node['nodeEdges']
-            nodeNameList.append(nodeName)
 
             # Add nodes to the graph with name
             self.mapGraph.add_node(nodeName, pos=nodePosition, type=nodeType, edgeDirs=nodeEdges)
