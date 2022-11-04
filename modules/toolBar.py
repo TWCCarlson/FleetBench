@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import networkx as nx
 
 class toolBar(tk.Frame):
     def __init__(self, parent):
@@ -24,6 +25,7 @@ class toolBar(tk.Frame):
 
     def buildReferences(self):
         self.mainView = self.parent.mainView
+        self.mapData = self.parent.mapData
 
     def initUI(self):
         print("Create toolbar ui elements")
@@ -68,7 +70,7 @@ class toolBar(tk.Frame):
         self.entryX = tk.Entry(self.agentDataFrame, 
             width=10, 
             textvariable=self.entryXValue,
-            validate='all',
+            validate='key',
             validatecommand=(self.highlightXPos, '%P')
             )
         self.entryYValue = tk.StringVar()
@@ -77,7 +79,7 @@ class toolBar(tk.Frame):
         self.entryY = tk.Entry(self.agentDataFrame, 
             width=10, 
             textvariable=self.entryYValue,
-            validate='all',
+            validate='key',
             validatecommand=(self.highlightYPos, '%P')
             )
         # Render
@@ -97,7 +99,7 @@ class toolBar(tk.Frame):
             width=15,
             )
         self.placeAgentButton = tk.Button(self.agentFrame, 
-            command = self.placeholder, 
+            command = self.createAgent, 
             text="Create Agent",
             width=15,
             )
@@ -152,3 +154,25 @@ class toolBar(tk.Frame):
 
     def createAgent(self):
         print("Create agent")
+        # Remove previous highlight of tile
+        self.mainView.mainCanvas.clearHighlight()
+        # Create the agent, place it
+        # https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html
+        # Note that if the dictionary contains nodes that are not in G, the values are silently ignored:
+        graphData = self.mapData.mapGraph
+        xPos = eval(self.entryXValue.get())-1
+        yPos = eval(self.entryYValue.get())-1
+        targetNode = "(" + str(xPos) + ", " + str(yPos) + ")"
+        agentID = 0
+        agentOrientation = "N"
+        attr = {targetNode: {'agent': True, 
+            'agentData': {'agentID' :agentID, 
+                'agentType': self.agentClass.get(), 
+                'agentOrientation': agentOrientation
+                }}}
+        nx.set_node_attributes(graphData, attr)
+        print(graphData.nodes.data())
+        # Re-render the map state
+        self.mainView.mainCanvas.renderGraphState()
+        # Close agent generator
+        self.agentCreationPrompt()

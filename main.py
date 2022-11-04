@@ -1,11 +1,11 @@
 import tkinter as tk
-from modules import commandBar
-from modules import toolBar
-from config import appearanceValues
-from modules import mainView
-from modules import contextView
-from modules import mapDataClass
-from modules import infoBox
+from modules.commandBar import commandBar
+from modules.toolBar import toolBar
+from modules.mainView import mainView
+from modules.contextView import contextView
+from modules.mapDataClass import mapDataClass
+from modules.infoBox import infoBox
+from config.appearanceValues import appearanceValues
 
 class App(tk.Tk):
     def __init__(self):

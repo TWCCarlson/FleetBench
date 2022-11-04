@@ -111,8 +111,9 @@ class mainCanvas(tk.Canvas):
         coord = coord * tileSize + 0.5 * tileSize
         return coord
 
-    def renderGraphState(self, graphData):
+    def renderGraphState(self):
         print("render map data")
+        graphData = self.parent.mapData
         # Input: NetworkX graph
         # Output: render the tiles of the map, including
         #   - Node tiles
@@ -121,10 +122,13 @@ class mainCanvas(tk.Canvas):
         # Style references
         tileSize = self.appearanceValues.canvasTileSize
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
+        edgeWidth = self.appearanceValues.canvasEdgeWidth
         # Draw nodes, being sure to tag them for ordering and overlaying
+        # self.clearCanvas
         self.renderNodes(graphData, tileSize, nodeSizeRatio)
-        self.renderEdges(graphData)
-        self.renderDanglingEdges(graphData, tileSize)
+        self.renderEdges(graphData, edgeWidth)
+        self.renderDanglingEdges(graphData, tileSize, edgeWidth)
+        self.renderAgents(graphData, tileSize)
         self.generateHoverInfo(graphData, tileSize)
         self.setAllLayersVisible()
         self.sortCanvasLayers()
@@ -140,15 +144,15 @@ class mainCanvas(tk.Canvas):
             nodePosY = nodeData["pos"]["Y"]
             nodeType = nodeData["type"]
 
-            print("=========")
-            print(node[1])
+            # print("=========")
+            # print(node[1])
             # nx.set_node_attributes(graphData, ' ', node[0])
-            attr = {node[0]: {'agent': 'exists'}}
+            # attr = {node[0]: {'agent': 'exists'}}
             # node[1]['agent'] = 'exists'
-            nx.set_node_attributes(graphData, attr)
-            pp.pprint(graphData.nodes.data())
-            del graphData.nodes[node[0]]['agent']
-            pp.pprint(graphData.nodes.data())
+            # nx.set_node_attributes(graphData, attr)
+            # pp.pprint(graphData.nodes.data())
+            # del graphData.nodes[node[0]]['agent']
+            # pp.pprint(graphData.nodes.data())
 
             # Identify the center of the canvas tile
             nodePosGraphX = self.graphCoordToCanvas(nodePosX)
@@ -181,7 +185,7 @@ class mainCanvas(tk.Canvas):
                 tags=tags
             )
 
-    def renderEdges(self, graphData):
+    def renderEdges(self, graphData, edgeWidth):
         # Display connected edges
         for edge in graphData.edges():
             # Break the edge into its 2 nodes
@@ -207,11 +211,11 @@ class mainCanvas(tk.Canvas):
                 secondPosGraphX,
                 secondPosGraphY,
                 fill = "blue",
-                width = 3,
+                width = edgeWidth,
                 tags=["edge"]
             )
 
-    def renderDanglingEdges(self, graphData, tileSize):
+    def renderDanglingEdges(self, graphData, tileSize, edgeWidth):
         # Display dangling edges
         for node in graphData.nodes.data():
             # Break out the data
@@ -238,7 +242,7 @@ class mainCanvas(tk.Canvas):
                         nodePosGraphX,
                         nodePosGraphY - 0.5*tileSize,
                         fill="green",
-                        width=3,
+                        width=edgeWidth,
                         tags=["danglingEdge"]
                     )
             if nodeEdges["E"] == 1:
@@ -257,7 +261,7 @@ class mainCanvas(tk.Canvas):
                         nodePosGraphX + 0.5*tileSize,
                         nodePosGraphY,
                         fill="green",
-                        width=3,
+                        width=edgeWidth,
                         tags=["danglingEdge"]
                     )
             if nodeEdges["W"] == 1:
@@ -276,7 +280,7 @@ class mainCanvas(tk.Canvas):
                         nodePosGraphX - 0.5*tileSize,
                         nodePosGraphY,
                         fill="green",
-                        width=3,
+                        width=edgeWidth,
                         tags=["danglingEdge"]
                     )
             if nodeEdges["S"] == 1:
@@ -295,9 +299,56 @@ class mainCanvas(tk.Canvas):
                         nodePosGraphX,
                         nodePosGraphY + 0.5*tileSize,
                         fill="green",
-                        width=3,
+                        width=edgeWidth,
                         tags=["danglingEdge"]
                     )
+
+    def renderAgents(self, graphData, tileSize):
+        # Renders agent positions and orientations
+        print("render agents")
+        # Find all nodes containing an agent
+        for node in graphData.nodes.data():
+            nodeData = node[1]
+            if "agent" in nodeData:
+                # Find the center of the tile and place a diamond
+                nodePosX = nodeData["pos"]["X"]
+                centerPosX = nodePosX * tileSize + 0.5 * tileSize
+                nodePosY = nodeData["pos"]["Y"]
+                centerPosY = nodePosY * tileSize + 0.5 * tileSize
+                agentID = nodeData["agentData"]["agentID"]
+                agentOrientation = nodeData["agentData"]["agentOrientation"]
+                tag = ["agent" + str(agentID), "agent"]
+                dirDict = {
+                    "N": (centerPosX, centerPosY - 0.4 * tileSize),
+                    "W": (centerPosX - 0.4 * tileSize, centerPosY),
+                    "S": (centerPosX, centerPosY + 0.4 * tileSize),
+                    "E": (centerPosX + 0.4 * tileSize, centerPosY)
+                }
+                self.create_polygon(
+                    dirDict["N"][0],
+                    dirDict["N"][1],
+                    dirDict["W"][0],
+                    dirDict["W"][1],
+                    dirDict["S"][0],
+                    dirDict["S"][1],
+                    dirDict["E"][0],
+                    dirDict["E"][1],
+                    outline='black',
+                    width = 2,
+                    fill='orange',
+                    tags=tag
+                )
+                tag.append("agentOrientation")
+                self.create_line(
+                    dirDict[agentOrientation][0],
+                    dirDict[agentOrientation][1],
+                    centerPosX,
+                    centerPosY,
+                    arrow = tk.FIRST,
+                    tags=tag,
+                    fill='white',
+                    width=4
+                )
 
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
@@ -333,8 +384,16 @@ class mainCanvas(tk.Canvas):
         # Find all objects with each tag
         # Pull them to the front in the right order
         
-        # Node icons on top
+        # Node icons
         objs = self.find_withtag("node")
+        for obj in objs:
+            self.lift(obj)
+        # Agent icons
+        objs = self.find_withtag("agent")
+        for obj in objs:
+            self.lift(obj)
+        # Agent orientation indicators
+        objs = self.find_withtag("agentOrientation")
         for obj in objs:
             self.lift(obj)
         # Invisible infoTile layer
@@ -349,12 +408,14 @@ class mainCanvas(tk.Canvas):
         self.danglingEdgeVisibility = True
         self.edgeVisibility = True
         self.nodeVisibility = True
+        self.agentVisibility = True
 
         # Update the checkboxes
         self.infoBoxButtons = self.parent.parent.infoBox.infoBoxFrame
         self.infoBoxButtons.danglingEdgeTick.select()
         self.infoBoxButtons.edgeTick.select()
         self.infoBoxButtons.nodeTick.select()
+        self.infoBoxButtons.agentTick.select()
 
     def toggleDanglingEdgeVisibility(self):
         # Find all objects tagged as "danglingEdge"
@@ -395,6 +456,19 @@ class mainCanvas(tk.Canvas):
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
 
+    def toggleAgentVisibility(self):
+        # Find all objects tagged as "agent"
+        objs = self.find_withtag("agent")
+        # Invert their state
+        if self.agentVisibility == True:
+            self.agentVisibility = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            self.agentVisibility = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+
     def highlightTile(self, tileIDX, tileIDY):
         # Clear the old highlights before drawing this singular highlight
         self.clearHighlight()
@@ -403,23 +477,27 @@ class mainCanvas(tk.Canvas):
         # tileSize = self.appearanceValues.canvasTileSize
         tileSize = self.appearanceValues.canvasTileSize
         self.images = []
+        # Subtract 1 tile width from the starting point
         tileObject = self.create_rect(
+            eval(tileIDX) * tileSize - tileSize,
+            eval(tileIDY) * tileSize - tileSize,
             eval(tileIDX) * tileSize,
             eval(tileIDY) * tileSize,
-            eval(tileIDX) * tileSize + tileSize,
-            eval(tileIDY) * tileSize + tileSize,
             anchor=tk.NW,
             fill='red',
-            alpha=0.1,
-            tags=["infoTile"]
+            alpha=0.2,
+            tags=["highlight"]
         )
 
     def clearHighlight(self):
+        # Remove all objects tagged "highlight"
         objs = self.find_withtag("highlight")
         for obj in objs:
-            obj.destroy()
+            self.delete(obj)
 
     def create_rect(self, x1, y1, x2, y2, **kwargs):
+        # https://stackoverflow.com/questions/54637795/how-to-make-a-tkinter-canvas-rectangle-transparent
+        # Modified for passing 'anchor' and 'tags' as kwargs
         if 'alpha' in kwargs:
             alpha = int(kwargs.pop('alpha') * 255)
             fill = kwargs.pop('fill')

@@ -109,13 +109,13 @@ class mapDataClass:
             # plt.subplot(111)
             # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
             # plt.show()
-            self.mainView.mainCanvas.renderGraphState(self.mapGraph)
+            self.mainView.mainCanvas.renderGraphState()
         except:
             tk.messagebox.showwarning(title="Failed to load map", message="Map's graph is invalid. Verify there are no unconnected nodes...")
             # plt.subplot(111)
             # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
             # plt.show()
-            self.mainView.mainCanvas.renderGraphState(self.mapGraph)
+            self.mainView.mainCanvas.renderGraphState()
 
         
         # for node in self.mapGraph:

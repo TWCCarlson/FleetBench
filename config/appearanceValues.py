@@ -27,8 +27,9 @@ class appearanceValues():
         self.canvasDefaultWidth = 2000
         self.canvasDefaultHeight = 2000
         self.canvasTileSize = 48
-        self.canvasTileCircleRatio = 0.3
+        self.canvasTileCircleRatio = 0.28
         self.canvasGridlineColor = "black"
+        self.canvasEdgeWidth = 4
 
         # Contextview style
         self.contextViewHeight = screen_height - window_unusable
