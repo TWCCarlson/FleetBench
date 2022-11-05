@@ -483,12 +483,11 @@ class mainCanvas(tk.Canvas):
         # tileSize = self.appearanceValues.canvasTileSize
         tileSize = self.appearanceValues.canvasTileSize
         self.images = []
-        # Subtract 1 tile width from the starting point
         tileObject = self.create_rect(
-            eval(tileIDX) * tileSize - tileSize,
-            eval(tileIDY) * tileSize - tileSize,
             eval(tileIDX) * tileSize,
             eval(tileIDY) * tileSize,
+            eval(tileIDX) * tileSize + tileSize,
+            eval(tileIDY) * tileSize + tileSize,
             anchor=tk.NW,
             fill='red',
             alpha=0.2,

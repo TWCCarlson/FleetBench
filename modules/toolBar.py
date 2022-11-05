@@ -103,13 +103,14 @@ class toolBar(tk.Frame):
             text="Edit Information",
             width=15,
             )
-        self.placeAgentButton = tk.Button(self.agentFrame, 
+        self.confirmCreateAgentButton = tk.Button(self.agentFrame, 
             command = self.createAgent, 
             text="Create Agent",
             width=15,
+            state=tk.DISABLED
             )
         self.editAgentClassButton.grid(row=2, column=0, sticky=tk.E, pady=4)
-        self.placeAgentButton.grid(row=2, column=1, sticky=tk.W, pady=4)
+        self.confirmCreateAgentButton.grid(row=2, column=1, sticky=tk.W, pady=4)
 
     def clearAgentCreationUI(self):
         for widget in self.agentFrame.winfo_children():
@@ -146,13 +147,19 @@ class toolBar(tk.Frame):
     def highlightTargetTile(self, xPos, yPos):
         # If an input is Nonetype, fetch it from its entry variable
         if xPos == None:
+            self.confirmCreateAgentButton.config(state=tk.DISABLED)
             xPos = self.entryXValue.get()
         elif yPos == None:
+            self.confirmCreateAgentButton.config(state=tk.DISABLED)
             yPos = self.entryYValue.get()
         # If both inputs are numeric, try to render the cell highlight
         if xPos.isnumeric() and yPos.isnumeric():
+            graphCandidate = '(' + str(xPos) + ", " + str(yPos) + ')'
+            if graphCandidate in self.mapData.mapGraph.nodes:
+                self.confirmCreateAgentButton.config(state=tk.ACTIVE)
             self.mainView.mainCanvas.highlightTile(xPos, yPos)
         else:
+            self.confirmCreateAgentButton.config(state=tk.DISABLED)
             self.mainView.mainCanvas.clearHighlight()
 
     def placeholder(self):
