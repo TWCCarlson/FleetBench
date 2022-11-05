@@ -483,7 +483,7 @@ class mainCanvas(tk.Canvas):
         # tileSize = self.appearanceValues.canvasTileSize
         tileSize = self.appearanceValues.canvasTileSize
         self.images = []
-        tileObject = self.create_rect(
+        self.create_rect(
             eval(tileIDX) * tileSize,
             eval(tileIDY) * tileSize,
             eval(tileIDX) * tileSize + tileSize,
