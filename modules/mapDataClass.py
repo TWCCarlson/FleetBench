@@ -25,14 +25,16 @@ class mapDataClass:
         path = tk.filedialog.askopenfile(title="Load Map JSON", filetypes = [("Text", ".txt")])
         if path != None:
             mapData = json.load(path)
-            # pp.pprint(mapData)
+            pp.pprint(mapData)
             self.loadMapToNetworkX(mapData)
         
     def loadMapToNetworkX(self, mapData):
         self.mapGraph.clear()
         for node in mapData:
             if 'mapDimensions' in node:
-                # Skip this line, its for the other program
+                # This json entry is only for setting max dims
+                self.dimensionX = node['mapDimensions']['Xdim']-1
+                self.dimensionY = node['mapDimensions']['Ydim']-1
                 continue
             
             # pp.pprint(node)

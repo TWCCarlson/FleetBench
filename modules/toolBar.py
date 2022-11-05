@@ -67,21 +67,25 @@ class toolBar(tk.Frame):
         # Coordinate Entry boxes and labels
         self.entryXValue = tk.StringVar()
         self.entryXLabel = tk.Label(self.agentDataFrame, text="X Position: ", width=8)
-        self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
-        self.entryX = tk.Entry(self.agentDataFrame, 
-            width=10, 
+        # self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
+        self.entryX = ttk.Spinbox(self.agentDataFrame, 
+            width=6,
+            from_=0,
+            to=self.mapData.dimensionX,
+            increment=1,
             textvariable=self.entryXValue,
-            validate='key',
-            validatecommand=(self.highlightXPos, '%P')
+            command=self.highlightTargetXPos
             )
         self.entryYValue = tk.StringVar()
         self.entryYLabel = tk.Label(self.agentDataFrame, text="Y Position: ", width=8)
-        self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
-        self.entryY = tk.Entry(self.agentDataFrame, 
-            width=10, 
+        # self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
+        self.entryY = ttk.Spinbox(self.agentDataFrame, 
+            width=6,
+            from_=0,
+            increment=1,
+            to=self.mapData.dimensionY,
             textvariable=self.entryYValue,
-            validate='key',
-            validatecommand=(self.highlightYPos, '%P')
+            command=self.highlightTargetYPos
             )
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
@@ -115,7 +119,8 @@ class toolBar(tk.Frame):
         for col in range(self.agentFrame.grid_size()[1]):
             self.agentFrame.columnconfigure(col, weight=0)
 
-    def highlightTargetXPos(self, xPos):
+    def highlightTargetXPos(self):
+        xPos = self.entryX.get()
         # If input is a number, pass it to the highlight draw function
         if xPos.isnumeric():
             self.highlightTargetTile(xPos, None)
@@ -126,7 +131,8 @@ class toolBar(tk.Frame):
         else:
             return False
 
-    def highlightTargetYPos(self, yPos):
+    def highlightTargetYPos(self):
+        yPos = self.entryY.get()
         # If input is a number, pass it to the highlight draw function
         if yPos.isnumeric():
             self.highlightTargetTile(None, yPos)

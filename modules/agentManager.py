@@ -28,10 +28,11 @@ class agentClass:
         print("Create agent")
         self.ID = kwargs.pop("ID")
         self.position = kwargs.pop("position")
-        self.parent.agentPositionList[str(self.position)] = self.ID
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
 
+        # Add the agent to the position list for reference in tileHover
+        self.parent.agentPositionList[str(self.position)] = self.ID
         # Push some data into the map graph attributes for fast referencing elsewhere
 
         
