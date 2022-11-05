@@ -99,8 +99,12 @@ class mainCanvas(tk.Canvas):
 
     def drawGridlines(self):
         # Draw them at each tile width
+        # self.create_rectangle(0, 0, self["height"], self["width"], fill="red")
+        # +1 for the extra line, +1 for making range inclusive
+        # Horizontal Lines
         for i in range(math.floor(int(self["height"])/self.canvasTileSize)+1):
             self.create_line(0, i*self.canvasTileSize, self["width"], i*self.canvasTileSize, fill=self.appearanceValues.canvasGridlineColor)
+        # Vertical lines
         for i in range(math.floor(int(self["width"])/self.canvasTileSize)+1):
             self.create_line(i*self.canvasTileSize, 0, i*self.canvasTileSize, self["height"], fill=self.appearanceValues.canvasGridlineColor)
 
@@ -123,8 +127,10 @@ class mainCanvas(tk.Canvas):
         tileSize = self.appearanceValues.canvasTileSize
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
         edgeWidth = self.appearanceValues.canvasEdgeWidth
+        # Clear current canvas 
+        self.clearMainCanvas()
         # Draw nodes, being sure to tag them for ordering and overlaying
-        # self.clearCanvas
+        self.drawGridlines()
         self.renderNodes(graphData, tileSize, nodeSizeRatio)
         self.renderEdges(graphData, edgeWidth)
         self.renderDanglingEdges(graphData, tileSize, edgeWidth)
@@ -423,6 +429,10 @@ class mainCanvas(tk.Canvas):
         self.infoBoxButtons.nodeTick.select()
         self.infoBoxButtons.agentTick.select()
 
+    def clearMainCanvas(self):
+        print("wipe canvas")
+        self.delete("all")
+
     def toggleDanglingEdgeVisibility(self):
         # Find all objects tagged as "danglingEdge"
         objs = self.find_withtag("danglingEdge")
@@ -512,4 +522,3 @@ class mainCanvas(tk.Canvas):
             image = Image.new('RGBA', (x2-x1, y2-y1), fill)
             self.images.append(ImageTk.PhotoImage(image))
             self.create_image(x1, y1, image=self.images[-1], anchor=anchor, tags=tags)
-        self.create_rectangle(x1, y1, x2, y2, **kwargs)

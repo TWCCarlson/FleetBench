@@ -100,8 +100,8 @@ class mapDataClass:
                         self.mapGraph.add_edge(node[0], candidateE)
         
         # Update mainView canvas size
-        canvasWidth = self.dimensionX * self.appearanceValues.canvasTileSize
-        canvasHeight = self.dimensionY * self.appearanceValues.canvasTileSize
+        canvasWidth = (self.dimensionX+1) * self.appearanceValues.canvasTileSize
+        canvasHeight = (self.dimensionY+1) * self.appearanceValues.canvasTileSize
         self.mainView.mainCanvas["width"] = canvasWidth
         self.mainView.mainCanvas["height"] = canvasHeight
         self.mainView.mainCanvas["scrollregion"] = (0, 0, canvasWidth, canvasHeight)
