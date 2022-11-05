@@ -17,8 +17,8 @@ class mapDataClass:
         self.mapGraph = nx.Graph()
 
     def buildReferences(self):
-        # print("==")
         self.mainView = self.parent.mainView
+        self.appearanceValues = self.parent.appearance
 
     def ingestMapFromJSON(self):
         # Choose map data file to load
@@ -99,6 +99,13 @@ class mapDataClass:
                         # print("exists:" + str(candidateE) + "->" + str(node[0]))
                         self.mapGraph.add_edge(node[0], candidateE)
         
+        # Update mainView canvas size
+        canvasWidth = self.dimensionX * self.appearanceValues.canvasTileSize
+        canvasHeight = self.dimensionY * self.appearanceValues.canvasTileSize
+        self.mainView.mainCanvas["width"] = canvasWidth
+        self.mainView.mainCanvas["height"] = canvasHeight
+        self.mainView.mainCanvas["scrollregion"] = (0, 0, canvasWidth, canvasHeight)
+
         try:
             pos = {node: eval(node) for node in self.mapGraph}
             # tsm = TSM(self.mapGraph, pos)
