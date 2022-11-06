@@ -503,6 +503,8 @@ class mainCanvas(tk.Canvas):
             alpha=0.2,
             tags=["highlight"]
         )
+        # Re-sort the layers to the infolayer is not hidden by the highlight
+        self.sortCanvasLayers()
 
     def clearHighlight(self):
         # Remove all objects tagged "highlight"
