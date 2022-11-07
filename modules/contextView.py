@@ -33,27 +33,36 @@ class contextView(tk.Frame):
         self.initScrolling()
 
     def createTreeView(self):
+        self.columnList = {'Name': 50, 'Position': 50, 'Task': 50}
         # Tree view is a stupid fucking widget
         # https://stackoverflow.com/questions/39609865/how-to-set-width-of-treeview-in-tkinter-of-python
         # Create it once, with a single column of nonzero width but all other columns declared, to set the width ???????
-        # Then update the object to lock in the value
+        # Then update the object to lock in the requested space
         # Finally reup with everything actually used
         treeViewWidth = self.appearanceValues.contextViewWidth - self.appearanceValues.frameBorderWidth*2 - 21
         self.objectTreeView = ttk.Treeview(self, selectmode='browse')
         self.objectTreeView.grid(row=1, column=0, sticky=tk.S)
         self.objectTreeView["height"] = 20
-        # self.rowconfigure(1, weight=1)
-        self.objectTreeView["columns"] = ('Name', 'Position')
+        self.objectTreeView["columns"] = list(self.columnList.keys()) # list() must be used for this widget
         self.objectTreeView.column('#0', width=int(treeViewWidth))
-        self.objectTreeView.column('Name', width=0)
-        self.objectTreeView.column('Position', width=0)
+        # Set other columns to be zero-width for simplicity
+        for col in self.columnList:
+            print(type(col))
+            self.objectTreeView.column(col, width=0)
         self.objectTreeView.update()
+
+        # Set the real column dimensions
         self.objectTreeView.heading('#0', text='im')
         self.objectTreeView.column('#0', width=50, stretch=0)
-        self.objectTreeView.heading('Name', text='name')
-        self.objectTreeView.column('Name', width=50, stretch=0)
-        self.objectTreeView.heading('Position', text='pos')
-        self.objectTreeView.column('Position', width=50, stretch=0)
+        # Stretch=True can be used to fill the available space evenly using every column that can stretch
+        for col in self.columnList:
+            self.objectTreeView.heading(col, text=col)
+            self.objectTreeView.column(col, width=self.columnList[col], stretch=True)
+
+        # Prevent column resizing:
+        # https://stackoverflow.com/questions/45358408/how-to-disable-manual-resizing-of-tkinters-treeview-column/46120502#46120502
+        self.objectTreeView.bind('<Button-1>', self.clickIntercept)
+        self.objectTreeView.bind('<Motion>', self.motionIntercept)
 
     def initScrolling(self):
         # Create scrollbar components
@@ -94,3 +103,13 @@ class contextView(tk.Frame):
 
     def shiftMousewheelAction(self, event):
         self.objectTreeView.xview_scroll(int(-1*(event.delta/10)), "units")
+
+    def clickIntercept(self, event):
+        if self.objectTreeView.identify_region(event.x, event.y) == "separator":
+            # Prevent click interacting with this region
+            return "break"
+
+    def motionIntercept(self, event):
+        if self.objectTreeView.identify_region(event.x, event.y) == "separator":
+            # Prevent click interacting with this region
+            return "break"
