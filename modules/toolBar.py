@@ -41,9 +41,14 @@ class toolBar(tk.Frame):
     def agentCreationPrompt(self):
         self.clearAgentCreationUI()
         # Create a button to start UI creation
-        self.createAgentButton = tk.Button(self.agentFrame, command=self.agentCreationUI, text="Create Agent. . .", width=15)
+        self.createAgentButton = tk.Button(self.agentFrame, 
+            command=self.agentCreationUI, text="Create Agent. . .", width=15,
+            state=tk.DISABLED)
         self.agentFrame.columnconfigure(0, weight=1)
         self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
+
+    def enableAgentCreation(self):
+        self.createAgentButton.config(state=tk.ACTIVE)
 
     def agentCreationUI(self):
         # Clear what's already in the frame to make space

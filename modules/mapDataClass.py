@@ -121,6 +121,8 @@ class mapDataClass:
             # plt.show()
             self.mainView.mainCanvas.renderGraphState()
 
+        # Enable the rest of the program options to work
+        self.parent.toolBar.enableAgentCreation()
         
         # for node in self.mapGraph:
         #     pp.pprint(eval(node))

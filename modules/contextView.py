@@ -124,6 +124,7 @@ class contextView(tk.Frame):
 
     def updateTreeView(self):
         # Clear the treeview to regenerate it
+        # Only remove children of the parent rows
         parentRows = self.objectTreeView.get_children()
         rows = self.objectTreeView.get_children(parentRows)
         for row in rows:
@@ -137,12 +138,9 @@ class contextView(tk.Frame):
             agentID = agent
             agentPosition = str(agentData.position)
             agentClass = agentData.className
-            print(self.treeViewAgentList.get(agent).position)
             self.objectTreeView.insert(parent="agentParentRow",
                 index='end',
                 iid=agentID,
                 text=agentID,
                 values=["ID: " + str(agentID), agentPosition, agentClass]
             )
-            # Generate and insert the treeview row
-            # print(agent.className)
