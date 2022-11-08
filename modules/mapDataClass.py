@@ -15,6 +15,7 @@ class mapDataClass:
         print("Map Data Class gen")
         # Create the graph object
         self.mapGraph = nx.Graph()
+        self.mapLoadedBool = False
 
     def buildReferences(self):
         self.mainView = self.parent.mainView
@@ -122,6 +123,7 @@ class mapDataClass:
             self.mainView.mainCanvas.renderGraphState()
 
         # Enable the rest of the program options to work
+        self.mapLoadedBool = True
         self.parent.toolBar.enableAgentCreation()
         
         # for node in self.mapGraph:

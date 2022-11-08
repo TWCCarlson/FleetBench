@@ -46,6 +46,9 @@ class toolBar(tk.Frame):
             state=tk.DISABLED)
         self.agentFrame.columnconfigure(0, weight=1)
         self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
+        # If a map is loaded when this gui is created, enable the creation button
+        if self.parent.mapData.mapLoadedBool == True:
+            self.createAgentButton.config(state=tk.ACTIVE)
 
     def enableAgentCreation(self):
         self.createAgentButton.config(state=tk.ACTIVE)
@@ -72,25 +75,29 @@ class toolBar(tk.Frame):
         # Coordinate Entry boxes and labels
         self.entryXValue = tk.StringVar()
         self.entryXLabel = tk.Label(self.agentDataFrame, text="X Position: ", width=8)
-        # self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
+        self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
         self.entryX = ttk.Spinbox(self.agentDataFrame, 
             width=6,
             from_=0,
             to=self.mapData.dimensionX,
             increment=1,
             textvariable=self.entryXValue,
-            command=self.highlightTargetXPos
+            command=self.highlightTargetXPos,
+            validate='key',
+            validatecommand=(self.highlightXPos, '%P')
             )
         self.entryYValue = tk.StringVar()
         self.entryYLabel = tk.Label(self.agentDataFrame, text="Y Position: ", width=8)
-        # self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
+        self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
         self.entryY = ttk.Spinbox(self.agentDataFrame, 
             width=6,
             from_=0,
             increment=1,
             to=self.mapData.dimensionY,
             textvariable=self.entryYValue,
-            command=self.highlightTargetYPos
+            command=self.highlightTargetYPos,
+            validate='key',
+            validatecommand=(self.highlightYPos, '%P')
             )
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
@@ -125,8 +132,12 @@ class toolBar(tk.Frame):
         for col in range(self.agentFrame.grid_size()[1]):
             self.agentFrame.columnconfigure(col, weight=0)
 
-    def highlightTargetXPos(self):
-        xPos = self.entryX.get()
+    def highlightTargetXPos(self, *args):
+        print(args)
+        if args:
+            xPos = args[0]
+        else:
+            xPos = self.entryX.get()
         # If input is a number, pass it to the highlight draw function
         if xPos.isnumeric():
             self.highlightTargetTile(xPos, None)
@@ -137,8 +148,12 @@ class toolBar(tk.Frame):
         else:
             return False
 
-    def highlightTargetYPos(self):
-        yPos = self.entryY.get()
+    def highlightTargetYPos(self, *args):
+        print(args)
+        if args:
+            yPos = args[0]
+        else:
+            yPos = self.entryY.get()
         # If input is a number, pass it to the highlight draw function
         if yPos.isnumeric():
             self.highlightTargetTile(None, yPos)
