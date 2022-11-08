@@ -19,9 +19,8 @@ class agentManager:
         self.latestAgent = agentClass(self, **kwargs, ID=self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
 
-        print(self.agentList)
-        print(self.agentPositionList)
-
+        self.parent.contextView.updateTreeView()
+        
 class agentClass:
     def __init__(self, parent, **kwargs):
         self.parent = parent

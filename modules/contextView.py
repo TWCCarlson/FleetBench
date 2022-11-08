@@ -33,7 +33,7 @@ class contextView(tk.Frame):
         self.initScrolling()
 
     def createTreeView(self):
-        self.columnList = {'Name': 50, 'Position': 50, 'Task': 50}
+        self.columnList = {'Name': 50, 'Position': 30, 'Task': 50}
         # Tree view is a stupid fucking widget
         # https://stackoverflow.com/questions/39609865/how-to-set-width-of-treeview-in-tkinter-of-python
         # Create it once, with a single column of nonzero width but all other columns declared, to set the width ???????
@@ -47,17 +47,25 @@ class contextView(tk.Frame):
         self.objectTreeView.column('#0', width=int(treeViewWidth))
         # Set other columns to be zero-width for simplicity
         for col in self.columnList:
-            print(type(col))
             self.objectTreeView.column(col, width=0)
         self.objectTreeView.update()
 
         # Set the real column dimensions
         self.objectTreeView.heading('#0', text='im')
-        self.objectTreeView.column('#0', width=50, stretch=0)
+        self.objectTreeView.column('#0', width=70, stretch=0)
         # Stretch=True can be used to fill the available space evenly using every column that can stretch
         for col in self.columnList:
             self.objectTreeView.heading(col, text=col)
             self.objectTreeView.column(col, width=self.columnList[col], stretch=True)
+
+        # Insert parent rows
+        self.objectTreeView.insert(parent="",
+            index=0,
+            iid='agentParentRow',
+            open=False,
+            tags=['agentTreeView'],
+            text="Agents"
+        )
 
         # Prevent column resizing:
         # https://stackoverflow.com/questions/45358408/how-to-disable-manual-resizing-of-tkinters-treeview-column/46120502#46120502
@@ -113,3 +121,28 @@ class contextView(tk.Frame):
         if self.objectTreeView.identify_region(event.x, event.y) == "separator":
             # Prevent click interacting with this region
             return "break"
+
+    def updateTreeView(self):
+        # Clear the treeview to regenerate it
+        parentRows = self.objectTreeView.get_children()
+        rows = self.objectTreeView.get_children(parentRows)
+        for row in rows:
+            self.objectTreeView.delete(row)
+
+        # Grabs the list of all agents from the agent manager and generates treeview entries based on their states
+        self.treeViewAgentList = self.parent.agentManager.agentList
+        for agent in self.treeViewAgentList:
+            # Extract relevant data
+            agentData = self.treeViewAgentList.get(agent)
+            agentID = agent
+            agentPosition = str(agentData.position)
+            agentClass = agentData.className
+            print(self.treeViewAgentList.get(agent).position)
+            self.objectTreeView.insert(parent="agentParentRow",
+                index='end',
+                iid=agentID,
+                text=agentID,
+                values=["ID: " + str(agentID), agentPosition, agentClass]
+            )
+            # Generate and insert the treeview row
+            # print(agent.className)
