@@ -485,29 +485,45 @@ class mainCanvas(tk.Canvas):
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
 
-    def highlightTile(self, tileIDX, tileIDY):
+    def highlightTile(self, tileIDX, tileIDY, color, multi):
+        print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
         # Clear the old highlights before drawing this singular highlight
-        self.clearHighlight()
-        
+        if multi == True:
+            pass
+        else:
+            self.clearHighlight()
         # Draw a translucent highlight over the indicated cell for user guidance
         # tileSize = self.appearanceValues.canvasTileSize
-        tileSize = self.appearanceValues.canvasTileSize
-        self.images = []
-        self.create_rect(
-            eval(tileIDX) * tileSize,
-            eval(tileIDY) * tileSize,
-            eval(tileIDX) * tileSize + tileSize,
-            eval(tileIDY) * tileSize + tileSize,
-            anchor=tk.NW,
-            fill='red',
-            alpha=0.2,
-            tags=["highlight"]
-        )
+        if isinstance(tileIDX, str):
+            tileSize = self.appearanceValues.canvasTileSize
+            self.create_rect(
+                eval(tileIDX) * tileSize,
+                eval(tileIDY) * tileSize,
+                eval(tileIDX) * tileSize + tileSize,
+                eval(tileIDY) * tileSize + tileSize,
+                anchor=tk.NW,
+                fill=color,
+                alpha=0.2,
+                tags=["highlight"]
+            )
+        else:
+            tileSize = self.appearanceValues.canvasTileSize
+            self.create_rect(
+                tileIDX * tileSize,
+                tileIDY * tileSize,
+                tileIDX * tileSize + tileSize,
+                tileIDY * tileSize + tileSize,
+                anchor=tk.NW,
+                fill=color,
+                alpha=0.2,
+                tags=["highlight"]
+            )
         # Re-sort the layers to the infolayer is not hidden by the highlight
         self.sortCanvasLayers()
 
     def clearHighlight(self):
         # Remove all objects tagged "highlight"
+        self.images = []
         objs = self.find_withtag("highlight")
         for obj in objs:
             self.delete(obj)

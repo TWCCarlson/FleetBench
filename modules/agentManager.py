@@ -20,7 +20,7 @@ class agentManager:
         self.agentList[self.dictLength] = self.latestAgent
 
         self.parent.contextView.updateTreeView()
-        
+
 class agentClass:
     def __init__(self, parent, **kwargs):
         self.parent = parent
@@ -51,3 +51,7 @@ class agentClass:
         # Drop off
         # pathfind
         # set orientation
+
+    def highlightAgent(self, multi):
+        # Have the agent request highlighting from the main canvas
+        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi)

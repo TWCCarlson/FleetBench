@@ -63,14 +63,15 @@ class contextView(tk.Frame):
             index=0,
             iid='agentParentRow',
             open=False,
-            tags=['agentTreeView'],
+            tags=['agentParentRow'],
             text="Agents"
         )
 
         # Prevent column resizing:
         # https://stackoverflow.com/questions/45358408/how-to-disable-manual-resizing-of-tkinters-treeview-column/46120502#46120502
-        self.objectTreeView.bind('<Button-1>', self.clickIntercept)
+        self.objectTreeView.bind('<Button-1>', self.handleClick)
         self.objectTreeView.bind('<Motion>', self.motionIntercept)
+        self.objectTreeView.bind('<<TreeviewSelect>>', self.handleSelect)
 
     def initScrolling(self):
         # Create scrollbar components
@@ -112,11 +113,6 @@ class contextView(tk.Frame):
     def shiftMousewheelAction(self, event):
         self.objectTreeView.xview_scroll(int(-1*(event.delta/10)), "units")
 
-    def clickIntercept(self, event):
-        if self.objectTreeView.identify_region(event.x, event.y) == "separator":
-            # Prevent click interacting with this region
-            return "break"
-
     def motionIntercept(self, event):
         if self.objectTreeView.identify_region(event.x, event.y) == "separator":
             # Prevent click interacting with this region
@@ -126,6 +122,9 @@ class contextView(tk.Frame):
         # Clear the treeview to regenerate it
         # Only remove children of the parent rows
         parentRows = self.objectTreeView.get_children()
+        print("==============")
+        print(parentRows)
+        print(type(parentRows))
         rows = self.objectTreeView.get_children(parentRows)
         for row in rows:
             self.objectTreeView.delete(row)
@@ -142,5 +141,36 @@ class contextView(tk.Frame):
                 index='end',
                 iid=agentID,
                 text=agentID,
-                values=["ID: " + str(agentID), agentPosition, agentClass]
+                values=[agentID, agentPosition, agentClass],
+                tags=["agent", agentID]
             )
+
+    def handleClick(self, event):
+        # Header clicks:
+        if self.objectTreeView.identify_region(event.x, event.y) == "separator":
+            # Prevent click interacting with this region
+            return "break"
+
+    def handleSelect(self, event):
+        # Identify the row clicked on
+        selectedRow = self.objectTreeView.focus()
+        # If the row describes a category
+        if selectedRow in self.objectTreeView.tag_has("agentParentRow"):
+            # parentRow = self.objectTreeView.item(selectedRow)
+            rowChildren = self.objectTreeView.get_children(selectedRow)
+            # Highlight all agents
+            for row in rowChildren:
+                rowData = self.objectTreeView.item(row)
+                print(rowData)
+                # Highlight the selected agent
+                agentID = rowData["values"][0]
+                agentRef = self.parent.agentManager.agentList.get(agentID)
+                agentRef.highlightAgent(multi=True)
+
+        # If the row describes an agent
+        if selectedRow in self.objectTreeView.tag_has("agent"):
+            rowData = self.objectTreeView.item(selectedRow)
+            # Highlight the selected agent
+            agentID = rowData["values"][0]
+            agentRef = self.parent.agentManager.agentList.get(agentID)
+            agentRef.highlightAgent(multi=False)

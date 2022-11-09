@@ -133,7 +133,6 @@ class toolBar(tk.Frame):
             self.agentFrame.columnconfigure(col, weight=0)
 
     def highlightTargetXPos(self, *args):
-        print(args)
         if args:
             xPos = args[0]
         else:
@@ -149,7 +148,6 @@ class toolBar(tk.Frame):
             return False
 
     def highlightTargetYPos(self, *args):
-        print(args)
         if args:
             yPos = args[0]
         else:
@@ -177,7 +175,7 @@ class toolBar(tk.Frame):
             graphCandidate = '(' + str(xPos) + ", " + str(yPos) + ')'
             if graphCandidate in self.mapData.mapGraph.nodes:
                 self.confirmCreateAgentButton.config(state=tk.ACTIVE)
-            self.mainView.mainCanvas.highlightTile(xPos, yPos)
+            self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
             self.mainView.mainCanvas.clearHighlight()
