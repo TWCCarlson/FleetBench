@@ -15,8 +15,12 @@ class agentManager:
     def createNewAgent(self, **kwargs):
         # The length of a dict is always 1 higher than the numeric id
         self.dictLength = len(self.agentList)
+        try:
+            ID = kwargs.pop("ID")
+        except KeyError:
+            ID = self.dictLength
         # Create a new agent and add it to the manager's list
-        self.latestAgent = agentClass(self, **kwargs, ID=self.dictLength)
+        self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
 
         self.parent.contextView.updateTreeView()
@@ -25,6 +29,7 @@ class agentClass:
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create agent")
+        self.numID = kwargs.pop("numID")
         self.ID = kwargs.pop("ID")
         self.position = kwargs.pop("position")
         self.orientation = kwargs.pop("orientation")

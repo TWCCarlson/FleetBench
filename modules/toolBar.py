@@ -99,11 +99,40 @@ class toolBar(tk.Frame):
             validate='key',
             validatecommand=(self.highlightYPos, '%P')
             )
+
+        # Custom name entrybox
+        self.agentNameLabel = tk.Label(self.agentDataFrame, text="Agent Name:", width=16)
+        self.agentNameValue = tk.StringVar()
+        self.agentNameEntry = tk.Entry(self.agentDataFrame, textvariable=self.agentNameValue, width=16)
+
+        # Starting orientation radio buttons
+        self.agentOrientationFrame = tk.Frame(self.agentDataFrame)
+        # tk.Frame.__init__(self, parent, height=frameHeight, 
+        #     width=frameWidth, 
+        #     borderwidth=frameBorderWidth, 
+        #     relief=frameRelief)
+        self.agentOrientationLabel = tk.Label(self.agentOrientationFrame, text="Orientation:", width=8)
+        self.agentOrientation = tk.StringVar()
+        self.agentOrientationN = tk.Radiobutton(self.agentOrientationFrame, text="N", variable=self.agentOrientation, value="N")
+        self.agentOrientationN.select()
+        self.agentOrientationW = tk.Radiobutton(self.agentOrientationFrame, text="W", variable=self.agentOrientation, value="W")
+        self.agentOrientationS = tk.Radiobutton(self.agentOrientationFrame, text="S", variable=self.agentOrientation, value="S")
+        self.agentOrientationE = tk.Radiobutton(self.agentOrientationFrame, text="E", variable=self.agentOrientation, value="E")
+        # self.agentOrientationN.select()
+
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
         self.entryYLabel.grid(row=2, column=0, sticky=tk.E)
         self.entryX.grid(row=1, column=1)
         self.entryY.grid(row=2, column=1)
+        self.agentNameLabel.grid(row=1, column=2, sticky=tk.E)
+        self.agentNameEntry.grid(row=1, column=3, sticky=tk.E)
+        self.agentOrientationFrame.grid(row=2, column=2, columnspan=2, sticky=tk.E)
+        self.agentOrientationLabel.pack(side=tk.LEFT)
+        self.agentOrientationN.pack(side=tk.LEFT)
+        self.agentOrientationW.pack(side=tk.LEFT)
+        self.agentOrientationS.pack(side=tk.LEFT)
+        self.agentOrientationE.pack(side=tk.LEFT)
 
         # Separator
         self.sep1 = ttk.Separator(self.agentDataFrame, orient='vertical')
@@ -194,8 +223,9 @@ class toolBar(tk.Frame):
         xPos = eval(self.entryXValue.get())
         yPos = eval(self.entryYValue.get())
         targetNode = (xPos, yPos)
-        agentOrientation = "N"
+        agentOrientation = self.agentOrientation.get()
         self.agentManager.createNewAgent(
+            ID = self.agentNameValue.get(),
             position=targetNode, 
             orientation=agentOrientation, 
             className=self.agentClass.get(),

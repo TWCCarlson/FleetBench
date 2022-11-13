@@ -52,7 +52,7 @@ class contextView(tk.Frame):
 
         # Set the real column dimensions
         self.objectTreeView.heading('#0', text='im')
-        self.objectTreeView.column('#0', width=60, stretch=0)
+        self.objectTreeView.column('#0', width=62, stretch=0)
         # Stretch=True can be used to fill the available space evenly using every column that can stretch
         for col in self.columnList:
             self.objectTreeView.heading(col, text=col)
@@ -134,15 +134,16 @@ class contextView(tk.Frame):
         for agent in self.treeViewAgentList:
             # Extract relevant data
             agentData = self.treeViewAgentList.get(agent)
+            agentNumID = agentData.numID
             agentID = agentData.ID
             agentPosition = str(agentData.position)
             agentClass = agentData.className
             self.objectTreeView.insert(parent="agentParentRow",
                 index='end',
                 iid=agentID,
-                text='A'+str(agentID),
+                text='A'+str(agentNumID),
                 values=[agentID, agentPosition, agentClass],
-                tags=["agent", agentID]
+                tags=["agent", agentNumID, agentID]
             )
 
     def handleClick(self, event):
@@ -161,9 +162,8 @@ class contextView(tk.Frame):
             # Highlight all agents
             for row in rowChildren:
                 rowData = self.objectTreeView.item(row)
-                print(rowData)
                 # Highlight the selected agent
-                agentID = rowData["values"][0]
+                agentID = rowData["tags"][1]
                 agentRef = self.parent.agentManager.agentList.get(agentID)
                 agentRef.highlightAgent(multi=True)
 
@@ -171,6 +171,6 @@ class contextView(tk.Frame):
         if selectedRow in self.objectTreeView.tag_has("agent"):
             rowData = self.objectTreeView.item(selectedRow)
             # Highlight the selected agent
-            agentID = rowData["values"][0]
+            agentID = rowData["tags"][1]
             agentRef = self.parent.agentManager.agentList.get(agentID)
             agentRef.highlightAgent(multi=False)
