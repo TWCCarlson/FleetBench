@@ -33,7 +33,7 @@ class contextView(tk.Frame):
         self.initScrolling()
 
     def createTreeView(self):
-        self.columnList = {'Name': 50, 'Position': 30, 'Task': 50}
+        self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}
         # Tree view is a stupid fucking widget
         # https://stackoverflow.com/questions/39609865/how-to-set-width-of-treeview-in-tkinter-of-python
         # Create it once, with a single column of nonzero width but all other columns declared, to set the width ???????
@@ -52,7 +52,7 @@ class contextView(tk.Frame):
 
         # Set the real column dimensions
         self.objectTreeView.heading('#0', text='im')
-        self.objectTreeView.column('#0', width=70, stretch=0)
+        self.objectTreeView.column('#0', width=60, stretch=0)
         # Stretch=True can be used to fill the available space evenly using every column that can stretch
         for col in self.columnList:
             self.objectTreeView.heading(col, text=col)
@@ -134,13 +134,13 @@ class contextView(tk.Frame):
         for agent in self.treeViewAgentList:
             # Extract relevant data
             agentData = self.treeViewAgentList.get(agent)
-            agentID = agent
+            agentID = agentData.ID
             agentPosition = str(agentData.position)
             agentClass = agentData.className
             self.objectTreeView.insert(parent="agentParentRow",
                 index='end',
                 iid=agentID,
-                text=agentID,
+                text='A'+str(agentID),
                 values=[agentID, agentPosition, agentClass],
                 tags=["agent", agentID]
             )

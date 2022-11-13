@@ -198,7 +198,7 @@ class toolBar(tk.Frame):
         self.agentManager.createNewAgent(
             position=targetNode, 
             orientation=agentOrientation, 
-            className=self.agentClass.get()
+            className=self.agentClass.get(),
             )
         # Re-render the map state
         self.mainView.mainCanvas.renderGraphState()
