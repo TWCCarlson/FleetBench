@@ -98,19 +98,19 @@ class toolBar(tk.Frame):
             command=self.highlightTargetYPos,
             validate='key',
             validatecommand=(self.highlightYPos, '%P')
-            )
+        )
 
         # Custom name entrybox
         self.agentNameLabel = tk.Label(self.agentDataFrame, text="Agent Name:", width=16)
         self.agentNameValue = tk.StringVar()
+        self.validateAgentName = self.register(self.agentNameValidation)
         self.agentNameEntry = tk.Entry(self.agentDataFrame, textvariable=self.agentNameValue, width=16)
+
+        # Separator
+        self.sep2 = ttk.Separator(self.agentDataFrame, orient='horizontal')
 
         # Starting orientation radio buttons
         self.agentOrientationFrame = tk.Frame(self.agentDataFrame)
-        # tk.Frame.__init__(self, parent, height=frameHeight, 
-        #     width=frameWidth, 
-        #     borderwidth=frameBorderWidth, 
-        #     relief=frameRelief)
         self.agentOrientationLabel = tk.Label(self.agentOrientationFrame, text="Orientation:", width=8)
         self.agentOrientation = tk.StringVar()
         self.agentOrientationN = tk.Radiobutton(self.agentOrientationFrame, text="N", variable=self.agentOrientation, value="N")
@@ -118,7 +118,6 @@ class toolBar(tk.Frame):
         self.agentOrientationW = tk.Radiobutton(self.agentOrientationFrame, text="W", variable=self.agentOrientation, value="W")
         self.agentOrientationS = tk.Radiobutton(self.agentOrientationFrame, text="S", variable=self.agentOrientation, value="S")
         self.agentOrientationE = tk.Radiobutton(self.agentOrientationFrame, text="E", variable=self.agentOrientation, value="E")
-        # self.agentOrientationN.select()
 
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
@@ -133,6 +132,7 @@ class toolBar(tk.Frame):
         self.agentOrientationW.pack(side=tk.LEFT)
         self.agentOrientationS.pack(side=tk.LEFT)
         self.agentOrientationE.pack(side=tk.LEFT)
+        self.sep2.grid(row=3, columnspan=4)
 
         # Separator
         self.sep1 = ttk.Separator(self.agentDataFrame, orient='vertical')
@@ -208,6 +208,15 @@ class toolBar(tk.Frame):
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
             self.mainView.mainCanvas.clearHighlight()
+
+    def agentNameValidation(self, agentName):
+        print("=========")
+        print(agentName)
+        if len(agentName) == 0:
+            # Disable the ability to create the agent
+            self.confirmCreateAgentButton.config(state=tk.DISABLED)
+            # Allow the box to be empty
+            return True
 
     def placeholder(self):
         print(self.entryXValue.get() + ", " + self.entryYValue.get())

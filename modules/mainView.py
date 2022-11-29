@@ -503,7 +503,7 @@ class mainCanvas(tk.Canvas):
                 eval(tileIDY) * tileSize + tileSize,
                 anchor=tk.NW,
                 fill=color,
-                alpha=0.2,
+                alpha=0.3,
                 tags=["highlight"]
             )
         else:
@@ -515,7 +515,7 @@ class mainCanvas(tk.Canvas):
                 tileIDY * tileSize + tileSize,
                 anchor=tk.NW,
                 fill=color,
-                alpha=0.2,
+                alpha=0.3,
                 tags=["highlight"]
             )
         # Re-sort the layers to the infolayer is not hidden by the highlight

@@ -162,6 +162,8 @@ class contextView(tk.Frame):
             # Highlight all agents
             for row in rowChildren:
                 rowData = self.objectTreeView.item(row)
+                # Clear existing highlights
+                self.parent.mainView.mainCanvas.clearHighlight()
                 # Highlight the selected agent
                 agentID = rowData["tags"][1]
                 agentRef = self.parent.agentManager.agentList.get(agentID)
