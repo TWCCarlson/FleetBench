@@ -5,3 +5,4 @@
 - Agent resource tracking
 - Simulation definition menu
 - Session save
+- Fix new agent sharing same name with previously created agent causing lockup in agent generator

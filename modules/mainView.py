@@ -37,6 +37,11 @@ class mainView(tk.Frame):
         # Initialize scrolling behavior
         self.initScrolling()
 
+    def buildReferences(self):
+        # Build references to classes declared after this one
+        self.contextView = self.parent.contextView
+        self.agentManager = self.parent.agentManager
+
     def initScrolling(self):
         # Create scrollbar components
         self.ybar = tk.Scrollbar(self, orient="vertical")
@@ -343,7 +348,11 @@ class mainCanvas(tk.Canvas):
                 fill='orange',
                 tags=tag
             )
+
+            # Arrow tags should include a sorting tag
             tag.append("agentOrientation")
+
+            # Draw the orientation arrow
             self.create_line(
                 dirDict[agentOrientation][0],
                 dirDict[agentOrientation][1],
@@ -354,6 +363,18 @@ class mainCanvas(tk.Canvas):
                 fill='white',
                 width=4
             )
+
+    def agentClickHighlighter(self, agentName, agentID, event):
+        # Remove previous highlighting
+        self.clearHighlight()
+        # Find iid for specified agent in the treeview
+        agentIID = self.parent.contextView.objectTreeView.tag_has(agentName)
+        # Set the selection to include the agent
+        self.parent.contextView.objectTreeView.see(agentIID)
+        self.parent.contextView.objectTreeView.selection_set(agentIID)
+        # Highlight the agent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentRef.highlightAgent(multi=False)
 
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
@@ -378,7 +399,10 @@ class mainCanvas(tk.Canvas):
             # If there is an agent in the node, include it in the hoverinfo text
             if node[0] in self.parent.parent.agentManager.agentPositionList:
                 nodeAgentID = self.parent.parent.agentManager.agentPositionList[node[0]]
-                hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent ID: "+str(nodeAgentID)
+                hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent Name: "+str(nodeAgentID[0])
+
+                # Further, make clicks on this hovertile select the agent
+                self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentID[0], nodeAgentID[1]))
             else:
                 hoverString = str(node[0])+": "+nodeType.capitalize()
 

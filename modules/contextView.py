@@ -71,7 +71,8 @@ class contextView(tk.Frame):
         # https://stackoverflow.com/questions/45358408/how-to-disable-manual-resizing-of-tkinters-treeview-column/46120502#46120502
         self.objectTreeView.bind('<Button-1>', self.handleClick)
         self.objectTreeView.bind('<Motion>', self.motionIntercept)
-        self.objectTreeView.bind('<<TreeviewSelect>>', self.handleSelect)
+        # This event captures too much
+        # self.objectTreeView.bind('<<TreeviewSelect>>', self.handleSelect)
 
     def initScrolling(self):
         # Create scrollbar components
@@ -122,9 +123,6 @@ class contextView(tk.Frame):
         # Clear the treeview to regenerate it
         # Only remove children of the parent rows
         parentRows = self.objectTreeView.get_children()
-        print("==============")
-        print(parentRows)
-        print(type(parentRows))
         rows = self.objectTreeView.get_children(parentRows)
         for row in rows:
             self.objectTreeView.delete(row)
@@ -151,6 +149,8 @@ class contextView(tk.Frame):
         if self.objectTreeView.identify_region(event.x, event.y) == "separator":
             # Prevent click interacting with this region
             return "break"
+        else:
+            self.handleSelect(event)
 
     def handleSelect(self, event):
         # Identify the row clicked on
@@ -171,6 +171,8 @@ class contextView(tk.Frame):
 
         # If the row describes an agent
         if selectedRow in self.objectTreeView.tag_has("agent"):
+            # Clear existing highlights
+            self.parent.mainView.mainCanvas.clearHighlight()
             rowData = self.objectTreeView.item(selectedRow)
             # Highlight the selected agent
             agentID = rowData["tags"][1]

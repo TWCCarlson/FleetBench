@@ -37,6 +37,7 @@ class App(tk.Tk):
         self.mapData.buildReferences()
         self.infoBox.buildReferences()
         self.toolBar.buildReferences()
+        self.mainView.buildReferences()
 
         # Render the app
         self.mainloop()
