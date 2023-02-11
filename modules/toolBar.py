@@ -104,7 +104,12 @@ class toolBar(tk.Frame):
         self.agentNameLabel = tk.Label(self.agentDataFrame, text="Agent Name:", width=16)
         self.agentNameValue = tk.StringVar()
         self.validateAgentName = self.register(self.agentNameValidation)
-        self.agentNameEntry = tk.Entry(self.agentDataFrame, textvariable=self.agentNameValue, width=16)
+        self.agentNameEntry = tk.Entry(self.agentDataFrame, 
+            textvariable=self.agentNameValue, 
+            width=16,
+            validate='key',
+            validatecommand=(self.validateAgentName, '%P')
+            )
 
         # Separator
         self.sep2 = ttk.Separator(self.agentDataFrame, orient='horizontal')
@@ -166,14 +171,23 @@ class toolBar(tk.Frame):
             xPos = args[0]
         else:
             xPos = self.entryX.get()
-        # If input is a number, pass it to the highlight draw function
+        # Verify that the input is correct
         if xPos.isnumeric():
+            # If the value is a number, then we need to:
+            # Highlight the value if the Y value is also a number
             self.highlightTargetTile(xPos, None)
+            # Check the node exists on the graph to enable the creation button
+
+            # Check that all other enabling conditions are met
+            self.updateAgentCreationButton()
+
+            # Numbers are allowed
             return True
         elif len(xPos) == 0:
             # Allow the box to be empty
             return True
         else:
+            # Nothing else is allowed
             return False
 
     def highlightTargetYPos(self, *args):
@@ -181,42 +195,80 @@ class toolBar(tk.Frame):
             yPos = args[0]
         else:
             yPos = self.entryY.get()
-        # If input is a number, pass it to the highlight draw function
+        # Verify that the input is correct
         if yPos.isnumeric():
+            # If the value is a number, then we need to:
+            # Highlight the value if the Y value is also a number
+            # And check the node exists on the graph to enable the creation button
             self.highlightTargetTile(None, yPos)
+            
+            # Check that all other enabling conditions are met
+            self.updateAgentCreationButton()
+
+            # Numbers are allowed
             return True
         elif len(yPos) == 0:
-            # Allow the box to be empty
+            # Emptying the box is allowed
             return True
         else:
+            # Anything else is not allowed 
             return False
 
     def highlightTargetTile(self, xPos, yPos):
         # If an input is Nonetype, fetch it from its entry variable
         if xPos == None:
-            self.confirmCreateAgentButton.config(state=tk.DISABLED)
             xPos = self.entryXValue.get()
         elif yPos == None:
-            self.confirmCreateAgentButton.config(state=tk.DISABLED)
             yPos = self.entryYValue.get()
         # If both inputs are numeric, try to render the cell highlight
         if xPos.isnumeric() and yPos.isnumeric():
-            graphCandidate = '(' + str(xPos) + ", " + str(yPos) + ')'
-            if graphCandidate in self.mapData.mapGraph.nodes:
-                self.confirmCreateAgentButton.config(state=tk.ACTIVE)
             self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
+            targetAgentNodeInGraph = self.tileInGraphValidation(xPos, yPos)
+            self.validAgentCreationNode = targetAgentNodeInGraph
         else:
-            self.confirmCreateAgentButton.config(state=tk.DISABLED)
+            self.validAgentCreationNode = False
+            # self.confirmCreateAgentButton.config(state=tk.DISABLED)
             self.mainView.mainCanvas.clearHighlight()
 
+    def tileInGraphValidation(self, xPos, yPos):
+        # Check that the node formed by these positions is actually part of the warehouse graph
+        graphCandidate = '(' + str(xPos) + ", " + str(yPos) + ')'
+        if graphCandidate in self.mapData.mapGraph.nodes:
+            # If so, enable the button
+            # self.confirmCreateAgentButton.config(state=tk.ACTIVE)
+            return True
+        else:
+            # self.confirmCreateAgentButton.config(state=tk.DISABLED)
+            return False
+
     def agentNameValidation(self, agentName):
-        print("=========")
-        print(agentName)
-        if len(agentName) == 0:
+        # If the agentName box is empty (length = 0), it is not valid
+        if len(agentName) < 3:
             # Disable the ability to create the agent
-            self.confirmCreateAgentButton.config(state=tk.DISABLED)
+            self.agentNameValid = False
+
+            # Check that all other enabling conditions are met
+            self.updateAgentCreationButton()
+
+            # self.confirmCreateAgentButton.config(state=tk.DISABLED)
             # Allow the box to be empty
             return True
+        else:
+            # Enable the ability to create the agent
+            self.agentNameValid = True
+
+            # Check that all other enabling conditions are met
+            self.updateAgentCreationButton()
+
+            # self.confirmCreateAgentButton.config(state=tk.ACTIVE)
+            return True
+
+    def updateAgentCreationButton(self):
+        # Checks if all preconditions for placing an agent on the graph are met
+        if self.validAgentCreationNode and self.agentNameValid:
+            self.confirmCreateAgentButton.config(state=tk.ACTIVE)
+        else:
+            self.confirmCreateAgentButton.config(state=tk.DISABLED)
 
     def placeholder(self):
         print(self.entryXValue.get() + ", " + self.entryYValue.get())
