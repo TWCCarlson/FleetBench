@@ -1,0 +1,7 @@
+- Manual agent control
+- Seeded RNG system for AI decisionmaking hooks in the future
+- Manual Task generator
+- Automatic Task generator
+- Agent resource tracking
+- Simulation definition menu
+- Session save

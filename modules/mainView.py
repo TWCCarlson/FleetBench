@@ -486,7 +486,7 @@ class mainCanvas(tk.Canvas):
                 self.itemconfigure(obj, state='normal')
 
     def highlightTile(self, tileIDX, tileIDY, color, multi):
-        print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
+        # print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
         # Clear the old highlights before drawing this singular highlight
         if multi == True:
             pass
