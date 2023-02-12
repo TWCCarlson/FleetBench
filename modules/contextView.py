@@ -1,5 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+# import networkx as nx
+# import matplotlib.pyplot as plt
 
 class contextView(tk.Frame):
     def __init__(self, parent):
@@ -19,6 +23,7 @@ class contextView(tk.Frame):
         self.grid_propagate(False)
         self.grid(row=0, column=2, rowspan=2, sticky=tk.N)
 
+        ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
         self.contextLabelFrame = tk.LabelFrame(self, text="Agent Generator")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -26,7 +31,10 @@ class contextView(tk.Frame):
         self.createAgentButton = tk.Button(self.contextLabelFrame, text="Create Agent. . .", width=15)
         self.contextLabelFrame.columnconfigure(0, weight=1)
         self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
+        ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
 
+        # Create Manual Movement Interface
+        self.createMovementInterface()
         # Create treeView
         self.createTreeView()
         # Initialize scrolling
@@ -41,7 +49,7 @@ class contextView(tk.Frame):
         # Finally reup with everything actually used
         treeViewWidth = self.appearanceValues.contextViewWidth - self.appearanceValues.frameBorderWidth*2 - 21
         self.objectTreeView = ttk.Treeview(self, selectmode='browse')
-        self.objectTreeView.grid(row=1, column=0, sticky=tk.S)
+        self.objectTreeView.grid(row=2, column=0, sticky=tk.S)
         self.objectTreeView["height"] = 20
         self.objectTreeView["columns"] = list(self.columnList.keys()) # list() must be used for this widget
         self.objectTreeView.column('#0', width=int(treeViewWidth))
@@ -84,8 +92,8 @@ class contextView(tk.Frame):
         self.objectTreeView.xbar["command"] = self.objectTreeView.xview
 
         # Adjust positioning, size relative to grid
-        self.objectTreeView.ybar.grid(row=1, column=1, sticky="ns")
-        self.objectTreeView.xbar.grid(row=2, column=0, sticky="ew")
+        self.objectTreeView.ybar.grid(row=2, column=1, sticky="ns")
+        self.objectTreeView.xbar.grid(row=3, column=0, sticky="ew")
 
         # Make canvas update scrollbar position to match its view
         self.objectTreeView["yscrollcommand"] = self.objectTreeView.ybar.set
@@ -168,6 +176,9 @@ class contextView(tk.Frame):
                 agentID = rowData["tags"][1]
                 agentRef = self.parent.agentManager.agentList.get(agentID)
                 agentRef.highlightAgent(multi=True)
+                # Update the selection
+                self.parent.agentManager.currentAgent = agentID
+                print(self.parent.agentManager.currentAgent)
 
         # If the row describes an agent
         if selectedRow in self.objectTreeView.tag_has("agent"):
@@ -178,3 +189,94 @@ class contextView(tk.Frame):
             agentID = rowData["tags"][1]
             agentRef = self.parent.agentManager.agentList.get(agentID)
             agentRef.highlightAgent(multi=False)
+            # Update the selection
+            self.parent.agentManager.currentAgent = agentID
+            print(self.parent.agentManager.currentAgent)
+
+    def createMovementInterface(self):
+        self.movementFrame = tk.LabelFrame(self, text="Manual Movement")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.movementFrame.grid(row=1, column=0, sticky=tk.E+tk.W, padx=4, columnspan=2)
+        self.movementFrame.columnconfigure(0, weight=1)
+        # self.movementFrame.columnconfigure(1, weight=1)
+        self.movementFrame.columnconfigure(2, weight=1)
+        # Cardinal movement
+        self.moveUp = tk.Button(self.movementFrame, text="N", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+            command=self.moveAgentUp)
+        self.moveUp.grid(row=0, column=1, pady=4, padx=4, columnspan=1, sticky=tk.S)
+        self.moveLeft = tk.Button(self.movementFrame, text="W", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+            command=self.moveAgentLeft)
+        self.moveLeft.grid(row=1, column=0, pady=4, padx=4, columnspan=1, sticky=tk.E)
+        self.moveRight = tk.Button(self.movementFrame, text="E", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+            command=self.moveAgentRight)
+        self.moveRight.grid(row=1, column=2, pady=4, padx=4, columnspan=1, sticky=tk.W)
+        self.moveDown = tk.Button(self.movementFrame, text="S", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+            command=self.moveAgentDown)
+        self.moveDown.grid(row=2, column=1, pady=4, padx=4, columnspan=1, sticky=tk.N)
+        # Rotational movement
+        self.rotateCW = tk.Button(self.movementFrame, text="CW", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
+            command=self.rotateAgentCW)
+        self.rotateCW.grid(row=0, column=0, pady=4, padx=4, columnspan=1, sticky=tk.SE)
+        self.rotateCCW = tk.Button(self.movementFrame, text="CCW", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
+            command=self.rotateAgentCCW)
+        self.rotateCCW.grid(row=0, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SW)
+        # Meta controls
+        self.pause = tk.Button(self.movementFrame, text="P", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
+            command=self.pauseAgent, background='yellow')
+        self.pause.grid(row=2, column=0, pady=4, padx=4, columnspan=1, sticky=tk.SW)
+        self.delete = tk.Button(self.movementFrame, text="Del", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
+            command=self.deleteAgent, background='red')
+        self.delete.grid(row=2, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SE)
+
+    def moveAgentUp(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.moveUp()
+
+    def moveAgentLeft(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.moveLeft()
+
+    def moveAgentRight(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.moveRight()
+
+    def moveAgentDown(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.moveDown()
+
+    def rotateAgentCW(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.rotateCW()
+
+    def rotateAgentCCW(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+        # Call movement method
+        agentRef.rotateCCW()
+
+    def pauseAgent(self):
+        print("Agent paused")
+        pp.pprint(self.parent.mainView.mapData.nodes(data=True))
+        # nx.draw(self.parent.mainView.mapData)
+        # plt.show()
+
+
+    def deleteAgent(self):
+        print("Agent deleted")

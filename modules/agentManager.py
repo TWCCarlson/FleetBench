@@ -10,6 +10,7 @@ class agentManager:
         # Create a non-gui interface for generating and accessing all agents in the system
         self.agentList = {}
         self.agentPositionList = {}
+        self.currentAgent = []
         print(type(self.agentList))
 
     def createNewAgent(self, **kwargs):
@@ -60,3 +61,22 @@ class agentClass:
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
         self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi)
+
+    def moveUp(self):
+        print("Move agent up")
+        
+
+    def moveLeft(self):
+        print("Move agent left")
+
+    def moveRight(self):
+        print("Move agent right")
+
+    def moveDown(self):
+        print("Move agent down")
+
+    def rotateCW(self):
+        print("Rotate CW")
+
+    def rotateCCW(self):
+        print("Rotate CCW")

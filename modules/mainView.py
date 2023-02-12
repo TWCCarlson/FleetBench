@@ -367,14 +367,21 @@ class mainCanvas(tk.Canvas):
     def agentClickHighlighter(self, agentName, agentID, event):
         # Remove previous highlighting
         self.clearHighlight()
+
         # Find iid for specified agent in the treeview
         agentIID = self.parent.contextView.objectTreeView.tag_has(agentName)
+
         # Set the selection to include the agent
         self.parent.contextView.objectTreeView.see(agentIID)
         self.parent.contextView.objectTreeView.selection_set(agentIID)
+
         # Highlight the agent
         agentRef = self.parent.agentManager.agentList.get(agentID)
         agentRef.highlightAgent(multi=False)
+
+        # Update the selection tracker
+        self.parent.parent.agentManager.currentAgent = agentID
+        print(self.parent.parent.agentManager.currentAgent)
 
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
