@@ -273,10 +273,6 @@ class contextView(tk.Frame):
 
     def pauseAgent(self):
         print("Agent paused")
-        pp.pprint(self.parent.mainView.mapData.nodes(data=True))
-        # nx.draw(self.parent.mainView.mapData)
-        # plt.show()
-
 
     def deleteAgent(self):
         print("Agent deleted")

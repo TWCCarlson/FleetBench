@@ -25,6 +25,8 @@ class agentManager:
         self.agentList[self.dictLength] = self.latestAgent
 
         self.parent.contextView.updateTreeView()
+        self.parent.mapData.updateAgentLocations(self.agentList)
+
 
 class agentClass:
     def __init__(self, parent, **kwargs):
@@ -65,7 +67,6 @@ class agentClass:
     def moveUp(self):
         print("Move agent up")
         
-
     def moveLeft(self):
         print("Move agent left")
 

@@ -26,7 +26,7 @@ class mapDataClass:
         path = tk.filedialog.askopenfile(title="Load Map JSON", filetypes = [("Text", ".txt")])
         if path != None:
             mapData = json.load(path)
-            pp.pprint(mapData)
+            # pp.pprint(mapData)
             self.loadMapToNetworkX(mapData)
         
     def loadMapToNetworkX(self, mapData):
@@ -128,4 +128,29 @@ class mapDataClass:
         
         # for node in self.mapGraph:
         #     pp.pprint(eval(node))
+
+    def updateAgentLocations(self, agentList, ):
+        print("update Agent locations in graph")
+
+        # Remove all agents from the graph
+        for node in self.mapGraph.nodes(data=True):
+            if 'agent' in self.mapGraph.nodes.data()[node[0]]:
+                self.mapGraph.nodes.data()[node[0]]['agent'] = None
+            else:
+                print(str(node) + " does not contain an agent" )
+
+        # Insert agents from the agent list back into the graph
+        for agent in agentList:
+            agentPosition = agentList[agent].position
+            targetNode = f"({agentPosition[0]}, {agentPosition[1]})"
+            self.mapGraph.nodes[targetNode]['agent'] = agentList[agent]
+
+        # for node in self.mapGraph.nodes(data=True):
+        #     # print("Agent in node")
+        #     print(node[0])
+        #     try:
+        #         print(self.mapGraph.nodes.data()[node[0]]['agent'])
+        #     except:
+        #         print("No agent")
+        
             

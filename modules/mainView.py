@@ -128,13 +128,15 @@ class mainCanvas(tk.Canvas):
         #   - Node tiles
         #   - Edges
         #   - Colorization by type
+        #   - Agents
+        #   - Context tiles
         # Style references
         tileSize = self.appearanceValues.canvasTileSize
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
         edgeWidth = self.appearanceValues.canvasEdgeWidth
         # Clear current canvas 
         self.clearMainCanvas()
-        # Draw nodes, being sure to tag them for ordering and overlaying
+        # Draw tiles, being sure to tag them for ordering and overlaying
         self.drawGridlines()
         self.renderNodes(graphData, tileSize, nodeSizeRatio)
         self.renderEdges(graphData, edgeWidth)
@@ -317,52 +319,63 @@ class mainCanvas(tk.Canvas):
     def renderAgents(self, graphData, tileSize):
         # Renders agent positions and orientations
         print("render agents")
-        # Access the agent manager to find all agents which need to be rendered
-        self.agentManager = self.parent.parent.agentManager
-        for agentID in self.agentManager.agentList:
-            agentData = self.agentManager.agentList[agentID]
-            # Find the center of the tile and place a diamond
-            nodePosX = agentData.position[0]
-            centerPosX = nodePosX * tileSize + 0.5 * tileSize
-            nodePosY = agentData.position[1]
-            centerPosY = nodePosY * tileSize + 0.5 * tileSize
-            agentOrientation = agentData.orientation
-            tag = ["agent" + str(agentID), "agent"]
-            dirDict = {
-                "N": (centerPosX, centerPosY - 0.4 * tileSize),
-                "W": (centerPosX - 0.4 * tileSize, centerPosY),
-                "S": (centerPosX, centerPosY + 0.4 * tileSize),
-                "E": (centerPosX + 0.4 * tileSize, centerPosY)
-            }
-            self.create_polygon(
-                dirDict["N"][0],
-                dirDict["N"][1],
-                dirDict["W"][0],
-                dirDict["W"][1],
-                dirDict["S"][0],
-                dirDict["S"][1],
-                dirDict["E"][0],
-                dirDict["E"][1],
-                outline='black',
-                width = 2,
-                fill='orange',
-                tags=tag
-            )
 
-            # Arrow tags should include a sorting tag
-            tag.append("agentOrientation")
+        # Render the agent position direct from the graph object
+        # pp.pprint(graphData.nodes(data=True))
+        for node in graphData.nodes(data=True):
+            if 'agent' in graphData.nodes.data()[node[0]]:
+                # Extract the reference to the agent object with a shallow copy
+                agentRef = graphData.nodes.data()[node[0]]['agent']
+                # Extract position data, convert to canvas coordinates and centralize
+                nodePosX = agentRef.position[0]
+                centerPosX = nodePosX * tileSize + 0.5 * tileSize
+                nodePosY = agentRef.position[1]
+                centerPosY = nodePosY * tileSize + 0.5 * tileSize
+                # Extract the agent orientation
+                agentOrientation = agentRef.orientation
+                # Tag the agent for layer sorting
+                tag = ["agent" + str(agentRef.ID), "agent"]
+                # Dictionary of points for the polygon
+                dirDict = {
+                    "N": (centerPosX, centerPosY - 0.4 * tileSize),
+                    "W": (centerPosX - 0.4 * tileSize, centerPosY),
+                    "S": (centerPosX, centerPosY + 0.4 * tileSize),
+                    "E": (centerPosX + 0.4 * tileSize, centerPosY)
+                }
+                # Draw the polygon representing the agent
+                self.create_polygon(
+                    dirDict["N"][0],
+                    dirDict["N"][1],
+                    dirDict["W"][0],
+                    dirDict["W"][1],
+                    dirDict["S"][0],
+                    dirDict["S"][1],
+                    dirDict["E"][0],
+                    dirDict["E"][1],
+                    outline='black',
+                    width = 2,
+                    fill='orange',
+                    tags=tag
+                )
 
-            # Draw the orientation arrow
-            self.create_line(
-                dirDict[agentOrientation][0],
-                dirDict[agentOrientation][1],
-                centerPosX,
-                centerPosY,
-                arrow = tk.FIRST,
-                tags=tag,
-                fill='white',
-                width=4
-            )
+                # Arrow tags should include a sorting tag
+                tag.append("agentOrientation")
+
+                # Draw the orientation arrow
+                self.create_line(
+                    dirDict[agentOrientation][0],
+                    dirDict[agentOrientation][1],
+                    centerPosX,
+                    centerPosY,
+                    arrow = tk.FIRST,
+                    tags=tag,
+                    fill='white',
+                    width=4
+                )
+                # print(f"{node} contains agent")
+            else:
+                # print(f"{node} does not contain an agent")
+                pass
 
     def agentClickHighlighter(self, agentName, agentID, event):
         # Remove previous highlighting

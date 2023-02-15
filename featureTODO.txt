@@ -6,3 +6,32 @@
 - Simulation definition menu
 - Session save
 - Fix new agent sharing same name with previously created agent causing lockup in agent generator
+
+The graph datastructure should probably contain as much information as possible
+The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
+    This should be decoupled from the functional code and called after every change
+
+Informational Classes are then:
+    mapData
+    agentData
+    taskData
+    statisticsData
+
+Functional element Classes are then:
+    commandBar - file, etc
+    toolBar - the left pane
+    infoBox - top bar with highlight info and layer visibilities
+    mainView - central pane with graph render
+    contextView - right hand pane
+
+Graph structure:
+    node data holds almost everything
+    <Node Name> : <Node Data>
+    '(A, B)': {
+        'pos': {X: A, Y: B},
+        'type': <'Node type'>,
+        'edgeDirs': {'N': <0/1>, 'W': <0/1>, 'S': <0/1>, 'E': <0/1>},
+        'agent': <AgentID>
+        'task': <TaskID>
+    }
+    maybe include 'reservations': {AgentID: weight/how many turns/etc}
