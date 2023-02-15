@@ -220,15 +220,34 @@ class toolBar(tk.Frame):
             xPos = self.entryXValue.get()
         elif yPos == None:
             yPos = self.entryYValue.get()
-        # If both inputs are numeric, try to render the cell highlight
-        if xPos.isnumeric() and yPos.isnumeric():
-            self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
-            targetAgentNodeInGraph = self.tileInGraphValidation(xPos, yPos)
-            self.validAgentCreationNode = targetAgentNodeInGraph
-        else:
+
+        # Using guard clauses, check that
+        # The x input is numeric
+        if not xPos.isnumeric():
+            # Else it is invalid
             self.validAgentCreationNode = False
-            # self.confirmCreateAgentButton.config(state=tk.DISABLED)
             self.mainView.mainCanvas.clearHighlight()
+            return
+        # The y input is numeric
+        if not yPos.isnumeric():
+            # Else it is invalid
+            self.validAgentCreationNode = False
+            self.mainView.mainCanvas.clearHighlight()
+            return
+        # And that the tile does not already contain an agent
+        print(self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"])
+        if 'agent' in self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"]:
+            # Else it is invalid    
+            print("AGENT EXISTS IN THIS TILE ALREADY")
+            self.validAgentCreationNode = False
+            self.mainView.mainCanvas.clearHighlight()
+            return
+        # If all guard clauses are passed, highlight the tile
+        self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
+        # Check that it belongs to the graph
+        targetAgentNodeInGraph = self.tileInGraphValidation(xPos, yPos)
+        # Enable the button based on graph belongingness
+        self.validAgentCreationNode = targetAgentNodeInGraph
 
     def tileInGraphValidation(self, xPos, yPos):
         # Check that the node formed by these positions is actually part of the warehouse graph
@@ -265,6 +284,7 @@ class toolBar(tk.Frame):
 
     def updateAgentCreationButton(self):
         # Checks if all preconditions for placing an agent on the graph are met
+        # Input box validation is done with callbacks
         if self.validAgentCreationNode and self.agentNameValid:
             self.confirmCreateAgentButton.config(state=tk.ACTIVE)
         else:
