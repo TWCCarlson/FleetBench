@@ -19,6 +19,10 @@ class toolBar(tk.Frame):
         # Render frame
         self.grid_propagate(False)
         self.grid(row=0, column=0, rowspan=2, sticky=tk.N)
+
+        # Default status
+        self.agentNameValid = False
+        self.validAgentCreationNode = False
         
         # Establish buttons and inputs
         self.initUI()
@@ -159,12 +163,17 @@ class toolBar(tk.Frame):
         self.confirmCreateAgentButton.grid(row=2, column=1, sticky=tk.W, pady=4)
 
     def clearAgentCreationUI(self):
+        # Destroys all the agent creation ui elements
         for widget in self.agentFrame.winfo_children():
             widget.destroy()
         for row in range(self.agentFrame.grid_size()[0]):
             self.agentFrame.rowconfigure(row, weight=0)
         for col in range(self.agentFrame.grid_size()[1]):
             self.agentFrame.columnconfigure(col, weight=0)
+
+        # Resets the enabled status of the create agent button
+        self.validAgentCreationNode = False
+        self.agentNameValid = False
 
     def highlightTargetXPos(self, *args):
         if args:
@@ -234,20 +243,23 @@ class toolBar(tk.Frame):
             self.validAgentCreationNode = False
             self.mainView.mainCanvas.clearHighlight()
             return
+        # Check that it belongs to the graph
+        if not self.tileInGraphValidation(xPos, yPos):
+            # This can still be highlited as a guide to the user
+            self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
+            self.validAgentCreationNode = False
+            return
         # And that the tile does not already contain an agent
-        print(self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"])
+        # print(self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"])
         if 'agent' in self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"]:
             # Else it is invalid    
-            print("AGENT EXISTS IN THIS TILE ALREADY")
+            # print("AGENT EXISTS IN THIS TILE ALREADY")
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.clearHighlight()
             return
         # If all guard clauses are passed, highlight the tile
         self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
-        # Check that it belongs to the graph
-        targetAgentNodeInGraph = self.tileInGraphValidation(xPos, yPos)
         # Enable the button based on graph belongingness
-        self.validAgentCreationNode = targetAgentNodeInGraph
+        self.validAgentCreationNode = True
 
     def tileInGraphValidation(self, xPos, yPos):
         # Check that the node formed by these positions is actually part of the warehouse graph
