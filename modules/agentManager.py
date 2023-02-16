@@ -6,7 +6,6 @@ class agentManager:
         # Generate agent class definitions
         # Generate the agent class with inputs
 
-
         # Create a non-gui interface for generating and accessing all agents in the system
         self.agentList = {}
         self.agentPositionList = {}
@@ -41,6 +40,14 @@ class agentClass:
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]
         # Push some data into the map graph attributes for fast referencing elsewhere
 
+        # Dict of directions and numerical values used for calculating rotation
+        # Incrementing results in CCW, decerementing in CW
+        self.dirDict = {
+            "N" : 0,
+            "W" : 1,
+            "S" : 2,
+            "E" : 3
+        }
         
         # Collect specification values for this agent
         # - position, orientation, energy, etc
@@ -76,7 +83,22 @@ class agentClass:
         print("Move agent down")
 
     def rotateCW(self):
-        print("Rotate CW")
+        # Fetch current orientation as a number from the direction dictionary
+        curOrient = self.dirDict[self.orientation]
+        # Decrement for CW, modulo for wrapping
+        newOrient = (curOrient-1) % len(self.dirDict)
+        # Find the new direction as a char
+        self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
+        # Redraw the canvas to reflect the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
 
     def rotateCCW(self):
-        print("Rotate CCW")
+        # Fetch current orientation as a number from the direction dictionary
+        curOrient = self.dirDict[self.orientation]
+        # Decrement for CW, modulo for wrapping
+        newOrient = (curOrient+1) % len(self.dirDict)
+        # Find the new direction as a char
+        self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
+        # Redraw the canvas to reflect the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        
