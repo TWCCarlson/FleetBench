@@ -75,6 +75,8 @@ class agentClass:
         # Set the target node to be north
         targetNode = (self.position[0], self.position[1]-1)
         self.position = targetNode
+        # Change orientation to represent turning to move north
+        self.orientation = "N"
         # Update the canvas with the change
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
@@ -87,6 +89,8 @@ class agentClass:
         # Set the target node to be west
         targetNode = (self.position[0]-1, self.position[1])
         self.position = targetNode
+        # Change orientation to represent turning to move north
+        self.orientation = "W"
         # Update the canvas with the change
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
@@ -99,6 +103,8 @@ class agentClass:
         # Set the target node to be east
         targetNode = (self.position[0]+1, self.position[1])
         self.position = targetNode
+        # Change orientation to represent turning to move north
+        self.orientation = "E"
         # Update the canvas with the change
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
@@ -111,6 +117,8 @@ class agentClass:
         # Set the target node to be south
         targetNode =  (self.position[0], self.position[1]+1)
         self.position = targetNode
+        # Change orientation to represent turning to move north
+        self.orientation = "S"
         # Update the canvas with the change
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
