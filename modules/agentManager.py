@@ -72,15 +72,51 @@ class agentClass:
 
     def moveUp(self):
         print("Move agent up")
+        # Set the target node to be north
+        targetNode = (self.position[0], self.position[1]-1)
+        self.position = targetNode
+        # Update the canvas with the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Update the movement buttons with the change
+        self.parent.parent.contextView.validateMovementButtonStates()
+        # Shift the highlighting with the change
+        self.highlightAgent(multi=False)
         
     def moveLeft(self):
         print("Move agent left")
+        # Set the target node to be west
+        targetNode = (self.position[0]-1, self.position[1])
+        self.position = targetNode
+        # Update the canvas with the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Update the movement buttons with the change
+        self.parent.parent.contextView.validateMovementButtonStates()
+        # Shift the highlighting with the change
+        self.highlightAgent(multi=False)
 
     def moveRight(self):
         print("Move agent right")
+        # Set the target node to be east
+        targetNode = (self.position[0]+1, self.position[1])
+        self.position = targetNode
+        # Update the canvas with the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Update the movement buttons with the change
+        self.parent.parent.contextView.validateMovementButtonStates()
+        # Shift the highlighting with the change
+        self.highlightAgent(multi=False)
 
     def moveDown(self):
         print("Move agent down")
+        # Set the target node to be south
+        targetNode =  (self.position[0], self.position[1]+1)
+        self.position = targetNode
+        # Update the canvas with the change
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Update the movement buttons with the change
+        self.parent.parent.contextView.validateMovementButtonStates()
+        # Shift the highlighting with the change
+        self.highlightAgent(multi=False)
 
     def rotateCW(self):
         # Fetch current orientation as a number from the direction dictionary
@@ -101,4 +137,3 @@ class agentClass:
         self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
         # Redraw the canvas to reflect the change
         self.parent.parent.mainView.mainCanvas.renderGraphState()
-        
