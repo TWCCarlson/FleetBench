@@ -6,6 +6,7 @@ from modules.contextView import contextView
 from modules.mapDataClass import mapDataClass
 from modules.infoBox import infoBox
 from modules.agentManager import agentManager
+from modules.randomGenerator import randomGenerator
 from config.appearanceValues import appearanceValues
 
 class App(tk.Tk):
@@ -13,6 +14,9 @@ class App(tk.Tk):
         # Main window config
         tk.Tk.__init__(self)
         self.title("Warehousing Simulator")
+
+        # RNG Seeding class
+        self.randomGenerator = randomGenerator(self)
 
         # Map information class
         self.mapData = mapDataClass(self)

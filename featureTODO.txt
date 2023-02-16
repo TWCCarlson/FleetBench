@@ -1,4 +1,3 @@
-- Manual agent control
 - Seeded RNG system for AI decisionmaking hooks in the future
 - Manual Task generator
 - Automatic Task generator
@@ -31,7 +30,7 @@ Graph structure:
         'pos': {X: A, Y: B},
         'type': <'Node type'>,
         'edgeDirs': {'N': <0/1>, 'W': <0/1>, 'S': <0/1>, 'E': <0/1>},
-        'agent': <AgentID>
-        'task': <TaskID>
+        'agent': <Agent Object>
+        'task': <Task Object>
     }
     maybe include 'reservations': {AgentID: weight/how many turns/etc}

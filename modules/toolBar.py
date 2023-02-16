@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import networkx as nx
+from functools import partial
 
 class toolBar(tk.Frame):
     def __init__(self, parent):
@@ -34,13 +35,17 @@ class toolBar(tk.Frame):
 
     def initUI(self):
         print("Create toolbar ui elements")
-        # Create a labeled container
-        self.agentFrame = tk.LabelFrame(self, text="Agent Generator")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        # Create a labeled container for the agent generator
+        self.agentFrame = tk.LabelFrame(self, text="Agent Generator")
         self.agentFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
-
         self.agentCreationPrompt()
+
+        # Create a labeled container for the rng system
+        self.randomSeedFrame = tk.LabelFrame(self, text="RNG System Seed")
+        self.randomSeedFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.createRandomSeedPane()
 
     def agentCreationPrompt(self):
         self.clearAgentCreationUI()
@@ -123,7 +128,7 @@ class toolBar(tk.Frame):
         self.agentOrientationLabel = tk.Label(self.agentOrientationFrame, text="Orientation:", width=8)
         self.agentOrientation = tk.StringVar()
         self.agentOrientationN = tk.Radiobutton(self.agentOrientationFrame, text="N", variable=self.agentOrientation, value="N")
-        self.agentOrientationN.select()
+        self.agentOrientationN.select() # default selection
         self.agentOrientationW = tk.Radiobutton(self.agentOrientationFrame, text="W", variable=self.agentOrientation, value="W")
         self.agentOrientationS = tk.Radiobutton(self.agentOrientationFrame, text="S", variable=self.agentOrientation, value="S")
         self.agentOrientationE = tk.Radiobutton(self.agentOrientationFrame, text="E", variable=self.agentOrientation, value="E")
@@ -327,3 +332,69 @@ class toolBar(tk.Frame):
         self.mainView.mainCanvas.renderGraphState()
         # Close agent generator
         self.agentCreationPrompt()
+
+    def createRandomSeedPane(self):
+        print("create rng seed panel")
+        self.randomSeedFrame.columnconfigure(0, weight=1)
+        self.randomSeedFrame.columnconfigure(1, weight=1)
+        self.randomSeedFrame.columnconfigure(2, weight=1)
+
+        # Label for RNG seed entrybox
+        self.randomSeedLabel = tk.Label(self.randomSeedFrame, text="RNG Seed Value:")
+        self.randomSeedLabel.grid(row=0, column=0, pady=4, padx=4, sticky=tk.W)
+
+        # Entry box for setting the seed value
+        self.randomSeedValue = tk.StringVar()
+        self.validateRandomSeed = self.register(self.randomSeedValidation)
+        self.randomSeedEntry = tk.Entry(self.randomSeedFrame, 
+            textvariable=self.randomSeedValue, 
+            width=30,
+            validate='key',
+            validatecommand=(self.validateRandomSeed, '%P')
+            )
+        self.randomSeedEntry.grid(row=0, column=1, pady=4, padx=4, sticky=tk.W)
+
+        # Button for confirming choice of seed value
+        self.randomSeedSetButton = tk.Button(self.randomSeedFrame,
+            command = self.copyRandomSeed,
+            text="Set",
+            width=6,
+            state=tk.DISABLED
+        )
+        self.randomSeedSetButton.grid(row=0, column=2, pady=4, padx=4)
+
+        # Text displaying the current seed value
+        currentSeed = self.parent.randomGenerator.currentSeed
+        self.currentSeedLabel = tk.Label(self.randomSeedFrame, text=f"Current RNG Seed Value: {currentSeed}")
+        self.currentSeedLabel.grid(row=1, column=0, columnspan=2)
+
+    def randomSeedValidation(self, seedString):
+        # Only accept alphanumeric characters
+        if any(not char.isalnum() for char in seedString):
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            return False
+        # Ensure the new seed differs from the old seed
+        if seedString == self.parent.randomGenerator.currentSeed:
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            return False
+        # Ensure a minimum seed string length
+        if len(seedString) < 2:
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            return True
+        else:
+            self.randomSeedSetButton.config(state=tk.NORMAL)
+        return True
+
+    def copyRandomSeed(self):
+        # Pull the RNG seed from the text entry box
+        seed = self.randomSeedEntry.get()
+        # Update the generator's seed
+        self.parent.randomGenerator.updateCurrentSeed(seed)
+        # Update the display
+        self.updateCurrentSeedDisplay()
+        # Disable the set button
+        self.randomSeedSetButton.config(state=tk.DISABLED)
+
+    def updateCurrentSeedDisplay(self):
+        currentSeed = self.parent.randomGenerator.currentSeed
+        self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
