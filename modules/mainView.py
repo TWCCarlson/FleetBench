@@ -395,6 +395,9 @@ class mainCanvas(tk.Canvas):
         # Update the selection tracker
         self.parent.parent.agentManager.currentAgent = agentID
         print(self.parent.parent.agentManager.currentAgent)
+        
+        # Update movement choices for the selected agent
+        self.parent.parent.contextView.validateMovementButtonStates()
 
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile

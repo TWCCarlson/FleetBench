@@ -11,7 +11,6 @@ class agentManager:
         self.agentList = {}
         self.agentPositionList = {}
         self.currentAgent = []
-        print(type(self.agentList))
 
     def createNewAgent(self, **kwargs):
         # The length of a dict is always 1 higher than the numeric id

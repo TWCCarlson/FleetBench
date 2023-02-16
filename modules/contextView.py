@@ -179,6 +179,8 @@ class contextView(tk.Frame):
                 # Update the selection
                 self.parent.agentManager.currentAgent = agentID
                 print(self.parent.agentManager.currentAgent)
+                # Update movement choices for the selected agent
+                self.validateMovementButtonStates()
 
         # If the row describes an agent
         if selectedRow in self.objectTreeView.tag_has("agent"):
@@ -192,6 +194,8 @@ class contextView(tk.Frame):
             # Update the selection
             self.parent.agentManager.currentAgent = agentID
             print(self.parent.agentManager.currentAgent)
+            # Update movement choices for the selected agent
+            self.validateMovementButtonStates()
 
     def createMovementInterface(self):
         self.movementFrame = tk.LabelFrame(self, text="Manual Movement")
@@ -228,6 +232,46 @@ class contextView(tk.Frame):
         self.delete = tk.Button(self.movementFrame, text="Del", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.deleteAgent, background='red')
         self.delete.grid(row=2, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SE)
+
+    def validateMovementButtonStates(self):
+        # Retrieve the current agent's object
+        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.agentList.get(agentID)
+
+        # Extract the agent's postion
+        agentPosition = agentRef.position
+
+        # Check whether edges exist in the cardinal directions from the agent's current tile to the next
+        candidateNodeDict = {
+            "N": f"({agentPosition[0]}, {agentPosition[1]-1})",
+            "W": f"({agentPosition[0]-1}, {agentPosition[1]})",
+            "E": f"({agentPosition[0]+1}, {agentPosition[1]})",
+            "S": f"({agentPosition[0]}, {agentPosition[1]+1})" 
+        }
+
+        # Check if an edge exists to the north
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["N"]):
+            self.moveUp.config(state=tk.NORMAL, background='#4ddb67')
+        else:
+            self.moveUp.config(state=tk.DISABLED, background='#fc7f03')
+
+        # Check if an edge exists to the south
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["S"]):
+            self.moveDown.config(state=tk.NORMAL, background='#4ddb67')
+        else:
+            self.moveDown.config(state=tk.DISABLED, background='#fc7f03')
+
+        # Check if an edge exists to west
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["W"]):
+            self.moveLeft.config(state=tk.NORMAL, background='#4ddb67')
+        else:
+            self.moveLeft.config(state=tk.DISABLED, background='#fc7f03')
+
+        # Check if an edge exists to the left
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["E"]):
+            self.moveRight.config(state=tk.NORMAL, background='#4ddb67')
+        else:
+            self.moveRight.config(state=tk.DISABLED, background='#fc7f03')
 
     def moveAgentUp(self):
         # Retrieve the current agent's object
