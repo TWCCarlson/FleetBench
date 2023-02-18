@@ -660,7 +660,6 @@ class toolBar(tk.Frame):
             # Else it is invalid
             self.validTaskLocations = False
             self.updateTaskCreationButton()
-            # print("DROPOFFX IS NOT NUMERIC")
             return
         # The dropoff y position input is numeric
         if not dropoffY.isnumeric():
@@ -668,7 +667,6 @@ class toolBar(tk.Frame):
             # Else it is invalid
             self.validTaskLocations = False
             self.updateTaskCreationButton()
-            # print("DROPOFFY IS NOT NUMERIC")
             return
         # The pickup location must belong to the graph
         if not self.tileInGraphValidation(pickupX, pickupY):
