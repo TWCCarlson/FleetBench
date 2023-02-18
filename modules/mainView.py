@@ -99,6 +99,9 @@ class mainCanvas(tk.Canvas):
         self.parent.rowconfigure(0, weight=1)
         self.grid(column=0, row=0, sticky=tk.N+tk.S+tk.E+tk.W)
 
+        # Container for highlighted tiles
+        self.images = {}
+
         # Draw gridlines
         self.drawGridlines()
 
@@ -532,13 +535,13 @@ class mainCanvas(tk.Canvas):
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
 
-    def highlightTile(self, tileIDX, tileIDY, color, multi):
+    def highlightTile(self, tileIDX, tileIDY, color, multi, highlightType):
         # print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
+        # print(f"With: {color}, multi={multi}, and type {highlightType}")
         # Clear the old highlights before drawing this singular highlight
-        if multi == True:
-            pass
-        else:
-            self.clearHighlight()
+        if multi == False:
+            self.clearHighlight(highlightType)
+            # print(f"cleared old highlight of type {highlightType}")
         # Draw a translucent highlight over the indicated cell for user guidance
         # tileSize = self.appearanceValues.canvasTileSize
         if isinstance(tileIDX, str):
@@ -551,7 +554,7 @@ class mainCanvas(tk.Canvas):
                 anchor=tk.NW,
                 fill=color,
                 alpha=0.3,
-                tags=["highlight"]
+                tags=["highlight", highlightType]
             )
         else:
             tileSize = self.appearanceValues.canvasTileSize
@@ -563,17 +566,26 @@ class mainCanvas(tk.Canvas):
                 anchor=tk.NW,
                 fill=color,
                 alpha=0.3,
-                tags=["highlight"]
+                tags=["highlight", highlightType]
             )
-        # Re-sort the layers to the infolayer is not hidden by the highlight
+        # Re-sort the layers so the infolayer is not hidden by the highlight
         self.sortCanvasLayers()
 
-    def clearHighlight(self):
-        # Remove all objects tagged "highlight"
-        self.images = []
-        objs = self.find_withtag("highlight")
-        for obj in objs:
-            self.delete(obj)
+    def clearHighlight(self, highlightType=None):
+        # Remove all objects tagged "highlight" if a type isn't specified
+        if highlightType == None:
+            self.images = {}
+            objs = self.find_withtag("highlight")
+            for obj in objs:
+                self.delete(obj)
+        # If a type is specified, only delete highlights of that type
+        else:
+            objs = self.find_withtag(highlightType)
+            for obj in objs:
+                self.delete(obj)
+            for image in list(self.images.keys()):
+                if highlightType in self.images[image]:
+                    del self.images[image]
 
     def create_rect(self, x1, y1, x2, y2, **kwargs):
         # https://stackoverflow.com/questions/54637795/how-to-make-a-tkinter-canvas-rectangle-transparent
@@ -585,5 +597,6 @@ class mainCanvas(tk.Canvas):
             tags = kwargs.pop('tags')
             fill = self.parent.parent.winfo_rgb(fill) + (alpha,)
             image = Image.new('RGBA', (x2-x1, y2-y1), fill)
-            self.images.append(ImageTk.PhotoImage(image))
-            self.create_image(x1, y1, image=self.images[-1], anchor=anchor, tags=tags)
+            tkImage = ImageTk.PhotoImage(image)
+            self.images[tkImage] = tags
+            self.create_image(x1, y1, image=tkImage, anchor=anchor, tags=tags)

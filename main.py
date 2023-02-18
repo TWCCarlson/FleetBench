@@ -6,6 +6,7 @@ from modules.contextView import contextView
 from modules.mapDataClass import mapDataClass
 from modules.infoBox import infoBox
 from modules.agentManager import agentManager
+from modules.taskManager import taskManager
 from modules.randomGenerator import randomGenerator
 from config.appearanceValues import appearanceValues
 
@@ -22,6 +23,8 @@ class App(tk.Tk):
         self.mapData = mapDataClass(self)
         # Agent information manager class
         self.agentManager = agentManager(self)
+        # Task information manager class
+        self.taskManager = taskManager(self)
 
         # Window components
         # Appearance

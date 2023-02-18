@@ -125,6 +125,7 @@ class mapDataClass:
         # Enable the rest of the program options to work
         self.mapLoadedBool = True
         self.parent.toolBar.enableAgentCreation()
+        self.parent.toolBar.enableTaskCreation()
         
         # for node in self.mapGraph:
         #     pp.pprint(eval(node))

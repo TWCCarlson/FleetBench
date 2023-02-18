@@ -20,10 +20,6 @@ class toolBar(tk.Frame):
         # Render frame
         self.grid_propagate(False)
         self.grid(row=0, column=0, rowspan=2, sticky=tk.N)
-
-        # Default status
-        self.agentNameValid = False
-        self.validAgentCreationNode = False
         
         # Establish buttons and inputs
         self.initUI()
@@ -32,20 +28,27 @@ class toolBar(tk.Frame):
         self.mainView = self.parent.mainView
         self.mapData = self.parent.mapData
         self.agentManager = self.parent.agentManager
+        self.taskManager = self.parent.taskManager
 
     def initUI(self):
         print("Create toolbar ui elements")
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        # self.rowconfigure(0, weight=1)
         # Create a labeled container for the agent generator
         self.agentFrame = tk.LabelFrame(self, text="Agent Generator")
         self.agentFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.agentCreationPrompt()
 
+        # Create a labeled container for the task generator
+        self.taskFrame = tk.LabelFrame(self, text="Task Generator")
+        self.taskFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.taskCreationPrompt()
+
         # Create a labeled container for the rng system
         self.randomSeedFrame = tk.LabelFrame(self, text="RNG System Seed")
-        self.randomSeedFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.randomSeedFrame.grid(row=2, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.createRandomSeedPane()
+
 
     def agentCreationPrompt(self):
         self.clearAgentCreationUI()
@@ -57,14 +60,19 @@ class toolBar(tk.Frame):
         self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
         # If a map is loaded when this gui is created, enable the creation button
         if self.parent.mapData.mapLoadedBool == True:
-            self.createAgentButton.config(state=tk.ACTIVE)
+            self.createAgentButton.config(state=tk.NORMAL)
 
     def enableAgentCreation(self):
-        self.createAgentButton.config(state=tk.ACTIVE)
+        self.createAgentButton.config(state=tk.NORMAL)
 
     def agentCreationUI(self):
         # Clear what's already in the frame to make space
         self.clearAgentCreationUI()
+
+        # Default button state values
+        self.agentNameValid = False
+        self.taskNameValid = False
+        self.validAgentCreationNode = False
 
         # Dropdown selector for agent class
         self.classLabel = tk.Label(self.agentFrame, text="Agent class:")
@@ -82,31 +90,38 @@ class toolBar(tk.Frame):
         self.agentDataFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
 
         # Coordinate Entry boxes and labels
-        self.entryXValue = tk.StringVar()
+        self.agentXPosValue = tk.StringVar()
+        self.agentYPosValue = tk.StringVar()
         self.entryXLabel = tk.Label(self.agentDataFrame, text="X Position: ", width=8)
-        self.highlightXPos = self.register(self.highlightTargetXPos) # Function wrapper for callback on entry update
-        self.entryX = ttk.Spinbox(self.agentDataFrame, 
+        validateCommand = self.register(self.validateNumericSpinbox)
+        # self.validateAgentXPos = self.register(self.highlightTargetXPos) # Validation
+        # self.commandAgentXPos = partial(self.highlightTargetXPos, 'X', 'agentHighlight', self.entryXValue, self.entryYValue)
+        self.agentXPosValue.trace_add("write", lambda *args, b=self.agentXPosValue, c=self.agentYPosValue : self.highlightTargetTile('agentHighlight', b, c, *args))
+        self.agentXPosEntry = ttk.Spinbox(self.agentDataFrame, 
             width=6,
             from_=0,
             to=self.mapData.dimensionX,
             increment=1,
-            textvariable=self.entryXValue,
-            command=self.highlightTargetXPos,
+            textvariable=self.agentXPosValue,
+            # command=self.commandAgentXPos,   # Triggered on scrolling/spinbox button press
             validate='key',
-            validatecommand=(self.highlightXPos, '%P')
+            validatecommand=validateCommand
+            # validatecommand=(self.validateAgentXPos, '%P', 'agentHighlight') # Triggered on typing
             )
-        self.entryYValue = tk.StringVar()
         self.entryYLabel = tk.Label(self.agentDataFrame, text="Y Position: ", width=8)
-        self.highlightYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
-        self.entryY = ttk.Spinbox(self.agentDataFrame, 
+        # self.validateAgentYPos = self.register(self.highlightTargetYPos) # Function wrapper for callback on entry update
+        # self.commandAgentYPos = partial(self.highlightTargetYPos, 'Y', 'agentHighlight', self.entryXValue, self.entryYValue)
+        self.agentYPosValue.trace_add("write", lambda *args, b=self.agentXPosValue, c=self.agentYPosValue : self.highlightTargetTile('agentHighlight', b, c, *args))
+        self.agentYPosEntry = ttk.Spinbox(self.agentDataFrame, 
             width=6,
             from_=0,
             increment=1,
             to=self.mapData.dimensionY,
-            textvariable=self.entryYValue,
-            command=self.highlightTargetYPos,
+            textvariable=self.agentYPosValue,
+            # command=self.commandAgentYPos,   # Triggered on scrolling/spinbox button press
             validate='key',
-            validatecommand=(self.highlightYPos, '%P')
+            validatecommand=validateCommand
+            # validatecommand=(self.validateAgentYPos, '%P', 'agentHighlight')  # Triggered on typing
         )
 
         # Custom name entrybox
@@ -136,8 +151,8 @@ class toolBar(tk.Frame):
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
         self.entryYLabel.grid(row=2, column=0, sticky=tk.E)
-        self.entryX.grid(row=1, column=1)
-        self.entryY.grid(row=2, column=1)
+        self.agentXPosEntry.grid(row=1, column=1)
+        self.agentYPosEntry.grid(row=2, column=1)
         self.agentNameLabel.grid(row=1, column=2, sticky=tk.E)
         self.agentNameEntry.grid(row=1, column=3, sticky=tk.E)
         self.agentOrientationFrame.grid(row=2, column=2, columnspan=2, sticky=tk.E)
@@ -180,79 +195,66 @@ class toolBar(tk.Frame):
         self.validAgentCreationNode = False
         self.agentNameValid = False
 
-    def highlightTargetXPos(self, *args):
-        if args:
-            xPos = args[0]
-        else:
-            xPos = self.entryX.get()
-        # Verify that the input is correct
-        if xPos.isnumeric():
-            # If the value is a number, then we need to:
-            # Highlight the value if the Y value is also a number
-            self.highlightTargetTile(xPos, None)
-            # Check the node exists on the graph to enable the creation button
-
-            # Check that all other enabling conditions are met
-            self.updateAgentCreationButton()
-
-            # Numbers are allowed
-            return True
-        elif len(xPos) == 0:
-            # Allow the box to be empty
-            return True
-        else:
-            # Nothing else is allowed
-            return False
-
-    def highlightTargetYPos(self, *args):
-        if args:
-            yPos = args[0]
-        else:
-            yPos = self.entryY.get()
-        # Verify that the input is correct
-        if yPos.isnumeric():
-            # If the value is a number, then we need to:
-            # Highlight the value if the Y value is also a number
-            # And check the node exists on the graph to enable the creation button
-            self.highlightTargetTile(None, yPos)
-            
-            # Check that all other enabling conditions are met
-            self.updateAgentCreationButton()
-
-            # Numbers are allowed
-            return True
-        elif len(yPos) == 0:
-            # Emptying the box is allowed
-            return True
-        else:
-            # Anything else is not allowed 
-            return False
-
-    def highlightTargetTile(self, xPos, yPos):
+    def highlightTargetTile(self, highlightType, stringVarX, stringVarY, *args):
+        # 
         # If an input is Nonetype, fetch it from its entry variable
-        if xPos == None:
-            xPos = self.entryXValue.get()
-        elif yPos == None:
-            yPos = self.entryYValue.get()
+        # print(stringVarX)
+        xPos = stringVarX.get()
+        yPos = stringVarY.get()
+        # print(f"Called highlightTargetTile with: {xPos}, {yPos}, {highlightType}, {stringVarX.get()}, {stringVarY.get()}")
+
+        # Color selection dictionary
+        highlightColors = {
+            "agentHighlight": "red",
+            "pickupHighlight": "green",
+            "dropoffHighlight": "cyan"
+        }
+        highlightColor = highlightColors[highlightType]
 
         # Using guard clauses, check that
         # The x input is numeric
         if not xPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.clearHighlight()
+            self.mainView.mainCanvas.clearHighlight(highlightType)
             return
         # The y input is numeric
         if not yPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.clearHighlight()
+            self.mainView.mainCanvas.clearHighlight(highlightType)
+            return
+        # If all guard clauses are passed, highlight the tile
+        if highlightType == 'agentHighlight':
+            self.mainView.mainCanvas.highlightTile(xPos, yPos, highlightColor, multi=False, highlightType=highlightType)
+            # Validate for placing an agent
+            self.validateAgentPlacement(xPos, yPos, highlightType)
+        elif highlightType == 'pickupHighlight' or highlightType == 'dropoffHighlight':
+            print(f"highlighting tile of type {highlightType}")
+            self.mainView.mainCanvas.highlightTile(xPos, yPos, highlightColor, multi=False, highlightType=highlightType)
+            # Validate for placing a task
+            self.validateTaskPlacement(highlightType)
+
+    def validateAgentPlacement(self, xPos, yPos, highlightType):
+        # Using guard clauses, check that
+        # The x input is numeric
+        if not xPos.isnumeric():
+            # Else it is invalid
+            self.validAgentCreationNode = False
+            self.updateAgentCreationButton()
+            self.mainView.mainCanvas.clearHighlight(highlightType)
+            return
+        # The y input is numeric
+        if not yPos.isnumeric():
+            # Else it is invalid
+            self.validAgentCreationNode = False
+            self.updateAgentCreationButton()
+            self.mainView.mainCanvas.clearHighlight(highlightType)
             return
         # Check that it belongs to the graph
         if not self.tileInGraphValidation(xPos, yPos):
-            # This can still be highlited as a guide to the user
-            self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
             self.validAgentCreationNode = False
+            self.updateAgentCreationButton()
             return
         # And that the tile does not already contain an agent
         # print(self.mapData.mapGraph.nodes.data()[f"({eval(xPos)}, {eval(yPos)})"])
@@ -260,11 +262,13 @@ class toolBar(tk.Frame):
             # Else it is invalid    
             # print("AGENT EXISTS IN THIS TILE ALREADY")
             self.validAgentCreationNode = False
+            self.updateAgentCreationButton()
             return
-        # If all guard clauses are passed, highlight the tile
-        self.mainView.mainCanvas.highlightTile(xPos, yPos, 'red', multi=False)
         # Enable the button based on graph belongingness
         self.validAgentCreationNode = True
+
+        # Check that all other enabling conditions are met
+        self.updateAgentCreationButton()
 
     def tileInGraphValidation(self, xPos, yPos):
         # Check that the node formed by these positions is actually part of the warehouse graph
@@ -303,7 +307,7 @@ class toolBar(tk.Frame):
         # Checks if all preconditions for placing an agent on the graph are met
         # Input box validation is done with callbacks
         if self.validAgentCreationNode and self.agentNameValid:
-            self.confirmCreateAgentButton.config(state=tk.ACTIVE)
+            self.confirmCreateAgentButton.config(state=tk.NORMAL)
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
 
@@ -318,8 +322,8 @@ class toolBar(tk.Frame):
         # Create the agent, place it
         # https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html
         # Note that if the dictionary contains nodes that are not in G, the values are silently ignored:
-        xPos = eval(self.entryXValue.get())
-        yPos = eval(self.entryYValue.get())
+        xPos = eval(self.agentXPosValue.get())
+        yPos = eval(self.agentYPosValue.get())
         targetNode = (xPos, yPos)
         agentOrientation = self.agentOrientation.get()
         self.agentManager.createNewAgent(
@@ -398,3 +402,327 @@ class toolBar(tk.Frame):
     def updateCurrentSeedDisplay(self):
         currentSeed = self.parent.randomGenerator.currentSeed
         self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
+
+    def taskCreationPrompt(self):
+        print("Create task generator prompt")
+        self.clearTaskCreationUI()
+        # Default button state values
+        self.taskNameValid = False
+        self.validTaskLocations = False
+        self.validTaskTimeLimit = False
+        # Create a button to start UI creation
+        self.createTaskButton = tk.Button(self.taskFrame, 
+            command=self.taskCreationUI, text="Create Task. . .", width=15,
+            state=tk.DISABLED)
+        self.taskFrame.columnconfigure(0, weight=1)
+        self.createTaskButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
+        # If a map is loaded when this gui is created, enable the creation button
+        if self.parent.mapData.mapLoadedBool == True:
+            self.createTaskButton.config(state=tk.NORMAL)
+
+    def enableTaskCreation(self):
+        self.createTaskButton.config(state=tk.NORMAL)
+
+    def clearTaskCreationUI(self):
+        # Destroys all the task creation ui elements
+        for widget in self.taskFrame.winfo_children():
+            widget.destroy()
+        # Reset column/row weights
+        for row in range(self.taskFrame.grid_size()[0]):
+            self.taskFrame.rowconfigure(row, weight=0)
+        for col in range(self.taskFrame.grid_size()[1]):
+            self.taskFrame.columnconfigure(col, weight=0)
+
+    def taskCreationUI(self):
+        # Clear what's already in the task frame to make space
+        self.clearTaskCreationUI()
+
+        # Tasks have
+        # Pickup location
+        # Dropoff location
+        # Name
+        # Internal ID
+        # Status (unassigned, assigned, in progress, complete, abandoned, cancelled, failed)
+
+        # Containing frame
+        self.taskSpecsFrame = tk.LabelFrame(self.taskFrame, text="Task Specs")
+        self.taskSpecsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, pady=4)
+
+        # Task name entry section
+        self.taskNameLabel = tk.Label(self.taskSpecsFrame, text="Task Name: ")
+        self.taskNameValue = tk.StringVar()
+        self.validateTaskName = self.register(self.taskNameValidation)
+        self.taskNameEntry = tk.Entry(self.taskSpecsFrame, 
+            textvariable=self.taskNameValue,
+            width=16,
+            validate='key',
+            validatecommand=(self.validateTaskName, '%P')
+        )
+        
+        # Task coordinate entry section
+        self.coordinateLabelX = tk.Label(self.taskSpecsFrame, text="X")
+        self.coordinateLabelY = tk.Label(self.taskSpecsFrame, text="Y")
+        self.pickupPositionLabel = tk.Label(self.taskSpecsFrame, text="Pickup Location:")
+        self.dropoffPositionLabel = tk.Label(self.taskSpecsFrame, text="Dropoff Location:")
+
+        self.pickupXPosValue = tk.StringVar()
+        self.pickupYPosValue = tk.StringVar()
+        validateCommand = self.register(self.validateNumericSpinbox)
+        # self.commandPickupXPos = partial(self.highlightTargetXPos, 'X', 'pickupHighlight', self.pickupXPosValue, self.pickupYPosValue)
+        # Use a trace on the stringvars to respond with a single function call any time the stringvar value is updated
+        # This decouples validation from highlighting
+        self.pickupXPosValue.trace_add("write", lambda *args, b=self.pickupXPosValue, c=self.pickupYPosValue : self.highlightTargetTile('pickupHighlight', b, c, *args))
+        self.pickupXPosEntry = ttk.Spinbox(self.taskSpecsFrame,
+            width=6,
+            from_=0,
+            to=self.mapData.dimensionX,
+            increment=1,
+            textvariable=self.pickupXPosValue,
+            # command=self.commandPickupXPos,
+            validate='key',
+            validatecommand=(validateCommand, '%P'),
+            background='#6fe64e'
+        )
+        # self.validatePickupYPos = self.register(self.highlightTargetYPos)
+        # self.commandPickupYPos = partial(self.highlightTargetYPos, 'Y', 'pickupHighlight', self.pickupXPosValue, self.pickupYPosValue)
+        self.pickupYPosValue.trace_add("write", lambda *args, b=self.pickupXPosValue, c=self.pickupYPosValue : self.highlightTargetTile('pickupHighlight', b, c, *args))
+        self.pickupYPosEntry = ttk.Spinbox(self.taskSpecsFrame,
+            width=6,
+            from_=0,
+            to=self.mapData.dimensionX,
+            increment=1,
+            textvariable=self.pickupYPosValue,
+            # command=self.commandPickupYPos,
+            validate='key',
+            validatecommand=(validateCommand, '%P'),
+            # validatecommand=(self.validatePickupYPos, '%P', 'pickupHighlight', self.pickupXPosValue, self.pickupYPosValue),
+            background='#6fe64e'
+        )
+        self.dropoffXPosValue = tk.StringVar()
+        self.dropoffYPosValue = tk.StringVar()
+        # self.validateDropoffXPos = self.register(self.highlightTargetXPos)
+        # self.commandDropoffXPos = partial(self.highlightTargetXPos, 'X', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue)
+        self.dropoffXPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('dropoffHighlight', b, c, *args))
+        self.dropoffXPosEntry = ttk.Spinbox(self.taskSpecsFrame,
+            width=6,
+            from_=0,
+            to=self.mapData.dimensionX,
+            increment=1,
+            textvariable=self.dropoffXPosValue,
+            # command=self.commandDropoffXPos,
+            validate='key',
+            validatecommand=(validateCommand, '%P'),
+            # validatecommand=(self.validateDropoffXPos, '%P', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue),
+            background='cyan'
+        )
+        # self.validateDropoffYPos = self.register(self.highlightTargetYPos)
+        # self.commandDropoffYPos = partial(self.highlightTargetYPos, 'Y', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue)
+        self.dropoffYPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('dropoffHighlight', b, c, *args))
+        self.dropoffYPosEntry = ttk.Spinbox(self.taskSpecsFrame,
+            width=6,
+            from_=0,
+            to=self.mapData.dimensionX,
+            increment=1,
+            textvariable=self.dropoffYPosValue,
+            # command=self.commandDropoffYPos,
+            validate='key',
+            validatecommand=(validateCommand, '%P'),
+            # validatecommand=(self.validateDropoffYPos, '%P', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue),
+            background='cyan'
+        )
+
+        # Task time limitation entry section
+        self.timeLimitLabel = tk.Label(self.taskSpecsFrame, text="Time limit (Sim steps)")
+        self.timeLimitLabel2 = tk.Label(self.taskSpecsFrame, text="0 means unlimited.")
+        self.timeLimitValue = tk.StringVar()
+        # self.validateTaskTimeLimit = self.register(self.taskTimeLimitValidation)
+        # self.commandTaskTimeLimit = partial(self.taskTimeLimitValidation, 'T')
+        self.timeLimitValue.trace_add("write", lambda *args, b=self.timeLimitValue : self.taskTimeLimitValidation(b, *args))
+        self.timeLimitEntry = ttk.Spinbox(self.taskSpecsFrame,
+            width=6,
+            from_=0,
+            to=999,
+            increment=1,
+            textvariable=self.timeLimitValue,
+            # command=self.commandTaskTimeLimit,
+            validate='key',
+            validatecommand=(validateCommand, '%P')
+        )
+
+        # Section separators
+        self.sep1 = ttk.Separator(self.taskSpecsFrame, orient='horizontal')
+        self.sep2 = ttk.Separator(self.taskSpecsFrame, orient='vertical')
+        self.sep3 = ttk.Separator(self.taskSpecsFrame, orient='horizontal')
+
+        # Confirm and cancel buttons
+        self.createTaskButton = tk.Button(self.taskSpecsFrame,
+            command=self.createTask,
+            text="Create Task",
+            width=15,
+            state=tk.DISABLED
+            )
+        self.cancelTaskCreation = tk.Button(self.taskSpecsFrame,
+            command=self.placeholder,
+            text="Cancel",
+            width=15,
+            )
+
+        self.taskSpecsFrame.columnconfigure(0, weight=1)
+        self.taskSpecsFrame.columnconfigure(1, weight=1)
+        self.taskSpecsFrame.columnconfigure(2, weight=1)
+        self.taskSpecsFrame.columnconfigure(3, weight=1)
+
+        # Render widgets
+        self.taskNameLabel.grid(row=0, column=0)
+        self.taskNameEntry.grid(row=0, column=1, sticky=tk.W)
+        self.coordinateLabelX.grid(row=2, column=2)
+        self.coordinateLabelY.grid(row=2, column=3)
+        self.pickupPositionLabel.grid(row=3, column=1)
+        self.dropoffPositionLabel.grid(row=4, column=1)
+        self.pickupXPosEntry.grid(row=3, column=2)
+        self.pickupYPosEntry.grid(row=3, column=3)
+        self.dropoffXPosEntry.grid(row=4, column=2)
+        self.dropoffYPosEntry.grid(row=4, column=3)
+        self.timeLimitLabel.grid(row=2, column=0)
+        self.timeLimitLabel2.grid(row=3, column=0)
+        self.timeLimitEntry.grid(row=4, column=0, pady=4)
+        self.sep1.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.E, padx=4, pady=4)
+        self.sep2.grid(row=2, column=1, rowspan=3, sticky=tk.N+tk.S+tk.W, pady=4)
+        self.sep3.grid(row=5, column=0, columnspan=4, sticky=tk.W+tk.E, padx=4)
+        self.cancelTaskCreation.grid(row=6, column=0, columnspan=2, pady=4)
+        self.createTaskButton.grid(row=6, column=2, columnspan=2, pady=4)
+
+    def validateNumericSpinbox(self, inputString):
+        if inputString.isnumeric():
+            # Only allow numeric characters
+            return True
+        elif len(inputString) == 0:
+            # Or an empty box
+            return True
+        else:
+            return False
+        
+
+    def taskNameValidation(self, taskName):
+        if len(taskName) < 1:
+            # Disable the ability to create the task
+            self.taskNameValid = False
+
+            # Check that all other enabling conditions are met
+            self.updateTaskCreationButton()
+
+            # Allow the box to be empty
+            return True
+        else:
+            # Enable the ability to create the task
+            self.taskNameValid = True
+
+            # Check that all tohe renabling conditions are met
+            self.updateTaskCreationButton()
+
+            return True
+
+    def taskTimeLimitValidation(self, timeLimit, *args):
+        # Spinbox should only accept numeric entries
+        if timeLimit.get().isnumeric():
+            self.validTaskTimeLimit = True
+            self.updateTaskCreationButton()
+            return True
+        else:
+            self.validTaskTimeLimit = False
+            self.updateTaskCreationButton()
+            return False
+
+    def validateTaskPlacement(self, highlightType):
+        # Using guard clauses check that
+        # The pickup x position input is numeric
+        pickupX = self.pickupXPosValue.get()
+        pickupY = self.pickupYPosValue.get()
+        dropoffX = self.dropoffXPosValue.get()
+        dropoffY = self.dropoffYPosValue.get()
+        # print(f"Validate task with: ({pickupX}, {pickupY}) and ({dropoffX}, {dropoffY})")
+        if not pickupX.isnumeric():
+            # print("PICKUPX IS NOT NUMERIC")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            return
+        # The pickup y position input is numeric
+        if not pickupY.isnumeric():
+            # print("PICKUPY IS NOT NUMERIC")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            return
+        # The dropoff x position input is numeric
+        if not dropoffX.isnumeric():
+            # print("DROPOFFX IS NOT NUMERIC")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            # print("DROPOFFX IS NOT NUMERIC")
+            return
+        # The dropoff y position input is numeric
+        if not dropoffY.isnumeric():
+            # print("DROPOFFY IS NOT NUMERIC")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            # print("DROPOFFY IS NOT NUMERIC")
+            return
+        # The pickup location must belong to the graph
+        if not self.tileInGraphValidation(pickupX, pickupY):
+            # print("PICKUP NODE NOT WITHIN GRAPH")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            return
+        # The dropoff location must belong to the graph
+        if not self.tileInGraphValidation(dropoffX, dropoffY):
+            # print("DROPOFF NODE NOT WITHIN GRAPH")
+            # Else it is invalid
+            self.validTaskLocations = False
+            self.updateTaskCreationButton()
+            return
+        # Pickups and dropoffs can overlap in this case, awkward to handle though, revisit
+        # If all guard clauses are passed, enable the create task button
+        self.validTaskLocations = True
+        print("valid task location")
+        # Check that all other enabling conditions are met
+        self.updateTaskCreationButton()
+
+    def updateTaskCreationButton(self):
+        # Change the status of the create task button based on entry validity
+        # Input validation is already handled at this point
+        if self.taskNameValid and self.validTaskLocations and self.validTaskTimeLimit:
+            self.createTaskButton.config(state=tk.NORMAL)
+        else:
+            # print(f"Task Name Valid: {self.taskNameValid}")
+            # print(f"Task Location Valid: {self.validTaskLocations}")
+            # print(f"Task Time Limit Valid: {self.validTaskTimeLimit}")
+            self.createTaskButton.config(state=tk.DISABLED)
+
+    def createTask(self):
+        print("Create task")
+        # Remove previous highlights
+        self.mainView.mainCanvas.clearHighlight()
+        # Create the task, place it
+        pickupXPos = eval(self.pickupXPosValue.get())
+        pickupYPos = eval(self.pickupYPosValue.get())
+        pickupNode = (pickupXPos, pickupYPos)
+        dropoffXPos = eval(self.dropoffXPosValue.get())
+        dropoffYPos = eval(self.dropoffYPosValue.get())
+        dropoffNode = (dropoffXPos, dropoffYPos)
+        timeLimit = eval(self.timeLimitValue.get())
+        taskName = self.taskNameValue.get()
+        self.taskManager.createNewTask(
+            taskName = taskName,
+            pickupPosition = pickupNode,
+            dropoffPosition = dropoffNode,
+            timeLimit = timeLimit
+        )
+        # Re-render the map state
+        self.mainView.mainCanvas.renderGraphState()
+        # Close the task generator
+        self.taskCreationPrompt()
+
