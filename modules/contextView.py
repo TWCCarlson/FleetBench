@@ -6,9 +6,13 @@ pp = pprint.PrettyPrinter(indent=4)
 # import matplotlib.pyplot as plt
 
 class contextView(tk.Frame):
+    """
+        The containing frame for the right-side panel
+        Will include manual agent movement, a list of agents, tasks, and ways to view agent decisionmaking
+    """
     def __init__(self, parent):
-        self.parent = parent
         # Fetch styling
+        self.parent = parent
         self.appearanceValues = self.parent.appearance
         frameHeight = self.appearanceValues.contextViewHeight
         frameWidth = self.appearanceValues.contextViewWidth
@@ -19,6 +23,7 @@ class contextView(tk.Frame):
             width=frameWidth, 
             borderwidth=frameBorderWidth, 
             relief=frameRelief)
+
         # Render frame
         self.grid_propagate(False)
         self.grid(row=0, column=2, rowspan=2, sticky=tk.N)
@@ -39,6 +44,9 @@ class contextView(tk.Frame):
         self.createTreeView()
         # Initialize scrolling
         self.initScrolling()
+
+        # Saveable data
+        self.contextViewState = contextViewState(self)
 
     def createTreeView(self):
         self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}
@@ -136,7 +144,7 @@ class contextView(tk.Frame):
             self.objectTreeView.delete(row)
 
         # Grabs the list of all agents from the agent manager and generates treeview entries based on their states
-        self.treeViewAgentList = self.parent.agentManager.agentList
+        self.treeViewAgentList = self.parent.agentManager.agentManagerState.agentList
         for agent in self.treeViewAgentList:
             # Extract relevant data
             agentData = self.treeViewAgentList.get(agent)
@@ -174,11 +182,11 @@ class contextView(tk.Frame):
                 self.parent.mainView.mainCanvas.clearHighlight()
                 # Highlight the selected agent
                 agentID = rowData["tags"][1]
-                agentRef = self.parent.agentManager.agentList.get(agentID)
+                agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
                 agentRef.highlightAgent(multi=True)
                 # Update the selection
-                self.parent.agentManager.currentAgent = agentID
-                print(self.parent.agentManager.currentAgent)
+                self.parent.agentManager.agentManagerState.currentAgent = agentID
+                print(self.parent.agentManager.agentManagerState.currentAgent)
                 # Update movement choices for the selected agent
                 self.validateMovementButtonStates()
 
@@ -189,11 +197,11 @@ class contextView(tk.Frame):
             rowData = self.objectTreeView.item(selectedRow)
             # Highlight the selected agent
             agentID = rowData["tags"][1]
-            agentRef = self.parent.agentManager.agentList.get(agentID)
+            agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
             agentRef.highlightAgent(multi=False)
             # Update the selection
-            self.parent.agentManager.currentAgent = agentID
-            print(self.parent.agentManager.currentAgent)
+            self.parent.agentManager.agentManagerState.currentAgent = agentID
+            print(self.parent.agentManager.agentManagerState.currentAgent)
             # Update movement choices for the selected agent
             self.validateMovementButtonStates()
 
@@ -235,8 +243,8 @@ class contextView(tk.Frame):
 
     def validateMovementButtonStates(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
 
         # Extract the agent's postion
         agentPosition = agentRef.position
@@ -275,43 +283,43 @@ class contextView(tk.Frame):
 
     def moveAgentUp(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.moveUp()
 
     def moveAgentLeft(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.moveLeft()
 
     def moveAgentRight(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.moveRight()
 
     def moveAgentDown(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.moveDown()
 
     def rotateAgentCW(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.rotateCW()
 
     def rotateAgentCCW(self):
         # Retrieve the current agent's object
-        agentID = self.parent.agentManager.currentAgent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentID = self.parent.agentManager.agentManagerState.currentAgent
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         # Call movement method
         agentRef.rotateCCW()
 
@@ -320,3 +328,10 @@ class contextView(tk.Frame):
 
     def deleteAgent(self):
         print("Agent deleted")
+
+class contextViewState:
+    """
+        Containing class for state data used by the context view widgets, decoupled for pickling and saving
+    """
+    def __init__(self, parent):
+        pass

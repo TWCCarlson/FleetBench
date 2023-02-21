@@ -1,6 +1,9 @@
 import networkx as nx
 
 class taskManager:
+    """
+        Class which manages the information pertaining to task existence and activity
+    """
     def __init__(self, parent):
         self.parent = parent
         print("Task Manager Class gen")
@@ -9,22 +12,28 @@ class taskManager:
         # Pickup loc, dropoff loc, optimal time to complete, maximum time before failure, status
         # Leave room for misc details (weight, etc)
         # Each task should be an instance of a task class
-
-        self.taskList = {}
-        self.taskPositionList = {}
+        self.taskManagerState = taskManagerState(self)
         
     def createNewTask(self, **kwargs):
         # The length of a dict is always 1 higher than the numeric id
-        self.dictLength = len(self.taskList)
+        self.dictLength = len(self.taskManagerState.taskList)
         try:
             ID = kwargs.pop("ID")
         except KeyError:
             ID = self.dictLength
-        self.latestTask = taskClass(self, **kwargs, ID=ID, numID = self.dictLength)
-        self.taskList[self.dictLength] = self.latestTask
-        print(self.taskList)
+        self.taskManagerState.latestTask = taskClass(self, **kwargs, ID=ID, numID = self.dictLength)
+        self.taskManagerState.taskList[self.dictLength] = self.taskManagerState.latestTask
+        print(self.taskManagerState.taskList)
+
+class taskManagerState:
+    def __init__(self, parent):
+        self.taskList = {}
+        self.taskPositionList = {}
 
 class taskClass:
+    """
+        Task class, contains descriptive information and methods
+    """
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create Task")

@@ -7,6 +7,9 @@ pp = pprint.PrettyPrinter(indent=4)
 import networkx as nx
 
 class mainView(tk.Frame):
+    """
+        The primary view of the warehouse, drawn with tk.Canvas layers and organized into a reliable stack
+    """
     def __init__(self, parent):
         self.parent = parent
 
@@ -83,6 +86,10 @@ class mainView(tk.Frame):
         self.mainCanvas.xview_scroll(int(-1*(event.delta/120)), "units")
 
 class mainCanvas(tk.Canvas):
+    """
+        The primary view of the warehouse, drawn with tk.Canvas layers and organized into a reliable stack
+        Probably needs organizational refactor
+    """
     def __init__(self, parent, appearanceValues):
         tk.Canvas.__init__(self, parent)
         self.parent = parent
@@ -392,12 +399,12 @@ class mainCanvas(tk.Canvas):
         self.parent.contextView.objectTreeView.selection_set(agentIID)
 
         # Highlight the agent
-        agentRef = self.parent.agentManager.agentList.get(agentID)
+        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
         agentRef.highlightAgent(multi=False)
 
         # Update the selection tracker
-        self.parent.parent.agentManager.currentAgent = agentID
-        print(self.parent.parent.agentManager.currentAgent)
+        self.parent.parent.agentManager.agentManagerState.currentAgent = agentID
+        print(self.parent.parent.agentManager.agentManagerState.currentAgent)
         
         # Update movement choices for the selected agent
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -423,8 +430,8 @@ class mainCanvas(tk.Canvas):
                 tags=["infoTile"]
             )
             # If there is an agent in the node, include it in the hoverinfo text
-            if node[0] in self.parent.parent.agentManager.agentPositionList:
-                nodeAgentID = self.parent.parent.agentManager.agentPositionList[node[0]]
+            if node[0] in self.parent.parent.agentManager.agentManagerState.agentPositionList:
+                nodeAgentID = self.parent.parent.agentManager.agentManagerState.agentPositionList[node[0]]
                 hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent Name: "+str(nodeAgentID[0])
 
                 # Further, make clicks on this hovertile select the agent

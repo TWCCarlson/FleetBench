@@ -1,6 +1,11 @@
 import tkinter as tk
 
 class infoBox(tk.Frame):
+    """
+        Bar resting above the main canvas
+        Contains toggles for showing things like agents, nodes, edges, dangling edges, tasks
+        Also contains text responsive to where the cursor hovers in the main canvas
+    """
     def __init__(self, parent):
         self.parent = parent
 
@@ -19,6 +24,8 @@ class infoBox(tk.Frame):
             relief=frameRelief
         )
 
+        self.infoBoxState = infoBoxState(self)
+
     def buildReferences(self):
         self.mainView = self.parent.mainView
         self.reInit()
@@ -31,6 +38,11 @@ class infoBox(tk.Frame):
         self.grid(row=0, column=1, sticky=tk.N)
 
 class infoBoxFrame(tk.Frame):
+    """
+        Bar resting above the main canvas
+        Contains toggles for showing things like agents, nodes, edges, dangling edges, tasks
+        Also contains text responsive to where the cursor hovers in the main canvas
+    """
     def __init__(self, parent):
         self.parent = parent
 
@@ -85,3 +97,10 @@ class infoBoxFrame(tk.Frame):
     def setAgentVisibility(self):
         # Call the canvas function for toggling the state of the layer
         self.parent.mainView.mainCanvas.toggleAgentVisibility()
+
+class infoBoxState:
+    """
+        Containing class for state data used by the info box widget, decoupled for pickling and saving
+    """
+    def __init__(self, parent):
+        pass

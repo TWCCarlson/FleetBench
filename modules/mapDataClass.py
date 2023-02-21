@@ -10,6 +10,9 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 class mapDataClass:
+    """
+        Class storing the graph on which the warehouse is based
+    """
     def __init__(self, parent):
         self.parent = parent
         print("Map Data Class gen")

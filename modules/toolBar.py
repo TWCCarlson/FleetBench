@@ -4,6 +4,11 @@ import networkx as nx
 from functools import partial
 
 class toolBar(tk.Frame):
+    """
+        The containing frame for the left-side panel
+        Will include agent generation, task generation, rng seed control
+        Probably needs to be refactored into more manageable chunks
+    """
     def __init__(self, parent):
         self.parent = parent
         # Fetch styling
@@ -368,7 +373,7 @@ class toolBar(tk.Frame):
         self.randomSeedSetButton.grid(row=0, column=2, pady=4, padx=4)
 
         # Text displaying the current seed value
-        currentSeed = self.parent.randomGenerator.currentSeed
+        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
         self.currentSeedLabel = tk.Label(self.randomSeedFrame, text=f"Current RNG Seed Value: {currentSeed}")
         self.currentSeedLabel.grid(row=1, column=0, columnspan=2)
 
@@ -378,7 +383,7 @@ class toolBar(tk.Frame):
             self.randomSeedSetButton.config(state=tk.DISABLED)
             return False
         # Ensure the new seed differs from the old seed
-        if seedString == self.parent.randomGenerator.currentSeed:
+        if seedString == self.parent.randomGenerator.randomGeneratorState.currentSeed:
             self.randomSeedSetButton.config(state=tk.DISABLED)
             return False
         # Ensure a minimum seed string length
@@ -393,14 +398,14 @@ class toolBar(tk.Frame):
         # Pull the RNG seed from the text entry box
         seed = self.randomSeedEntry.get()
         # Update the generator's seed
-        self.parent.randomGenerator.updateCurrentSeed(seed)
+        self.parent.randomGenerator.randomGeneratorState.updateCurrentSeed(seed)
         # Update the display
         self.updateCurrentSeedDisplay()
         # Disable the set button
         self.randomSeedSetButton.config(state=tk.DISABLED)
 
     def updateCurrentSeedDisplay(self):
-        currentSeed = self.parent.randomGenerator.currentSeed
+        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
         self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
 
     def taskCreationPrompt(self):

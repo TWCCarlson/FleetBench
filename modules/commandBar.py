@@ -1,22 +1,41 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
-
+import pickle
 
 class commandBar(tk.Menu):
+    """
+        Containing class for the command bar and options. Includes options like:
+            - File: New Session, Save Session, Load Session, Quit Session
+
+        commandBar will be the actual Tk widget
+        commandBarState will be the decoupled state data of the element
+    """
     def __init__(self, parent):
-        tk.Menu.__init__(self, parent)
-        # Establish structure
         self.parent = parent
+        tk.Menu.__init__(self, parent)
+
         self.parent.config(menu=self)
-        self.file = FileCommands(self)
+        self.fileCommand = FileCommands(self)
+
+        self.commandBarState = commandBarState(self)
+
+class commandBarState:
+    """
+        Containing class for state data used by the command bar widget, decoupled for pickling and saving
+    """
+    def __init__(self, parent):
+        pass
 
 class FileCommands(tk.Menu):
+    """
+        The cascade menu containing commands for new, load, save, and quitting of the simulation sessions
+    """
     def __init__(self, parent):
         tk.Menu.__init__(self, parent, tearoff=0)
+
         # Establish structure
         self.parent = parent
-        self.refMainApp = parent.parent
         self.refMapData = parent.parent.mapData
 
         # Add menu functions
@@ -59,6 +78,18 @@ class FileCommands(tk.Menu):
     def saveSession(self):
         # Save a session
         print("Save Session")
+        # self.parent = parent causes classes to become unpickleable, but the structure needs to exist
+        # Therefore rely on subclasses containing the data
+        itemsToSave = {
+            "mapDataClass": self.parent.parent.mapData.mapGraph,
+            "agentManager": self.parent.parent.agentManager.agentManagerState,
+            "taskManager": self.parent.parent.taskManager.taskManagerState,
+            "randomGenerator" : self.parent.parent.randomGenerator.randomGeneratorState,
+        }
+        fid = tk.filedialog.asksaveasfile(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
+        print(fid)
+        with open(fid.name, 'wb') as out:
+            pickle.dump(itemsToSave, out, pickle.HIGHEST_PROTOCOL)
 
     def quitSession(self):
         # Close the current session

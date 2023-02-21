@@ -1,4 +1,7 @@
 class agentManager:
+    """
+        Class which manages the information pertaining to agent existence and activity
+    """
     def __init__(self, parent):
         self.parent = parent
         print("Agent Manager Class gen")
@@ -7,25 +10,31 @@ class agentManager:
         # Generate the agent class with inputs
 
         # Create a non-gui interface for generating and accessing all agents in the system
-        self.agentList = {}
-        self.agentPositionList = {}
-        self.currentAgent = []
+        self.agentManagerState = agentManagerState(self)
 
     def createNewAgent(self, **kwargs):
         # The length of a dict is always 1 higher than the numeric id
-        self.dictLength = len(self.agentList)
+        self.dictLength = len(self.agentManagerState.agentList)
         try:
             ID = kwargs.pop("ID")
         except KeyError:
             ID = self.dictLength
         # Create a new agent and add it to the manager's list
-        self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
-        self.agentList[self.dictLength] = self.latestAgent
+        self.agentManagerState.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
+        self.agentManagerState.agentList[self.dictLength] = self.agentManagerState.latestAgent
         self.parent.contextView.updateTreeView()
-        self.parent.mapData.updateAgentLocations(self.agentList)
+        self.parent.mapData.updateAgentLocations(self.agentManagerState.agentList)
 
+class agentManagerState:
+    def __init__(self, parent):
+        self.agentList = {}
+        self.agentPositionList = {}
+        self.currentAgent = []
 
 class agentClass:
+    """
+        Agent class, contains descriptive information and methods for navigating the warehosue
+    """
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create agent")
@@ -36,7 +45,7 @@ class agentClass:
         self.className = kwargs.pop("className")
 
         # Add the agent to the position list for reference in tileHover
-        self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]
+        self.parent.agentManagerState.agentPositionList[str(self.position)] = [self.ID, self.numID]
         # Push some data into the map graph attributes for fast referencing elsewhere
 
         # Dict of directions and numerical values used for calculating rotation
@@ -67,7 +76,7 @@ class agentClass:
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
-        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi)
+        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHightlight')
 
     def moveUp(self):
         print("Move agent up")
