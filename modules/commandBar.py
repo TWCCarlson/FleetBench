@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
 
 
 class commandBar(tk.Menu):
@@ -50,6 +51,10 @@ class FileCommands(tk.Menu):
     def promptSave(self):
         # Create a message box asking to save the current session
         print("Save?")
+        messageBox = tk.messagebox.askquestion(title = "Save work?",
+            message="Save current session?")
+        if messageBox=="yes":
+            self.saveSession()
 
     def saveSession(self):
         # Save a session

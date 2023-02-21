@@ -48,5 +48,4 @@ class App(tk.Tk):
 
         # Render the app
         self.mainloop()
-
 app = App()
