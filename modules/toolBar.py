@@ -332,7 +332,7 @@ class toolBar(tk.Frame):
         targetNode = (xPos, yPos)
         agentOrientation = self.agentOrientation.get()
         self.agentManager.createNewAgent(
-            ID = self.agentNameValue.get(),
+            ID=self.agentNameValue.get(),
             position=targetNode, 
             orientation=agentOrientation, 
             className=self.agentClass.get(),

@@ -14,6 +14,15 @@ class randomGenerator:
         random.seed(value)
         self.randomGeneratorState.currentSeed = value
 
+    def packageRandomGeneratorData(self):
+        """
+            Package data for replicating the current session
+                - currentSeed
+        """
+        dataPackage = {}
+        dataPackage["currentSeed"] = self.randomGeneratorState.currentSeed
+        return dataPackage
+
 class randomGeneratorState:
     def __init__(self, parent):
         self.currentSeed = 123456789 # Default value

@@ -157,5 +157,30 @@ class mapDataClass:
         #         print(self.mapGraph.nodes.data()[node[0]]['agent'])
         #     except:
         #         print("No agent")
-        
-            
+
+    def packageMapData(self):
+        """
+            Package reconstruction data for replicating the current state of the graph
+            This means the data needed to create each node, edge, and edge connection needs to be available
+                - Nodes: '(0, 0)': { ...
+                - Edges: ('(0, 1)', '(0, 2)', {}), ...
+                - pos: 'pos': {'X': 0, 'Y': 0}
+                - type: 'edge'/'charge'/'pickup'/'deposit'/'rest'
+                - edgeDirs: 'edgeDirs': {'N': 1, 'W': 1, 'S': 1, 'E': 1}
+        """
+        dataPackage = {}
+        for node in self.mapGraph.nodes(data=True):
+            # pp.pprint(node)
+            nodeEdgeData = node[1]["edgeDirs"]
+            nodePos = node[1]["pos"]
+            nodeType = node[1]["type"]
+            # Ignore task and data objects, can't be pickled, let them be repopulated independently
+            dataPackage[node[0]] = {
+                "edgeDirs": nodeEdgeData,
+                "pos": nodePos,
+                "type": nodeType
+            }
+            # nodeData = node[1]
+            # pp.pprint(nodeData)
+        # pp.pprint(dataPackage)
+        return dataPackage

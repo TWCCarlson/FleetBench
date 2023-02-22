@@ -1,4 +1,6 @@
 import networkx as nx
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class taskManager:
     """
@@ -12,23 +14,50 @@ class taskManager:
         # Pickup loc, dropoff loc, optimal time to complete, maximum time before failure, status
         # Leave room for misc details (weight, etc)
         # Each task should be an instance of a task class
-        self.taskManagerState = taskManagerState(self)
+        self.taskList = {}
+        self.taskPositionList = {}
         
     def createNewTask(self, **kwargs):
+        """
+            Create a new instance of the Task class, using collected properties from the generation UI
+            Also used when loading in saved data
+            Inputs:
+                - taskName: 'Human-readable' name of the task
+                - pickupPosition: Node in the graph at which the task begins
+                - dropoffPosition: Node in the graph at which the task ends
+                - timeLimit: The amount of simulation steps before the task is considered overdue
+        """
         # The length of a dict is always 1 higher than the numeric id
-        self.dictLength = len(self.taskManagerState.taskList)
+        self.dictLength = len(self.taskList)
         try:
             ID = kwargs.pop("ID")
         except KeyError:
             ID = self.dictLength
-        self.taskManagerState.latestTask = taskClass(self, **kwargs, ID=ID, numID = self.dictLength)
-        self.taskManagerState.taskList[self.dictLength] = self.taskManagerState.latestTask
-        print(self.taskManagerState.taskList)
+        self.latestTask = taskClass(self, **kwargs, ID=ID, numID = self.dictLength)
+        self.taskList[self.dictLength] = self.latestTask
+        print(self.taskList)
 
-class taskManagerState:
-    def __init__(self, parent):
-        self.taskList = {}
-        self.taskPositionList = {}
+    def packageTaskData(self):
+        """
+            Package reconstruction data for replicating the current state of the task manager
+            This means the data needed to create each task needs to be available to each call to createNewTask
+                - Task Name
+                - Pickup Node
+                - Dropoff Node
+                - Time Limit
+        """
+        dataPackage = {}
+        for task in self.taskList:
+            pp.pprint(self.taskList[task])
+            taskData = {
+                "name": self.taskList[task].name,
+                "pickupPosition": self.taskList[task].pickupPosition,
+                "dropoffPosition": self.taskList[task].dropoffPosition,
+                "timeLimit": self.taskList[task].timeLimit
+            }
+            dataPackage[self.taskList[task].numID] = taskData
+        pp.pprint(dataPackage)
+        return dataPackage
 
 class taskClass:
     """

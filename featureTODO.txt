@@ -5,6 +5,7 @@
 - Simulation definition menu
 - Session save
 - Fix new agent sharing same name with previously created agent causing lockup in agent generator
+- Add alert that task is not completable
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

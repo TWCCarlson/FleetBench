@@ -399,12 +399,12 @@ class mainCanvas(tk.Canvas):
         self.parent.contextView.objectTreeView.selection_set(agentIID)
 
         # Highlight the agent
-        agentRef = self.parent.agentManager.agentManagerState.agentList.get(agentID)
+        agentRef = self.parent.agentManager.agentList.get(agentID)
         agentRef.highlightAgent(multi=False)
 
         # Update the selection tracker
-        self.parent.parent.agentManager.agentManagerState.currentAgent = agentID
-        print(self.parent.parent.agentManager.agentManagerState.currentAgent)
+        self.parent.parent.agentManager.currentAgent = agentID
+        print(self.parent.parent.agentManager.currentAgent)
         
         # Update movement choices for the selected agent
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -430,8 +430,8 @@ class mainCanvas(tk.Canvas):
                 tags=["infoTile"]
             )
             # If there is an agent in the node, include it in the hoverinfo text
-            if node[0] in self.parent.parent.agentManager.agentManagerState.agentPositionList:
-                nodeAgentID = self.parent.parent.agentManager.agentManagerState.agentPositionList[node[0]]
+            if node[0] in self.parent.parent.agentManager.agentPositionList:
+                nodeAgentID = self.parent.parent.agentManager.agentPositionList[node[0]]
                 hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent Name: "+str(nodeAgentID[0])
 
                 # Further, make clicks on this hovertile select the agent

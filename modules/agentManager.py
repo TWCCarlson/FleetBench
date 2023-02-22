@@ -1,3 +1,6 @@
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 class agentManager:
     """
         Class which manages the information pertaining to agent existence and activity
@@ -8,44 +11,70 @@ class agentManager:
         # Generate agent class value options
         # Generate agent class definitions
         # Generate the agent class with inputs
-
-        # Create a non-gui interface for generating and accessing all agents in the system
-        self.agentManagerState = agentManagerState(self)
+        self.agentList = {}
+        self.agentPositionList = {}
+        self.currentAgent = []
 
     def createNewAgent(self, **kwargs):
+        """
+            Create a new instance of the Agent class, using collected properties from the generation UI
+            Also used when loading in saved data
+            Inputs:
+                - ID: Human-readable name
+                - position: Node within the graph
+                - orientation: Direction the agent is facing
+                - className: The type of agent to be loaded
+                    Each class may carry certain other properties
+        """
         # The length of a dict is always 1 higher than the numeric id
-        self.dictLength = len(self.agentManagerState.agentList)
+        self.dictLength = len(self.agentList)
         try:
             ID = kwargs.pop("ID")
         except KeyError:
             ID = self.dictLength
         # Create a new agent and add it to the manager's list
-        self.agentManagerState.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
-        self.agentManagerState.agentList[self.dictLength] = self.agentManagerState.latestAgent
+        self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
+        self.agentList[self.dictLength] = self.latestAgent
         self.parent.contextView.updateTreeView()
-        self.parent.mapData.updateAgentLocations(self.agentManagerState.agentList)
+        self.parent.mapData.updateAgentLocations(self.agentList)
 
-class agentManagerState:
-    def __init__(self, parent):
-        self.agentList = {}
-        self.agentPositionList = {}
-        self.currentAgent = []
+    def packageAgentData(self):
+        """
+            Package reconstruction data for replicating the current state of the agent manager
+            This means the data needed to create each agent needs to be available to each call to createNewAgent
+                - Agent Name
+                - Agent position
+                - Agent orientation
+                - Agent Class
+        """
+        dataPackage = {}
+        for agent in self.agentList:
+            pp.pprint(self.agentList[agent])
+            agentData = {
+                "ID": self.agentList[agent].ID,
+                "position": self.agentList[agent].position,
+                "orientation": self.agentList[agent].orientation,
+                "className": self.agentList[agent].className 
+            }
+            dataPackage[self.agentList[agent].numID] = agentData
+        pp.pprint(dataPackage)
+        return dataPackage
 
 class agentClass:
     """
-        Agent class, contains descriptive information and methods for navigating the warehosue
+        Agent class, contains descriptive information and methods for navigating the warehouse
     """
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create agent")
-        self.numID = kwargs.pop("numID")
-        self.ID = kwargs.pop("ID")
+        self.numID = kwargs.pop("numID")# numeric ID, computer use only
+        self.ID = kwargs.pop("ID")      # "human-readable" ID, name
         self.position = kwargs.pop("position")
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
 
         # Add the agent to the position list for reference in tileHover
-        self.parent.agentManagerState.agentPositionList[str(self.position)] = [self.ID, self.numID]
+        self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]
         # Push some data into the map graph attributes for fast referencing elsewhere
 
         # Dict of directions and numerical values used for calculating rotation

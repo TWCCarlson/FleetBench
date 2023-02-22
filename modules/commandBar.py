@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
 import pickle
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class commandBar(tk.Menu):
     """
@@ -66,6 +68,55 @@ class FileCommands(tk.Menu):
         # Open a saved session
         self.promptSave()
         print("Open Session")
+        
+        # Prompt for which saved file to load
+        fid = tk.filedialog.askopenfilename()
+        # print(fid)
+        # Read the data using pickle
+        with open(fid, 'rb') as inp:
+            data = pickle.load(inp)
+        # pp.pprint(data)
+
+        # Insert the data into the relevant locations
+        # self.parent.parent.mapData.mapGraph = data["mapDataClass"]
+        # self.parent.parent.agentManager = data["agentManager"]
+        # self.parent.parent.taskManager = data["taskManager"]
+        # self.parent.parent.randomGenerator.randomGeneratorState = data["randomGenerator"]
+        # Reconstruct the map from the data
+        graphData = data["mapDataClass"]
+        pp.pprint(graphData)
+
+        # Reconstruct the agents from the data
+        for agent in data["agentManager"]:
+            ID = data["agentManager"][agent]["ID"]
+            position = data["agentManager"][agent]["position"]
+            orientation = data["agentManager"][agent]["orientation"]
+            className = data["agentManager"][agent]["className"]
+            self.parent.parent.agentManager.createNewAgent(
+                ID=ID, 
+                position=position, 
+                orientation=orientation, 
+                className=className
+                )
+
+        # Reconstruct the tasks from the data
+        for task in data["taskManager"]:
+            taskName = data["taskManager"][task]["taskName"]
+            pickupPosition = data["taskManager"][task]["pickupPosition"]
+            dropoffPosition = data["taskManager"][task]["dropoffPosition"]
+            timeLimit = data["taskManager"][task]["timeLimit"]
+            self.parent.parent.taskManager.createNewTask(
+                taskName=taskName,
+                pickupPosition=pickupPosition,
+                dropoffPosition=dropoffPosition,
+                timeLimit=timeLimit
+                )
+        
+        # Reconstruct the current Random Generator data
+        self.parent.parent.randomGenerator.randomGeneratorState.currentSeed = data["randomGenerator"]["currentSeed"]
+
+        # Rerender the main canvas
+        self.parent.parent.mainView.mainCanvas.renderGraphState()
 
     def promptSave(self):
         # Create a message box asking to save the current session
@@ -81,14 +132,14 @@ class FileCommands(tk.Menu):
         # self.parent = parent causes classes to become unpickleable, but the structure needs to exist
         # Therefore rely on subclasses containing the data
         itemsToSave = {
-            "mapDataClass": self.parent.parent.mapData.mapGraph,
-            "agentManager": self.parent.parent.agentManager.agentManagerState,
-            "taskManager": self.parent.parent.taskManager.taskManagerState,
-            "randomGenerator" : self.parent.parent.randomGenerator.randomGeneratorState,
+            "mapDataClass": self.parent.parent.mapData.packageMapData(),
+            "agentManager": self.parent.parent.agentManager.packageAgentData(),
+            "taskManager": self.parent.parent.taskManager.packageTaskData(),
+            "randomGenerator" : self.parent.parent.randomGenerator.packageRandomGeneratorData(),
         }
-        fid = tk.filedialog.asksaveasfile(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
+        fid = tk.filedialog.asksaveasfilename(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
         print(fid)
-        with open(fid.name, 'wb') as out:
+        with open(fid, 'wb') as out:
             pickle.dump(itemsToSave, out, pickle.HIGHEST_PROTOCOL)
 
     def quitSession(self):
