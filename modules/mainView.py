@@ -153,8 +153,8 @@ class mainCanvas(tk.Canvas):
         self.renderDanglingEdges(graphData, tileSize, edgeWidth)
         self.renderAgents(graphData, tileSize)
         self.generateHoverInfo(graphData, tileSize)
-        self.setAllLayersVisible()
         self.sortCanvasLayers()
+        self.checkLayerVisibility()
         
     def renderNodes(self, graphData, tileSize, nodeSizeRatio):
         # Display nodes in graph
@@ -470,7 +470,7 @@ class mainCanvas(tk.Canvas):
         for obj in objs:
             self.lift(obj)
         print("sort canvas")
-        self.setAllLayersVisible()
+        # self.setAllLayersVisible()
 
     def setAllLayersVisible(self):
         # Mark layer states
@@ -488,74 +488,59 @@ class mainCanvas(tk.Canvas):
         self.infoBoxButtons.agentTick.select()
         self.infoBoxButtons.agentOrientationTick.select()
 
+    def checkLayerVisibility(self):
+        layerStates = {
+            "danglingEdge": self.danglingEdgeVisibility,
+            "edge": self.edgeVisibility,
+            "node": self.nodeVisibility,
+            "agent": self.agentVisibility,
+            "agentOrientation": self.agentOrientationVisibility
+        }
+        for layer in layerStates:
+            self.setLayerVisibility(layer, layerStates[layer])
+
     def clearMainCanvas(self):
         print("wipe canvas")
         self.delete("all")
 
-    def toggleDanglingEdgeVisibility(self):
-        # Find all objects tagged as "danglingEdge"
-        objs = self.find_withtag("danglingEdge")
-        # Invert their state
-        if self.danglingEdgeVisibility == True:
-            self.danglingEdgeVisibility = False
+    def setLayerVisibility(self, layerTag, desiredState):
+        print(f"Layer '{layerTag}' set to '{desiredState}'")
+        objs = self.find_withtag(layerTag)
+        if desiredState == True:
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+        elif desiredState == False:
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+
+    def toggleLayerVisibility(self, layerTag, state):
+        # Find all the objects with the matching tag
+        objs = self.find_withtag(layerTag)
+        # Toggle their state and visibility
+        if state == True:
+            state = False
             for obj in objs:
                 self.itemconfigure(obj, state='hidden')
         else:
-            self.danglingEdgeVisibility = True
+            state = True
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
+        return state
+
+    def toggleDanglingEdgeVisibility(self):
+        self.danglingEdgeVisibility = self.toggleLayerVisibility("danglingEdge", self.danglingEdgeVisibility)
 
     def toggleEdgeVisibility(self):
-        # # Find all objects tagged as "edge"
-        objs = self.find_withtag("edge")
-        # # Invert their state
-        if self.edgeVisibility == True:
-            self.edgeVisibility = False
-            for obj in objs:
-                self.itemconfigure(obj, state='hidden')
-        else:
-            self.edgeVisibility = True
-            for obj in objs:
-                self.itemconfigure(obj, state='normal')
+        self.edgeVisibility = self.toggleLayerVisibility("edge", self.edgeVisibility)
 
     def toggleNodeVisibility(self):
-        # Find all objects tagged as "node"
-        objs = self.find_withtag("node")
-        # Invert their state
-        if self.nodeVisibility == True:
-            self.nodeVisibility = False
-            for obj in objs:
-                self.itemconfigure(obj, state='hidden')
-        else:
-            self.nodeVisibility = True
-            for obj in objs:
-                self.itemconfigure(obj, state='normal')
+        self.nodeVisibility = self.toggleLayerVisibility("node", self.nodeVisibility)
 
     def toggleAgentVisibility(self):
-        # Find all objects tagged as "agent"
-        objs = self.find_withtag("agent")
-        # Invert their state
-        if self.agentVisibility == True:
-            self.agentVisibility = False
-            for obj in objs:
-                self.itemconfigure(obj, state='hidden')
-        else:
-            self.agentVisibility = True
-            for obj in objs:
-                self.itemconfigure(obj, state='normal')
+        self.agentVisibility = self.toggleLayerVisibility("agent", self.agentVisibility)
 
     def toggleAgentOrientationVisibility(self):
-        # Find all objects tagged as "agentOrientation"
-        objs = self.find_withtag("agentOrientation")
-        # Invert their state
-        if self.agentOrientationVisibility == True:
-            self.agentOrientationVisibility = False
-            for obj in objs:
-                self.itemconfigure(obj, state='hidden')
-        else:
-            self.agentOrientationVisibility = True
-            for obj in objs:
-                self.itemconfigure(obj, state='normal')
+        self.agentOrientationVisibility = self.toggleLayerVisibility("agentOrientation", self.agentOrientationVisibility)
 
     def highlightTile(self, tileIDX, tileIDY, color, multi, highlightType):
         # print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
