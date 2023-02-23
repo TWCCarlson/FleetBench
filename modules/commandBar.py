@@ -82,9 +82,10 @@ class FileCommands(tk.Menu):
         # self.parent.parent.agentManager = data["agentManager"]
         # self.parent.parent.taskManager = data["taskManager"]
         # self.parent.parent.randomGenerator.randomGeneratorState = data["randomGenerator"]
+        
         # Reconstruct the map from the data
         graphData = data["mapDataClass"]
-        pp.pprint(graphData)
+        self.parent.parent.mapData.loadMapToNetworkX(graphData)
 
         # Reconstruct the agents from the data
         for agent in data["agentManager"]:

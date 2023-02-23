@@ -33,6 +33,7 @@ class mapDataClass:
             self.loadMapToNetworkX(mapData)
         
     def loadMapToNetworkX(self, mapData):
+        pp.pprint(mapData)
         self.mapGraph.clear()
         for node in mapData:
             if 'mapDimensions' in node:
@@ -168,19 +169,28 @@ class mapDataClass:
                 - type: 'edge'/'charge'/'pickup'/'deposit'/'rest'
                 - edgeDirs: 'edgeDirs': {'N': 1, 'W': 1, 'S': 1, 'E': 1}
         """
-        dataPackage = {}
+        dataPackage = []
+        mapDimData = {
+            "mapDimensions": {
+                "Xdim": self.dimensionX+1,
+                "Ydim": self.dimensionY+1
+            }
+        }
+        dataPackage.append(mapDimData)
+
         for node in self.mapGraph.nodes(data=True):
             # pp.pprint(node)
             nodeEdgeData = node[1]["edgeDirs"]
             nodePos = node[1]["pos"]
             nodeType = node[1]["type"]
             # Ignore task and data objects, can't be pickled, let them be repopulated independently
-            dataPackage[node[0]] = {
-                "edgeDirs": nodeEdgeData,
-                "pos": nodePos,
-                "type": nodeType
+            nodeData = {
+                "nodeEdges": nodeEdgeData,
+                "nodePosition": nodePos,
+                "nodeType": nodeType
             }
+            dataPackage.append(nodeData)
             # nodeData = node[1]
             # pp.pprint(nodeData)
-        # pp.pprint(dataPackage)
+        pp.pprint(dataPackage)
         return dataPackage
