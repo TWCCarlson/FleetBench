@@ -160,7 +160,7 @@ class mapDataClass:
         #         print("No agent")
 
     def packageMapData(self):
-        """
+        """ 
             Package reconstruction data for replicating the current state of the graph
             This means the data needed to create each node, edge, and edge connection needs to be available
                 - Nodes: '(0, 0)': { ...

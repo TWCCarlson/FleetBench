@@ -90,8 +90,6 @@ class toolBar(tk.Frame):
 
         # Create labeled container for agent information
         self.agentDataFrame = tk.LabelFrame(self.agentFrame, text="Agent Specs")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
         self.agentDataFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
 
         # Coordinate Entry boxes and labels

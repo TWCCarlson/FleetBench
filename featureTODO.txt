@@ -1,5 +1,4 @@
 - Seeded RNG system for AI decisionmaking hooks in the future
-- Manual Task generator
 - Automatic Task generator
 - Agent resource tracking
 - Simulation definition menu
@@ -10,11 +9,6 @@
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
     This should be decoupled from the functional code and called after every change
-
-Some kind of bug with
-1: create agent
-2: move the agent around
-3: try to make a new agent
 
 Informational Classes are then:
     mapData
