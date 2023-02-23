@@ -115,6 +115,7 @@ class agentClass:
         # Change orientation to represent turning to move north
         self.orientation = "N"
         # Update the canvas with the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -129,6 +130,7 @@ class agentClass:
         # Change orientation to represent turning to move north
         self.orientation = "W"
         # Update the canvas with the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -143,6 +145,7 @@ class agentClass:
         # Change orientation to represent turning to move north
         self.orientation = "E"
         # Update the canvas with the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -157,6 +160,7 @@ class agentClass:
         # Change orientation to represent turning to move north
         self.orientation = "S"
         # Update the canvas with the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -171,6 +175,7 @@ class agentClass:
         # Find the new direction as a char
         self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
         # Redraw the canvas to reflect the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
 
     def rotateCCW(self):
@@ -181,4 +186,5 @@ class agentClass:
         # Find the new direction as a char
         self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
         # Redraw the canvas to reflect the change
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()

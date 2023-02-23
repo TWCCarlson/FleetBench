@@ -140,7 +140,7 @@ class mapDataClass:
         # Remove all agents from the graph
         for node in self.mapGraph.nodes(data=True):
             if 'agent' in self.mapGraph.nodes.data()[node[0]]:
-                self.mapGraph.nodes.data()[node[0]]['agent'] = None
+                del self.mapGraph.nodes.data()[node[0]]['agent']
             else:
                 # print(str(node) + " does not contain an agent" )
                 pass
