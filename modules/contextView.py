@@ -265,25 +265,25 @@ class contextView(tk.Frame):
         }
 
         # Check if an edge exists to the north
-        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["N"]):
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["N"]) and not 'agent' in self.parent.mapData.mapGraph.nodes[candidateNodeDict["N"]]:
             self.moveUp.config(state=tk.NORMAL, background='#4ddb67')
         else:
             self.moveUp.config(state=tk.DISABLED, background='#fc7f03')
 
         # Check if an edge exists to the south
-        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["S"]):
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["S"]) and not 'agent' in self.parent.mapData.mapGraph.nodes[candidateNodeDict["S"]]:
             self.moveDown.config(state=tk.NORMAL, background='#4ddb67')
         else:
             self.moveDown.config(state=tk.DISABLED, background='#fc7f03')
 
         # Check if an edge exists to west
-        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["W"]):
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["W"]) and not 'agent' in self.parent.mapData.mapGraph.nodes[candidateNodeDict["W"]]:
             self.moveLeft.config(state=tk.NORMAL, background='#4ddb67')
         else:
             self.moveLeft.config(state=tk.DISABLED, background='#fc7f03')
 
         # Check if an edge exists to the left
-        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["E"]):
+        if self.parent.mapData.mapGraph.has_edge(str(agentPosition), candidateNodeDict["E"]) and not 'agent' in self.parent.mapData.mapGraph.nodes[candidateNodeDict["E"]]:
             self.moveRight.config(state=tk.NORMAL, background='#4ddb67')
         else:
             self.moveRight.config(state=tk.DISABLED, background='#fc7f03')
