@@ -391,6 +391,8 @@ class mainCanvas(tk.Canvas):
         # Remove previous highlighting
         self.clearHighlight()
 
+        print(f"agentName: {agentName}, agentID: {agentID}")
+
         # Find iid for specified agent in the treeview
         agentIID = self.parent.contextView.objectTreeView.tag_has(agentName)
 
@@ -400,6 +402,7 @@ class mainCanvas(tk.Canvas):
 
         # Highlight the agent
         agentRef = self.parent.agentManager.agentList.get(agentID)
+        print(agentRef)
         agentRef.highlightAgent(multi=False)
 
         # Update the selection tracker
@@ -413,6 +416,7 @@ class mainCanvas(tk.Canvas):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
         # Place one in each cell of the grid that contains a node
         for node in graphData.nodes.data():
+            # pp.pprint(node)
             # Break down the data
             nodeData = node[1]
             nodePosX = nodeData["pos"]["X"]
@@ -430,14 +434,15 @@ class mainCanvas(tk.Canvas):
                 tags=["infoTile"]
             )
             # If there is an agent in the node, include it in the hoverinfo text
-            if node[0] in self.parent.parent.agentManager.agentPositionList:
-                nodeAgentID = self.parent.parent.agentManager.agentPositionList[node[0]]
-                hoverString = str(node[0])+": "+nodeType.capitalize()+", Agent Name: "+str(nodeAgentID[0])
+            if 'agent' in nodeData:
+                nodeAgentName = nodeData['agent'].ID
+                nodeAgentID = nodeData['agent'].numID
+                hoverString = f"{str(node[0])}: {nodeType.capitalize()}, Agent Name: {nodeAgentName}"
 
                 # Further, make clicks on this hovertile select the agent
-                self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentID[0], nodeAgentID[1]))
+                self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentName, nodeAgentID))
             else:
-                hoverString = str(node[0])+": "+nodeType.capitalize()
+                hoverString = f"{str(node[0])}: {nodeType.capitalize()}"
 
             # Assign the mouseover event to it
             # Tkinter automatically passes the event object to the handler
@@ -504,7 +509,7 @@ class mainCanvas(tk.Canvas):
         self.delete("all")
 
     def setLayerVisibility(self, layerTag, desiredState):
-        print(f"Layer '{layerTag}' set to '{desiredState}'")
+        # print(f"Layer '{layerTag}' set to '{desiredState}'")
         objs = self.find_withtag(layerTag)
         if desiredState == True:
             for obj in objs:
