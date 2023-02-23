@@ -102,7 +102,7 @@ class FileCommands(tk.Menu):
 
         # Reconstruct the tasks from the data
         for task in data["taskManager"]:
-            taskName = data["taskManager"][task]["taskName"]
+            taskName = data["taskManager"][task]["name"]
             pickupPosition = data["taskManager"][task]["pickupPosition"]
             dropoffPosition = data["taskManager"][task]["dropoffPosition"]
             timeLimit = data["taskManager"][task]["timeLimit"]
