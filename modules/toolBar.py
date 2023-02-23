@@ -398,7 +398,7 @@ class toolBar(tk.Frame):
         # Pull the RNG seed from the text entry box
         seed = self.randomSeedEntry.get()
         # Update the generator's seed
-        self.parent.randomGenerator.randomGeneratorState.updateCurrentSeed(seed)
+        self.parent.randomGenerator.updateCurrentSeed(seed)
         # Update the display
         self.updateCurrentSeedDisplay()
         # Disable the set button
