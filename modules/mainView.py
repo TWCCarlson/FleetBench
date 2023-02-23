@@ -478,6 +478,7 @@ class mainCanvas(tk.Canvas):
         self.edgeVisibility = True
         self.nodeVisibility = True
         self.agentVisibility = True
+        self.agentOrientationVisibility = True
 
         # Update the checkboxes
         self.infoBoxButtons = self.parent.parent.infoBox.infoBoxFrame
@@ -485,6 +486,7 @@ class mainCanvas(tk.Canvas):
         self.infoBoxButtons.edgeTick.select()
         self.infoBoxButtons.nodeTick.select()
         self.infoBoxButtons.agentTick.select()
+        self.infoBoxButtons.agentOrientationTick.select()
 
     def clearMainCanvas(self):
         print("wipe canvas")
@@ -539,6 +541,19 @@ class mainCanvas(tk.Canvas):
                 self.itemconfigure(obj, state='hidden')
         else:
             self.agentVisibility = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+
+    def toggleAgentOrientationVisibility(self):
+        # Find all objects tagged as "agentOrientation"
+        objs = self.find_withtag("agentOrientation")
+        # Invert their state
+        if self.agentOrientationVisibility == True:
+            self.agentOrientationVisibility = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            self.agentOrientationVisibility = True
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
 

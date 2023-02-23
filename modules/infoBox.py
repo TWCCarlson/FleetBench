@@ -50,6 +50,7 @@ class infoBoxFrame(tk.Frame):
         self.edgeVisibility = tk.IntVar()
         self.nodeVisibility = tk.IntVar()
         self.agentVisibility = tk.IntVar()
+        self.agentOrienationVisibility = tk.IntVar()
         # Create checkboxes for each canvas layer
         self.danglingEdgeTick = tk.Checkbutton(self.parent, text='Dangling Edges', 
                 variable=self.danglingEdgeVisibility, onvalue=1, offvalue=0,
@@ -63,6 +64,9 @@ class infoBoxFrame(tk.Frame):
         self.agentTick = tk.Checkbutton(self.parent, text='Agents',
                 variable=self.agentVisibility, onvalue=1, offvalue=0,
                 command=self.setAgentVisibility)
+        self.agentOrientationTick = tk.Checkbutton(self.parent, text='Agent Orientation',
+                variable=self.agentOrienationVisibility, onvalue=1, offvalue=0,
+                command=self.setAgentOrientationVisibility)
 
         # Create the hover info text
         self.hoverInfoText = tk.StringVar()
@@ -75,12 +79,12 @@ class infoBoxFrame(tk.Frame):
         self.edgeTick.grid(row=0, column=1)
         self.nodeTick.grid(row=0, column=2)
         self.agentTick.grid(row=0, column=3)
+        self.agentOrientationTick.grid(row=0, column=4)
         
-
         # Render the hovertext
         # Right justify
-        self.parent.columnconfigure(4, weight=1)
-        self.hoverInfo.grid(row=0, column=4, sticky=tk.E)
+        self.parent.columnconfigure(5, weight=1)
+        self.hoverInfo.grid(row=0, column=5, sticky=tk.E)
 
     def setDanglingEdgeVisibility(self):
         # Call the canvas function for toggling the state of the layer
@@ -97,6 +101,10 @@ class infoBoxFrame(tk.Frame):
     def setAgentVisibility(self):
         # Call the canvas function for toggling the state of the layer
         self.parent.mainView.mainCanvas.toggleAgentVisibility()
+
+    def setAgentOrientationVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        self.parent.mainView.mainCanvas.toggleAgentOrientationVisibility()
 
 class infoBoxState:
     """

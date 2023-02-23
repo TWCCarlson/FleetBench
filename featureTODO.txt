@@ -7,6 +7,9 @@
 - Add alert that task is not completable
 - Treeview pages (Agent, Task, Stats/Status)
 - Dynamic text representing valid task/agent creation option
+- Migrate .grid() col and row IDs to be dictionaried with weights
+    Removing magic numbers
+- Remove magic numbers in general
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
