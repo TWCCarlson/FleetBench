@@ -296,6 +296,20 @@ class toolBar(tk.Frame):
             # self.confirmCreateAgentButton.config(state=tk.DISABLED)
             # Allow the box to be empty
             return True
+        elif next((i for i in self.parent.agentManager.agentList if self.parent.agentManager.agentList[i].ID == agentName), False):
+            # i for i in self.parent.agentManager.agentList if self.parent.agentManager.agentList[i].ID == agentName
+            # Creates an iterator containing all instances where there is a match
+            # Next then moves the generator through the container, either yielding a value (True) or reaching the end of the container
+            # At the end of the container, raise StopIteration or return the default value False
+
+            # If the agentName is the same as an agent that already exists, disallow creating it
+            self.agentNameValid = False
+
+            # Check that all other enabling conditions are met
+            self.updateAgentCreationButton()
+
+            # Allow the box to be empty
+            return True
         else:
             # Enable the ability to create the agent
             self.agentNameValid = True

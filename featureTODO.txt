@@ -1,8 +1,6 @@
-- Seeded RNG system for AI decisionmaking hooks in the future
 - Automatic Task generator
 - Agent resource tracking
 - Simulation definition menu
-- Session save
 - Fix new agent sharing same name with previously created agent causing lockup in agent generator
 - Add alert that task is not completable
 - Treeview pages (Agent, Task, Stats/Status)
