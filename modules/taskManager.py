@@ -37,6 +37,9 @@ class taskManager:
         self.taskList[self.dictLength] = self.latestTask
         print(self.taskList)
 
+        # Update the treeview
+        self.parent.contextView.updateTaskTreeView()
+
     def packageTaskData(self):
         """
             Package reconstruction data for replicating the current state of the task manager
@@ -78,6 +81,11 @@ class taskClass:
         self.calculateShortest_Path()
         self.calculateAStarBestPath()
         self.calculateRankedShortestSimplePaths()
+
+    def highlightTask(self, multi):
+        # Hightlight the pickup position
+        self.parent.parent.mainView.mainCanvas.highlightTile(self.pickupPosition[0], self.pickupPosition[1], 'green', multi=multi, highlightType='pickupHighlight')
+        self.parent.parent.mainView.mainCanvas.highlightTile(self.dropoffPosition[0], self.dropoffPosition[1], 'blue', multi=multi, highlightType='dropoffHighlight')
 
     # Pathfinding
     # It may be better to have the central AI compute all shortest paths and have agents reference a dict

@@ -95,7 +95,7 @@ class contextView(tk.Frame):
             self.agentTreeView.column(col, width=self.columnList[col], stretch=True)
 
         # Event bindings
-        self.agentTreeView.bind('<Motion>', 'break')
+        self.agentTreeView.bind('<Motion>', 'break') # Prevents resizing
         self.agentListFrame.bind('<Enter>', self.bindAgentClicks)
         self.agentListFrame.bind('<Leave>', self.unbindAgentClicks)
 
@@ -148,14 +148,6 @@ class contextView(tk.Frame):
                 tags=["agent", agentNumID, agentID]
             )
 
-    def handleAgentTreeViewClick(self, event):
-        # Header clicks:
-        if self.agentTreeView.identify_region(event.x, event.y) == "separator":
-            # Prevent click interacting with this region
-            return
-        else:
-            self.handleAgentSelect(event)
-
     def bindAgentClicks(self, *event):
         self.agentClickBindFunc = self.agentTreeView.bind('<<TreeviewSelect>>', self.handleAgentSelect)
 
@@ -177,6 +169,95 @@ class contextView(tk.Frame):
             print(self.parent.agentManager.currentAgent)
             # Trigger movement button state validation
             self.validateMovementButtonStates()
+
+    def createTaskTreeView(self):
+        self.columnList = {'Name': 50, 'Pickup': 50, 'Dropoff': 50, 'Time Limit': 40}
+        self.taskTreeView = ttk.Treeview(self.taskListFrame, selectmode='browse')
+        self.taskTreeView.grid(row=0, column=0, sticky=tk.S+tk.W+tk.E)
+        self.taskTreeView["height"] = 20
+        self.taskTreeView["columns"] = list(self.columnList.keys())
+        self.taskListFrame.columnconfigure(0, weight=1)
+
+        self.taskTreeView.heading('#0', text='A')
+        self.taskTreeView.column('#0', width=35, stretch=0)
+        for col in self.columnList:
+            self.taskTreeView.heading(col, text=col)
+            self.taskTreeView.column(col, width=self.columnList[col], stretch=True)
+
+        # Event bindings
+        self.taskTreeView.bind('<Motion>', 'break') # Prevents resizing
+        self.taskTreeView.bind('<Enter>', self.bindTaskClicks)
+        self.taskTreeView.bind('<Leave>', self.unbindTaskClicks)
+
+        # Initialize scrolling
+        self.initTaskTreeScrolling()
+
+    def initTaskTreeScrolling(self):
+        # Create scrollbar components
+        self.taskTreeView.ybar = tk.Scrollbar(self.taskListFrame, orient="vertical")
+        self.taskTreeView.xbar = tk.Scrollbar(self.taskListFrame, orient="horizontal")
+
+        # Bind the scrollbars to the canvas
+        self.taskTreeView.ybar["command"] = self.taskTreeView.yview
+        self.taskTreeView.xbar["command"] = self.taskTreeView.xview
+
+        # Adjust positioning, size relative to grid
+        self.taskTreeView.ybar.grid(row=0, column=1, sticky=tk.N+tk.S)
+        self.taskTreeView.xbar.grid(row=1, column=0, sticky=tk.E+tk.W)
+
+        # Make canvas update scrollbar position to match its view
+        self.taskTreeView["yscrollcommand"] = self.taskTreeView.ybar.set
+        self.taskTreeView["xscrollcommand"] = self.taskTreeView.xbar.set
+
+        # Bind mousewheel to interact with the scrollbars
+        # Only do this when the cursor is inside this frame
+        self.taskListFrame.bind('<Enter>', self.bindMousewheel)
+        self.taskListFrame.bind('<Leave>', self.unbindMousewheel)
+
+        # Reset the view
+        self.taskTreeView.xview_moveto("0.0")
+        self.taskTreeView.yview_moveto("0.0")
+
+    def updateTaskTreeView(self):
+        # Clear the treeview then regenerate it
+        for row in self.taskTreeView.get_children():
+            self.taskTreeView.delete(row)
+
+        # Access the list of all agents and rebuild the treeView based on their states
+        for task in self.parent.taskManager.taskList:
+            taskData = self.parent.taskManager.taskList.get(task)
+            taskNumID = taskData.numID
+            taskName = taskData.name
+            taskPickupPosition = taskData.pickupNode
+            taskDropoffPosition = taskData.dropoffNode
+            taskTimeLimit = taskData.timeLimit
+            self.taskTreeView.insert(parent="",
+                index='end',
+                iid=taskNumID,
+                text=f"T{str(taskNumID)}",
+                values=[taskName, taskPickupPosition, taskDropoffPosition, taskTimeLimit],
+                tags=["task", taskNumID, taskName]
+            )
+
+    def bindTaskClicks(self, *event):
+        self.taskClickBindFunc = self.taskTreeView.bind('<<TreeviewSelect>>', self.handleTaskSelect)
+
+    def unbindTaskClicks(self, *event):
+        self.taskTreeView.unbind('<<TreeviewSelect>>', self.taskClickBindFunc)
+
+    def handleTaskSelect(self, event):
+        # Identify the selected row
+        selectedRow = self.taskTreeView.focus()
+        if selectedRow in self.taskTreeView.tag_has("task"):
+            # Clear existing highlights
+            self.parent.mainView.mainCanvas.clearHighlight()
+            rowData = self.taskTreeView.item(selectedRow)
+            # Hightlight the selected tasks's pickup and dropoff points
+            taskID = rowData["tags"][1]
+            self.parent.taskManager.taskList.get(taskID).highlightTask(False)
+            # Update taskManager's currentTask prop
+            self.parent.taskManager.currentTask = taskID
+            print(self.parent.taskManager.currentTask)
 
     def createTreeView(self):
         self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}

@@ -105,7 +105,7 @@ class agentClass:
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
-        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHightlight')
+        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
 
     def moveUp(self):
         print("Move agent up")
