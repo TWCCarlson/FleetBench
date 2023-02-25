@@ -394,11 +394,11 @@ class mainCanvas(tk.Canvas):
         print(f"agentName: {agentName}, agentID: {agentID}")
 
         # Find iid for specified agent in the treeview
-        agentIID = self.parent.contextView.objectTreeView.tag_has(agentName)
+        agentIID = self.parent.contextView.agentTreeView.tag_has(agentName)
 
         # Set the selection to include the agent
-        self.parent.contextView.objectTreeView.see(agentIID)
-        self.parent.contextView.objectTreeView.selection_set(agentIID)
+        # self.parent.contextView.objectTreeView.see(agentIID)
+        self.parent.contextView.agentTreeView.selection_set(agentIID)
 
         # Highlight the agent
         agentRef = self.parent.agentManager.agentList.get(agentID)
