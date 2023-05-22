@@ -285,7 +285,7 @@ class toolBar(tk.Frame):
             return False
 
     def agentNameValidation(self, agentName):
-        # If the agentName box is empty (length = 0), it is not valid
+        # If the agentName box contains a name of less length than 3, it is not valid
         if len(agentName) < 3:
             # Disable the ability to create the agent
             self.agentNameValid = False
@@ -296,7 +296,7 @@ class toolBar(tk.Frame):
             # self.confirmCreateAgentButton.config(state=tk.DISABLED)
             # Allow the box to be empty
             return True
-        elif next((i for i in self.parent.agentManager.agentList if self.parent.agentManager.agentList[i].ID == agentName), False):
+        elif any(self.parent.agentManager.agentList[i].ID == agentName for i in self.parent.agentManager.agentList):
             # i for i in self.parent.agentManager.agentList if self.parent.agentManager.agentList[i].ID == agentName
             # Creates an iterator containing all instances where there is a match
             # Next then moves the generator through the container, either yielding a value (True) or reaching the end of the container
