@@ -424,17 +424,21 @@ class contextView(tk.Frame):
         self.movementFrame.columnconfigure(0, weight=1)
         # self.movementFrame.columnconfigure(1, weight=1)
         self.movementFrame.columnconfigure(2, weight=1)
+
+        ## Movement buttons
+        # These should probably not be hotkeyed — its an extra state to manage without much benefit. 
+        # Most movement is algorithmic, not manual, a few clicks won't be a significant problem
         # Cardinal movement
-        self.moveUp = tk.Button(self.movementFrame, text="N", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+        self.moveUp = tk.Button(self.movementFrame, text="⬆\nN", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
             command=self.moveAgentUp)
         self.moveUp.grid(row=0, column=1, pady=4, padx=4, columnspan=1, sticky=tk.S)
-        self.moveLeft = tk.Button(self.movementFrame, text="W", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+        self.moveLeft = tk.Button(self.movementFrame, text="⬅ W", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
             command=self.moveAgentLeft)
         self.moveLeft.grid(row=1, column=0, pady=4, padx=4, columnspan=1, sticky=tk.E)
-        self.moveRight = tk.Button(self.movementFrame, text="E", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+        self.moveRight = tk.Button(self.movementFrame, text="E ➡", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
             command=self.moveAgentRight)
         self.moveRight.grid(row=1, column=2, pady=4, padx=4, columnspan=1, sticky=tk.W)
-        self.moveDown = tk.Button(self.movementFrame, text="S", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
+        self.moveDown = tk.Button(self.movementFrame, text="S\n⬇", width=10, height=4, relief=tk.GROOVE, borderwidth=6,
             command=self.moveAgentDown)
         self.moveDown.grid(row=2, column=1, pady=4, padx=4, columnspan=1, sticky=tk.N)
         # Rotational movement
@@ -445,7 +449,7 @@ class contextView(tk.Frame):
             command=self.rotateAgentCCW)
         self.rotateCCW.grid(row=0, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SW)
         # Meta controls
-        self.pause = tk.Button(self.movementFrame, text="P", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
+        self.pause = tk.Button(self.movementFrame, text="Pause", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.pauseAgent, background='yellow')
         self.pause.grid(row=2, column=0, pady=4, padx=4, columnspan=1, sticky=tk.SW)
         self.delete = tk.Button(self.movementFrame, text="Del", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
