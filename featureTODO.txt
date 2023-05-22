@@ -8,6 +8,9 @@
 - Migrate .grid() col and row IDs to be dictionaried with weights
     Removing magic numbers
 - Remove magic numbers in general
+- Task treeview should have a visual cue for which node is pickup/dropoff
+- Main canvas maybe needs numbering for nodes
+- Add status and a corresponding image to agents and tasks in treeviews
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
