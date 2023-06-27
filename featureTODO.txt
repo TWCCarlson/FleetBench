@@ -1,7 +1,6 @@
 - Automatic Task generator
 - Agent resource tracking
 - Simulation definition menu
-- Fix new agent sharing same name with previously created agent causing lockup in agent generator
 - Add alert that task is not completable
 - Treeview pages (Agent, Task, Stats/Status)
 - Dynamic text representing valid task/agent creation option
