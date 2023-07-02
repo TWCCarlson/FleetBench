@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import networkx as nx
+import modules.exceptions as RWSE
 from functools import partial
 
 class toolBar(tk.Frame):
@@ -738,11 +739,13 @@ class toolBar(tk.Frame):
                 dropoffPosition = dropoffNode,
                 timeLimit = timeLimit
             )
+            # Re-render the map state
+            self.mainView.mainCanvas.renderGraphState()
+            # Close the task generator
+            self.taskCreationPrompt()
         except nx.NetworkXNoPath:
             # If the graph does not contain connections to allow path completion, display a warning 
             tk.messagebox.showerror(title="Invalid Task Path", message=f"No path between {pickupNode} and {dropoffNode}!")
-        # Re-render the map state
-        self.mainView.mainCanvas.renderGraphState()
-        # Close the task generator
-        self.taskCreationPrompt()
+        except RWSE.RWSTaskTimeLimitImpossible as exc:
+            tk.messagebox.showerror(title="Task time limit too low", message=f"Optimal pathing cannot complete the task in time. \nMinimum complete time: {exc.minTimeToComplete} \nTime limit: {exc.timeLimit}")
 

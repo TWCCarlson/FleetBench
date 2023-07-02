@@ -1,5 +1,6 @@
 import networkx as nx
 import pprint
+import modules.exceptions as RWSE
 pp = pprint.PrettyPrinter(indent=4)
 
 class taskManager:
@@ -80,7 +81,10 @@ class taskClass:
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:
-        self.calculateShortest_Path()
+        # Calculate the minimum time to complete, assuming picking up the item and dropping it off takes 1 "step"
+        self.minTimeToComplete = self.calculateShortest_Path() + 2
+        if self.minTimeToComplete > self.timeLimit and self.timeLimit != 0:
+            raise RWSE.RWSTaskTimeLimitImpossible(timeLimit=self.timeLimit, minTimeToComplete=self.minTimeToComplete)
         # except nx.NetworkXNoPath:
 
         # self.calculateAStarBestPath()
@@ -102,6 +106,7 @@ class taskClass:
         bestShortest_Path = nx.shortest_path_length(self.graphRef, self.pickupNode, self.dropoffNode)
         bestDijkstraPathLength = nx.dijkstra_path_length(self.graphRef, self.pickupNode, self.dropoffNode)
         print(f"Dijkstra Calculates a path of length {bestDijkstraPathLength}")
+        return bestDijkstraPathLength
 
     def calculateAStarBestPath(self):
         bestAStarPathLength = nx.astar_path_length(self.graphRef, self.pickupNode, self.dropoffNode, heuristic=None, weight=None)
