@@ -55,7 +55,6 @@ class toolBar(tk.Frame):
         self.randomSeedFrame.grid(row=2, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.createRandomSeedPane()
 
-
     def agentCreationPrompt(self):
         self.clearAgentCreationUI()
         # Create a button to start UI creation
@@ -620,7 +619,6 @@ class toolBar(tk.Frame):
         else:
             return False
         
-
     def taskNameValidation(self, taskName):
         if len(taskName) < 1:
             # Disable the ability to create the task
@@ -748,4 +746,3 @@ class toolBar(tk.Frame):
             tk.messagebox.showerror(title="Invalid Task Path", message=f"No path between {pickupNode} and {dropoffNode}!")
         except RWSE.RWSTaskTimeLimitImpossible as exc:
             tk.messagebox.showerror(title="Task time limit too low", message=f"Optimal pathing cannot complete the task in time. \nMinimum complete time: {exc.minTimeToComplete} \nTime limit: {exc.timeLimit}")
-

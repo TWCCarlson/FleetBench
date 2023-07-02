@@ -8,6 +8,7 @@ from modules.infoBox import infoBox
 from modules.agentManager import agentManager
 from modules.taskManager import taskManager
 from modules.randomGenerator import randomGenerator
+from modules.simulationManager import simulationManager
 from config.appearanceValues import appearanceValues
 
 class App(tk.Tk):
@@ -25,6 +26,8 @@ class App(tk.Tk):
         self.agentManager = agentManager(self)
         # Task information manager class
         self.taskManager = taskManager(self)
+        # Simulation configuration information class
+        self.simulationManager = simulationManager(self)
 
         # Window components
         # Appearance
