@@ -85,7 +85,6 @@ class taskClass:
         self.minTimeToComplete = self.calculateShortest_Path() + 2
         if self.minTimeToComplete > self.timeLimit and self.timeLimit != 0:
             raise RWSE.RWSTaskTimeLimitImpossible(timeLimit=self.timeLimit, minTimeToComplete=self.minTimeToComplete)
-        # except nx.NetworkXNoPath:
 
         # self.calculateAStarBestPath()
         # self.calculateRankedShortestSimplePaths()

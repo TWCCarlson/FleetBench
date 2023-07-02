@@ -1,8 +1,6 @@
 - Automatic Task generator
 - Agent resource tracking
 - Simulation definition menu
-- Add alert that task is not completable
-- Treeview pages (Agent, Task, Stats/Status)
 - Dynamic text representing valid task/agent creation option
 - Migrate .grid() col and row IDs to be dictionaried with weights
     Removing magic numbers

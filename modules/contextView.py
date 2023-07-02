@@ -29,11 +29,11 @@ class contextView(tk.Frame):
         self.grid(row=0, column=2, rowspan=2, sticky=tk.N)
 
         ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
-        self.contextLabelFrame = tk.LabelFrame(self, text="Agent Generator")
+        self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Configuration Menu")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.contextLabelFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
-        self.createAgentButton = tk.Button(self.contextLabelFrame, text="Create Agent. . .", width=15,  command=self.tempFunc)
+        self.createAgentButton = tk.Button(self.contextLabelFrame, text="Configure Simulation. . .", width=20,  command=self.tempFunc)
         self.contextLabelFrame.columnconfigure(0, weight=1)
         self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
         ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
