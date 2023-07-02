@@ -730,12 +730,17 @@ class toolBar(tk.Frame):
         dropoffNode = (dropoffXPos, dropoffYPos)
         timeLimit = eval(self.timeLimitValue.get())
         taskName = self.taskNameValue.get()
-        self.taskManager.createNewTask(
-            taskName = taskName,
-            pickupPosition = pickupNode,
-            dropoffPosition = dropoffNode,
-            timeLimit = timeLimit
-        )
+        try:
+            # Attempt to create the task
+            self.taskManager.createNewTask(
+                taskName = taskName,
+                pickupPosition = pickupNode,
+                dropoffPosition = dropoffNode,
+                timeLimit = timeLimit
+            )
+        except nx.NetworkXNoPath:
+            # If the graph does not contain connections to allow path completion, display a warning 
+            tk.messagebox.showerror(title="Invalid Task Path", message=f"No path between {pickupNode} and {dropoffNode}!")
         # Re-render the map state
         self.mainView.mainCanvas.renderGraphState()
         # Close the task generator

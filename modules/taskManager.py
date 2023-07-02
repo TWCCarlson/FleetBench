@@ -78,9 +78,13 @@ class taskClass:
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
         # self.status = kwargs.pop("status")
+        # Verify that the task is completable (no obstacles considered)
+        # try:
         self.calculateShortest_Path()
-        self.calculateAStarBestPath()
-        self.calculateRankedShortestSimplePaths()
+        # except nx.NetworkXNoPath:
+
+        # self.calculateAStarBestPath()
+        # self.calculateRankedShortestSimplePaths()
 
     def highlightTask(self, multi):
         # Hightlight the pickup position
