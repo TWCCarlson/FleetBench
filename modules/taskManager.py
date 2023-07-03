@@ -1,5 +1,6 @@
 import networkx as nx
 import pprint
+import modules.exceptions as RWSE
 pp = pprint.PrettyPrinter(indent=4)
 
 class taskManager:
@@ -78,9 +79,15 @@ class taskClass:
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
         # self.status = kwargs.pop("status")
-        self.calculateShortest_Path()
-        self.calculateAStarBestPath()
-        self.calculateRankedShortestSimplePaths()
+        # Verify that the task is completable (no obstacles considered)
+        # try:
+        # Calculate the minimum time to complete, assuming picking up the item and dropping it off takes 1 "step"
+        self.minTimeToComplete = self.calculateShortest_Path() + 2
+        if self.minTimeToComplete > self.timeLimit and self.timeLimit != 0:
+            raise RWSE.RWSTaskTimeLimitImpossible(timeLimit=self.timeLimit, minTimeToComplete=self.minTimeToComplete)
+
+        # self.calculateAStarBestPath()
+        # self.calculateRankedShortestSimplePaths()
 
     def highlightTask(self, multi):
         # Hightlight the pickup position
@@ -98,6 +105,7 @@ class taskClass:
         bestShortest_Path = nx.shortest_path_length(self.graphRef, self.pickupNode, self.dropoffNode)
         bestDijkstraPathLength = nx.dijkstra_path_length(self.graphRef, self.pickupNode, self.dropoffNode)
         print(f"Dijkstra Calculates a path of length {bestDijkstraPathLength}")
+        return bestDijkstraPathLength
 
     def calculateAStarBestPath(self):
         bestAStarPathLength = nx.astar_path_length(self.graphRef, self.pickupNode, self.dropoffNode, heuristic=None, weight=None)

@@ -28,22 +28,20 @@ class contextView(tk.Frame):
         self.grid_propagate(False)
         self.grid(row=0, column=2, rowspan=2, sticky=tk.N)
 
-        ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
-        self.contextLabelFrame = tk.LabelFrame(self, text="Agent Generator")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.contextLabelFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
-        self.createAgentButton = tk.Button(self.contextLabelFrame, text="Create Agent. . .", width=15,  command=self.tempFunc)
-        self.contextLabelFrame.columnconfigure(0, weight=1)
-        self.createAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
-        ### TEMPORARY FOR PLACING MULTIPLE ELEMENTS ###
+        # Create the simulation information and configuration access pane
+        self.createSimulationInformationInterface()
 
         # Create Manual Movement Interface
         self.createMovementInterface()
+
         # Create treeView
         self.createTreeViewNotebook()
         # self.createTreeView()
         # self.initScrolling()
+
+        # Configure the Context View Frame column and row weights for spacing elements
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
         # Saveable data
         self.contextViewState = contextViewState(self)
@@ -543,6 +541,16 @@ class contextView(tk.Frame):
 
     def deleteAgent(self):
         print("Agent deleted")
+
+    def createSimulationInformationInterface(self):
+        self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Information")
+        self.contextLabelFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.configureSimulationButton = tk.Button(self.contextLabelFrame, text="Simulation Details", width=20,  command=self.openSimulationInformationWindow)
+        self.contextLabelFrame.columnconfigure(0, weight=1)
+        self.configureSimulationButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
+
+    def openSimulationInformationWindow(self):
+        print("Simulation Info window opened!")
 
 class contextViewState:
     """

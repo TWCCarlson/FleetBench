@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import networkx as nx
+import modules.exceptions as RWSE
 from functools import partial
 
 class toolBar(tk.Frame):
@@ -53,7 +54,6 @@ class toolBar(tk.Frame):
         self.randomSeedFrame = tk.LabelFrame(self, text="RNG System Seed")
         self.randomSeedFrame.grid(row=2, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.createRandomSeedPane()
-
 
     def agentCreationPrompt(self):
         self.clearAgentCreationUI()
@@ -619,7 +619,6 @@ class toolBar(tk.Frame):
         else:
             return False
         
-
     def taskNameValidation(self, taskName):
         if len(taskName) < 1:
             # Disable the ability to create the task
@@ -730,14 +729,20 @@ class toolBar(tk.Frame):
         dropoffNode = (dropoffXPos, dropoffYPos)
         timeLimit = eval(self.timeLimitValue.get())
         taskName = self.taskNameValue.get()
-        self.taskManager.createNewTask(
-            taskName = taskName,
-            pickupPosition = pickupNode,
-            dropoffPosition = dropoffNode,
-            timeLimit = timeLimit
-        )
-        # Re-render the map state
-        self.mainView.mainCanvas.renderGraphState()
-        # Close the task generator
-        self.taskCreationPrompt()
-
+        try:
+            # Attempt to create the task
+            self.taskManager.createNewTask(
+                taskName = taskName,
+                pickupPosition = pickupNode,
+                dropoffPosition = dropoffNode,
+                timeLimit = timeLimit
+            )
+            # Re-render the map state
+            self.mainView.mainCanvas.renderGraphState()
+            # Close the task generator
+            self.taskCreationPrompt()
+        except nx.NetworkXNoPath:
+            # If the graph does not contain connections to allow path completion, display a warning 
+            tk.messagebox.showerror(title="Invalid Task Path", message=f"No path between {pickupNode} and {dropoffNode}!")
+        except RWSE.RWSTaskTimeLimitImpossible as exc:
+            tk.messagebox.showerror(title="Task time limit too low", message=f"Optimal pathing cannot complete the task in time. \nMinimum complete time: {exc.minTimeToComplete} \nTime limit: {exc.timeLimit}")
