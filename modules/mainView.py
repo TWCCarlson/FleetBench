@@ -584,6 +584,7 @@ class mainCanvas(tk.Canvas):
         self.sortCanvasLayers()
 
     def clearHighlight(self, highlightType=None):
+        # Unsafe function, doesn't check that the kind of removal requested actually exists, fails silently too
         # Remove all objects tagged "highlight" if a type isn't specified
         if highlightType == None:
             self.images = {}

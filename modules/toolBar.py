@@ -172,8 +172,8 @@ class toolBar(tk.Frame):
 
         # Save and edit buttons
         self.editAgentClassButton = tk.Button(self.agentFrame, 
-            command=self.placeholder, 
-            text="Edit Information",
+            command=self.cancelAgentCreation, 
+            text="Cancel",
             width=15,
             )
         self.confirmCreateAgentButton = tk.Button(self.agentFrame, 
@@ -328,8 +328,8 @@ class toolBar(tk.Frame):
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
 
-    def placeholder(self):
-        print(self.entryXValue.get() + ", " + self.entryYValue.get())
+    def cancelAgentCreation(self):
+        self.mainView.mainCanvas.clearHighlight('agentHighlight')
         self.agentCreationPrompt()
 
     def createAgent(self):
@@ -421,7 +421,7 @@ class toolBar(tk.Frame):
         self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
 
     def taskCreationPrompt(self):
-        print("Create task generator prompt")
+        print("Create task generator prompt")   
         self.clearTaskCreationUI()
         # Default button state values
         self.taskNameValid = False
@@ -579,8 +579,8 @@ class toolBar(tk.Frame):
             width=15,
             state=tk.DISABLED
             )
-        self.cancelTaskCreation = tk.Button(self.taskSpecsFrame,
-            command=self.placeholder,
+        self.cancelTaskCreationButton = tk.Button(self.taskSpecsFrame,
+            command=self.cancelTaskCreation,
             text="Cancel",
             width=15,
             )
@@ -607,7 +607,7 @@ class toolBar(tk.Frame):
         self.sep1.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.E, padx=4, pady=4)
         self.sep2.grid(row=2, column=1, rowspan=3, sticky=tk.N+tk.S+tk.W, pady=4)
         self.sep3.grid(row=5, column=0, columnspan=4, sticky=tk.W+tk.E, padx=4)
-        self.cancelTaskCreation.grid(row=6, column=0, columnspan=2, pady=4)
+        self.cancelTaskCreationButton.grid(row=6, column=0, columnspan=2, pady=4)
         self.createTaskButton.grid(row=6, column=2, columnspan=2, pady=4)
 
         # Containing Frame for random task generation
@@ -632,6 +632,11 @@ class toolBar(tk.Frame):
         # Render Widgets
         self.taskRandomGeneratorRespectNodeTypeButton.grid(row=0, column=0, pady=4)
         self.taskRandomGeneratorButton.grid(row=0, column=1, pady=4)
+
+    def cancelTaskCreation(self):
+        self.mainView.mainCanvas.clearHighlight('pickupHighlight')
+        self.mainView.mainCanvas.clearHighlight('dropoffHighlight')
+        self.taskCreationPrompt()
 
     def toggleRandomGeneratorRespectsNodeTypeState(self):
         self.taskGeneratorRespectsNodeTypes = not self.taskGeneratorRespectsNodeTypes
@@ -748,7 +753,7 @@ class toolBar(tk.Frame):
         print("Create task")
         # Remove previous highlights
         self.mainView.mainCanvas.clearHighlight()
-        
+
         # Create the task, place it
         pickupXPos = eval(self.pickupXPosValue.get())
         pickupYPos = eval(self.pickupYPosValue.get())
