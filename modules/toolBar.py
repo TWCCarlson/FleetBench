@@ -748,6 +748,7 @@ class toolBar(tk.Frame):
         print("Create task")
         # Remove previous highlights
         self.mainView.mainCanvas.clearHighlight()
+        
         # Create the task, place it
         pickupXPos = eval(self.pickupXPosValue.get())
         pickupYPos = eval(self.pickupYPosValue.get())
@@ -755,6 +756,19 @@ class toolBar(tk.Frame):
         dropoffXPos = eval(self.dropoffXPosValue.get())
         dropoffYPos = eval(self.dropoffYPosValue.get())
         dropoffNode = (dropoffXPos, dropoffYPos)
+
+        # Verify that nodes belong to proper type
+        if not self.parent.mapData.mapGraph.nodes()[str(pickupNode)]['type'] == 'pickup' or not self.parent.mapData.mapGraph.nodes()[str(dropoffNode)]['type'] == 'deposit':
+            # Both nodes are invalid
+            pickupNodeType = self.parent.mapData.mapGraph.nodes()[str(pickupNode)]['type']
+            dropoffNodeType = self.parent.mapData.mapGraph.nodes()[str(dropoffNode)]['type']
+            response = tk.messagebox.askokcancel(title="One or more node types mismatch", 
+                message=f"One or more nodes in this task do not match the standard type. \n\nChosen pickup node {pickupNode} is of type '{pickupNodeType}'\nChosen dropoff node {dropoffNode} is of type '{dropoffNodeType}'\n\nPress OK to initiate the task anyway, or cancel to change nodes.")
+            if response == True:
+                pass
+            else:
+                return
+
         timeLimit = eval(self.timeLimitValue.get())
         taskName = self.taskNameValue.get()
         try:

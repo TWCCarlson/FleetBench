@@ -1,4 +1,3 @@
-- Automatic Task generator
 - Agent resource tracking
 - Simulation definition menu
 - Dynamic text representing valid task/agent creation option
@@ -19,6 +18,8 @@
 - Pruning pass on functions
 - possibly refactor the larger classes like toolBar into smaller packages
 - Simulation setting for whether picking up an item takes a 'turn' or if just touching the node counts as dropping off or picking up an item
+- Unify usage of dropoff vs deposit
+- On task creation cancel, highlight is removed, and shouldn't be
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
