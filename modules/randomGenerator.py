@@ -6,8 +6,14 @@ class randomGenerator:
     """
     def __init__(self, parent):
         self.parent = parent
-
         self.randomGeneratorState = randomGeneratorState(self)
+        random.seed(self.randomGeneratorState.currentSeed)
+
+    def randomChoice(self, sequence):
+        # Make a choice out of a sequence at random using the seeded generator
+        # Be aware that when selecting a random node from a nodeView, the returned value is a string of the node name, not a tuple
+        choice = random.choice(sequence)
+        return choice
 
     def updateCurrentSeed(self, value):
         # Update generator's seed

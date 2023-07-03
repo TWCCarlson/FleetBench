@@ -221,7 +221,7 @@ class contextView(tk.Frame):
         for row in self.taskTreeView.get_children():
             self.taskTreeView.delete(row)
 
-        # Access the list of all agents and rebuild the treeView based on their states
+        # Access the list of all tasks and rebuild the treeView based on their states
         for task in self.parent.taskManager.taskList:
             taskData = self.parent.taskManager.taskList.get(task)
             taskNumID = taskData.numID

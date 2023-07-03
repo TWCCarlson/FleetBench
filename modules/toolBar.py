@@ -427,6 +427,7 @@ class toolBar(tk.Frame):
         self.taskNameValid = False
         self.validTaskLocations = False
         self.validTaskTimeLimit = False
+        self.taskGeneratorRespectsNodeTypes = True
         # Create a button to start UI creation
         self.createTaskButton = tk.Button(self.taskFrame, 
             command=self.taskCreationUI, text="Create Task. . .", width=15,
@@ -608,6 +609,33 @@ class toolBar(tk.Frame):
         self.sep3.grid(row=5, column=0, columnspan=4, sticky=tk.W+tk.E, padx=4)
         self.cancelTaskCreation.grid(row=6, column=0, columnspan=2, pady=4)
         self.createTaskButton.grid(row=6, column=2, columnspan=2, pady=4)
+
+        # Containing Frame for random task generation
+        self.taskRandomGeneratorFrame = tk.LabelFrame(self.taskFrame, text="Generate Random Task")
+        self.taskRandomGeneratorFrame.grid(row=1, column=0, sticky=tk.E+tk.W, padx=4, pady=4)
+
+        # UI Elements for generating random tasks
+        self.taskRandomGeneratorRespectNodeTypeButton = tk.Checkbutton(self.taskRandomGeneratorFrame, 
+            text="Respect Node Types",
+            onvalue=True,
+            offvalue=False,
+            command=self.toggleRandomGeneratorRespectsNodeTypeState
+        )
+        self.taskRandomGeneratorRespectNodeTypeButton.select() # Default state is True, make the visual match
+
+        # Button to trigger generation
+        self.taskRandomGeneratorButton = tk.Button(self.taskRandomGeneratorFrame, 
+            text="Gen. Randomized Task", 
+            command=lambda : self.parent.taskManager.generateRandomTask(self.taskGeneratorRespectsNodeTypes)
+        )
+
+        # Render Widgets
+        self.taskRandomGeneratorRespectNodeTypeButton.grid(row=0, column=0, pady=4)
+        self.taskRandomGeneratorButton.grid(row=0, column=1, pady=4)
+
+    def toggleRandomGeneratorRespectsNodeTypeState(self):
+        self.taskGeneratorRespectsNodeTypes = not self.taskGeneratorRespectsNodeTypes
+        # print(self.taskGeneratorRespectsNodeTypes)
 
     def validateNumericSpinbox(self, inputString):
         if inputString.isnumeric():

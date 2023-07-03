@@ -7,6 +7,18 @@
 - Remove magic numbers in general
 - Main canvas maybe needs numbering for nodes?
 - Add status and a corresponding image to agents and tasks in treeviews
+- Make task generator check the type of node for actually being a pickup/dropoff node
+- Create a toggle for validation that a tile is a pickup/dropoff node
+- Enable agent deletion
+- Fix agent creation cancel button
+- Enable task deletion
+- Fisk task creation cancel button
+- Track whether work needs to be saved, fix save button behavior when no session active
+- Agent position spinboxes ignore first typed character—fix
+- Re-examine how the rng seed value is set
+- Pruning pass on functions
+- possibly refactor the larger classes like toolBar into smaller packages
+- Simulation setting for whether picking up an item takes a 'turn' or if just touching the node counts as dropping off or picking up an item
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

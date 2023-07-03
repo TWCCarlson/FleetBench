@@ -1,6 +1,7 @@
 import networkx as nx
 import pprint
 import modules.exceptions as RWSE
+import random
 pp = pprint.PrettyPrinter(indent=4)
 
 class taskManager:
@@ -31,10 +32,11 @@ class taskManager:
         # The length of a dict is always 1 higher than the numeric id
         self.dictLength = len(self.taskList)
         try:
-            ID = kwargs.pop("ID")
+            taskName = kwargs.pop("taskName")
         except KeyError:
-            ID = self.dictLength
-        self.latestTask = taskClass(self, **kwargs, ID=ID, numID = self.dictLength)
+            taskName = self.dictLength
+        print(taskName)
+        self.latestTask = taskClass(self, **kwargs, taskName=taskName, numID=self.dictLength)
         self.taskList[self.dictLength] = self.latestTask
         print(self.taskList)
 
@@ -62,6 +64,46 @@ class taskManager:
             dataPackage[self.taskList[task].numID] = taskData
         pp.pprint(dataPackage)
         return dataPackage
+    
+    def generateRandomTask(self, respectNodeTypes):
+        print("Generating random task")
+        print(respectNodeTypes)
+
+        # Find a node from which the task can begin ('pickup')
+        if self.parent.toolBar.taskGeneratorRespectsNodeTypes == True:
+            # Restrict the node options to those which have the node 'type' attribute 'Pickup'
+            nodeOptions = [node for node, attributes in self.parent.mapData.mapGraph.nodes(data=True) if attributes['type']=='pickup']
+            randomPickupNode = self.parent.randomGenerator.randomChoice(nodeOptions)
+            print(f"Node chosen from pickup nodes only: {randomPickupNode}")
+        elif self.parent.toolBar.taskGeneratorRespectsNodeTypes == False:
+            # Choose any node
+            nodeOptions = list(self.parent.mapData.mapGraph.nodes())
+            randomPickupNode = self.parent.randomGenerator.randomChoice(nodeOptions)
+            print(f"Node chosen from all nodes ignoring type: {randomPickupNode}")
+        pickupNodeData = self.parent.mapData.mapGraph.nodes(data=True)[randomPickupNode]
+        pickupPosition = (pickupNodeData['pos']['X'], pickupNodeData['pos']['Y'])
+        print(pickupPosition)
+
+        # Find all nodes it can access that are valid task endpoints ('deposit')
+        if self.parent.toolBar.taskGeneratorRespectsNodeTypes == True:
+            # Restrict the node options to those which have the node 'type' attribute 'deposit'
+            nodeOptions = [node for node, attributes in self.parent.mapData.mapGraph.nodes(data=True) if attributes['type']=='deposit']
+            randomDropoffNode = self.parent.randomGenerator.randomChoice(nodeOptions)
+            print(f"Node chosen from dropoff nodes only: {randomDropoffNode}")
+        elif self.parent.toolBar.taskGeneratorRespectsNodeTypes == False:
+            # Choose any node
+            nodeOptions = list(self.parent.mapData.mapGraph.nodes())
+            randomDropoffNode = self.parent.randomGenerator.randomChoice(nodeOptions)
+            # Catch the case where dropoff could end up being the same as pickup
+            while randomDropoffNode == randomPickupNode:
+                randomDropoffNode = self.parent.randomGenerator.randomChoice(nodeOptions)
+            print(f"Node chosen from all nodes ignoring type: {randomDropoffNode}")
+        dropoffNodeData = self.parent.mapData.mapGraph.nodes(data=True)[randomDropoffNode]
+        dropoffPosition = (dropoffNodeData['pos']['X'], dropoffNodeData['pos']['Y'])
+        print(dropoffPosition)
+
+        # Create the new task with the randomly generated positions
+        self.createNewTask(pickupPosition=pickupPosition, dropoffPosition=dropoffPosition, timeLimit=0)
 
 class taskClass:
     """
@@ -72,8 +114,8 @@ class taskClass:
         print("Create Task")
         self.numID = kwargs.pop("numID")
         self.name = kwargs.pop("taskName")
-        self.pickupPosition = kwargs.pop("pickupPosition")
-        self.dropoffPosition = kwargs.pop("dropoffPosition")
+        self.pickupPosition = kwargs.pop("pickupPosition")      # Expects Tuple
+        self.dropoffPosition = kwargs.pop("dropoffPosition")    # Expects Tuple
         self.timeLimit = kwargs.pop("timeLimit")
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
