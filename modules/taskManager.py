@@ -60,6 +60,7 @@ class taskManager:
 
         # Redraw the agent treeview
         self.parent.contextView.updateTaskTreeView()
+        self.parent.mainView.mainCanvas.renderGraphState()
 
     def packageTaskData(self):
         """

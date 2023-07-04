@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import pprint
 import modules.tk_extensions as tk_e
+from sys import getsizeof
 pp = pprint.PrettyPrinter(indent=4)
 # import networkx as nx
 # import matplotlib.pyplot as plt
@@ -102,7 +103,7 @@ class contextView(tk.Frame):
         self.initAgentTreeScrolling()
 
         # Build right click context menu
-        self.agentMenu = tk_e.treeViewMenu(self)
+        self.agentMenu = tk_e.agentTreeViewMenu(self)
         self.agentMenu.add_entry(label="Delete", command=self.parent.agentManager.deleteAgent)
         
     def initAgentTreeScrolling(self):
@@ -207,8 +208,8 @@ class contextView(tk.Frame):
         self.initTaskTreeScrolling()
 
         # Build right click context menu
-        self.taskMenu = tk.Menu(self.parent, tearoff=0)
-        self.taskMenu.add_command(label="Test")
+        self.taskMenu = tk_e.taskTreeViewMenu(self)
+        self.taskMenu.add_entry(label="Delete", command=self.parent.taskManager.deleteTask)
 
     def initTaskTreeScrolling(self):
         # Create scrollbar components
@@ -286,7 +287,7 @@ class contextView(tk.Frame):
         self.handleTaskSelect(event)
 
         # Create the popup menu
-        self.taskMenu.tk_popup(event.x_root, event.y_root)
+        self.taskMenu.popup(event.x, event.y, event.x_root, event.y_root)
 
     def createTreeView(self):
         self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}
@@ -581,7 +582,6 @@ class contextView(tk.Frame):
         self.configureSimulationButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
 
     def openSimulationInformationWindow(self):
-        self.parent.taskManager.deleteTask(taskName="0")
         print("Simulation Info window opened!")
 
 class contextViewState:
