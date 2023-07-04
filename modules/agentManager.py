@@ -31,7 +31,7 @@ class agentManager:
         try:
             ID = kwargs.pop("ID")
         except KeyError:
-            ID = self.dictLength
+            ID = str(self.dictLength)
         # Create a new agent and add it to the manager's list
         self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent

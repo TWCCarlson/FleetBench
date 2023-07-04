@@ -34,13 +34,31 @@ class taskManager:
         try:
             taskName = kwargs.pop("taskName")
         except KeyError:
-            taskName = self.dictLength
+            taskName = str(self.dictLength)
         print(taskName)
         self.latestTask = taskClass(self, **kwargs, taskName=taskName, numID=self.dictLength)
         self.taskList[self.dictLength] = self.latestTask
         print(self.taskList)
 
         # Update the treeview
+        self.parent.contextView.updateTaskTreeView()
+
+    def deleteTask(self, taskName=None, taskID=None):
+        """
+            Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in th efirst place.
+        """
+        # If the internal ID of the agent is supplied, it can be deleted from the dict directly
+        print("Delete task")
+        print(taskName)
+        if taskID:
+            del self.taskList[taskID]
+
+        # If the human-readable name of the agent is supplied, the attribute needs to be searched for first
+        if taskName:
+            print([taskID for taskID in list(self.taskList) if self.taskList[taskID].name == taskName])
+            del self.taskList[[taskID for taskID in list(self.taskList) if self.taskList[taskID].name == taskName][0]]
+
+        # Redraw the agent treeview
         self.parent.contextView.updateTaskTreeView()
 
     def packageTaskData(self):
@@ -112,8 +130,8 @@ class taskClass:
     def __init__(self, parent, **kwargs):
         self.parent = parent
         print("Create Task")
-        self.numID = kwargs.pop("numID")
-        self.name = kwargs.pop("taskName")
+        self.numID = kwargs.pop("numID")    # Numeric ID, internal use only
+        self.name = kwargs.pop("taskName")  # Human-readable ID, name
         self.pickupPosition = kwargs.pop("pickupPosition")      # Expects Tuple
         self.dropoffPosition = kwargs.pop("dropoffPosition")    # Expects Tuple
         self.timeLimit = kwargs.pop("timeLimit")

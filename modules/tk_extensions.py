@@ -1,5 +1,4 @@
 import tkinter as tk
-from functools import partial
 
 class treeViewMenu(tk.Menu):
     """

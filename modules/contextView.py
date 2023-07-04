@@ -581,6 +581,7 @@ class contextView(tk.Frame):
         self.configureSimulationButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
 
     def openSimulationInformationWindow(self):
+        self.parent.taskManager.deleteTask(taskName="0")
         print("Simulation Info window opened!")
 
 class contextViewState:
