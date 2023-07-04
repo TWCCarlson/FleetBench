@@ -99,6 +99,10 @@ class contextView(tk.Frame):
 
         # Initialize scrolling
         self.initAgentTreeScrolling()
+
+        # Build right click context menu
+        self.agentMenu = tk.Menu(self.parent, tearoff=0)
+        self.agentMenu.add_command(label="Test")
         
     def initAgentTreeScrolling(self):
         # Create scrollbar components
@@ -147,14 +151,18 @@ class contextView(tk.Frame):
             )
 
     def bindAgentClicks(self, *event):
-        self.agentClickBindFunc = self.agentTreeView.bind('<<TreeviewSelect>>', self.handleAgentSelect)
+        self.agentClickBindFunc = self.agentTreeView.bind('<Button-1>', self.handleAgentSelect)
+        self.agentRClickBindFunc = self.agentTreeView.bind('<Button-3>', self.handleAgentRClick)
 
     def unbindAgentClicks(self, *event):
-        self.agentTreeView.unbind('<<TreeviewSelect>>', self.agentClickBindFunc)
+        self.agentTreeView.unbind('<Button-1>', self.agentClickBindFunc)
+        self.agentTreeView.unbind('<Button-3>', self.agentRClickBindFunc)
 
     def handleAgentSelect(self, event):
         # Identify the selected row
-        selectedRow = self.agentTreeView.focus()
+        selectedRow = self.agentTreeView.identify_row(event.y)
+        self.agentTreeView.selection_set(selectedRow)
+
         if selectedRow in self.agentTreeView.tag_has("agent"):
             # Clear existing highlights
             self.parent.mainView.mainCanvas.clearHighlight()
@@ -167,6 +175,13 @@ class contextView(tk.Frame):
             print(self.parent.agentManager.currentAgent)
             # Trigger movement button state validation
             self.validateMovementButtonStates()
+
+    def handleAgentRClick(self, event):
+        # Give focus to the right clicked element
+        self.handleAgentSelect(event)
+
+        # Create the popup menu
+        self.agentMenu.tk_popup(event.x_root, event.y_root)
 
     def createTaskTreeView(self):
         self.columnList = {'Name': 50, 'Pickup': 50, 'Dropoff': 50, 'Time Limit': 40}
@@ -189,6 +204,10 @@ class contextView(tk.Frame):
 
         # Initialize scrolling
         self.initTaskTreeScrolling()
+
+        # Build right click context menu
+        self.taskMenu = tk.Menu(self.parent, tearoff=0)
+        self.taskMenu.add_command(label="Test")
 
     def initTaskTreeScrolling(self):
         # Create scrollbar components
@@ -238,14 +257,18 @@ class contextView(tk.Frame):
             )
 
     def bindTaskClicks(self, *event):
-        self.taskClickBindFunc = self.taskTreeView.bind('<<TreeviewSelect>>', self.handleTaskSelect)
+        self.taskClickBindFunc = self.taskTreeView.bind('<Button-1>', self.handleTaskSelect)
+        self.taskRClickBindFunc = self.taskTreeView.bind('<Button-3>', self.handleTaskRClick)
 
     def unbindTaskClicks(self, *event):
-        self.taskTreeView.unbind('<<TreeviewSelect>>', self.taskClickBindFunc)
+        self.taskTreeView.unbind('<Button-1>', self.taskClickBindFunc)
+        self.taskTreeView.unbind('<Button-3>', self.taskRClickBindFunc)
 
     def handleTaskSelect(self, event):
         # Identify the selected row
-        selectedRow = self.taskTreeView.focus()
+        selectedRow = self.taskTreeView.identify_row(event.y)
+        self.taskTreeView.selection_set(selectedRow)
+        
         if selectedRow in self.taskTreeView.tag_has("task"):
             # Clear existing highlights
             self.parent.mainView.mainCanvas.clearHighlight()
@@ -256,6 +279,13 @@ class contextView(tk.Frame):
             # Update taskManager's currentTask prop
             self.parent.taskManager.currentTask = taskID
             print(self.parent.taskManager.currentTask)
+
+    def handleTaskRClick(self, event):
+        # Give focus to the right clicked element
+        self.handleTaskSelect(event)
+
+        # Create the popup menu
+        self.taskMenu.tk_popup(event.x_root, event.y_root)
 
     def createTreeView(self):
         self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}

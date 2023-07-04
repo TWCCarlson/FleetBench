@@ -20,6 +20,9 @@
 - Simulation setting for whether picking up an item takes a 'turn' or if just touching the node counts as dropping off or picking up an item
 - Unify usage of dropoff vs deposit
 - On task creation cancel, highlight is removed, and shouldn't be
+- stupid tkinter problem: can't execute self.parent.mainView.mainCanvas.clearHighlight() in contextview handleAgentSelect without deathloop
+- Unify usage of name/ID/numID
+
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
