@@ -37,6 +37,27 @@ class agentManager:
         self.agentList[self.dictLength] = self.latestAgent
         self.parent.contextView.updateAgentTreeView()
         self.parent.mapData.updateAgentLocations(self.agentList)
+        for key in self.agentList:
+            pp.pprint(vars(self.agentList[key]))
+
+    def deleteAgent(self, agentName=None, agentID=None):
+        """
+            Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in the first place.
+        """
+        # If the internal ID of the agent is supplied, it can be deleted from the dict directly
+        print("Delete agent")
+        print(agentName)
+        if agentID:
+            del self.agentList[agentID]
+
+        # If the human-readable name of the agent is supplied, the attribute needs to be searched for in the dict
+        if agentName:
+            del self.agentList[[agentID for agentID in list(self.agentList) if self.agentList[agentID].ID == agentName][0]]
+
+        # Redraw the agent treeview and the main canvas
+        self.parent.contextView.updateAgentTreeView()
+        self.parent.mapData.updateAgentLocations(self.agentList)
+        self.parent.mainView.mainCanvas.renderGraphState()
 
     def packageAgentData(self):
         """

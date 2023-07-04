@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import pprint
+import modules.tk_extensions as tk_e
 pp = pprint.PrettyPrinter(indent=4)
 # import networkx as nx
 # import matplotlib.pyplot as plt
@@ -101,8 +102,8 @@ class contextView(tk.Frame):
         self.initAgentTreeScrolling()
 
         # Build right click context menu
-        self.agentMenu = tk.Menu(self.parent, tearoff=0)
-        self.agentMenu.add_command(label="Test")
+        self.agentMenu = tk_e.treeViewMenu(self)
+        self.agentMenu.add_entry(label="Delete", command=self.parent.agentManager.deleteAgent)
         
     def initAgentTreeScrolling(self):
         # Create scrollbar components
@@ -181,7 +182,7 @@ class contextView(tk.Frame):
         self.handleAgentSelect(event)
 
         # Create the popup menu
-        self.agentMenu.tk_popup(event.x_root, event.y_root)
+        self.agentMenu.popup(event.x, event.y, event.x_root, event.y_root)
 
     def createTaskTreeView(self):
         self.columnList = {'Name': 50, 'Pickup': 50, 'Dropoff': 50, 'Time Limit': 40}
@@ -268,7 +269,7 @@ class contextView(tk.Frame):
         # Identify the selected row
         selectedRow = self.taskTreeView.identify_row(event.y)
         self.taskTreeView.selection_set(selectedRow)
-        
+
         if selectedRow in self.taskTreeView.tag_has("task"):
             # Clear existing highlights
             self.parent.mainView.mainCanvas.clearHighlight()
