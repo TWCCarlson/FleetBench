@@ -1,7 +1,7 @@
 import networkx as nx
 import pprint
 import modules.exceptions as RWSE
-import random
+import tkinter as tk
 pp = pprint.PrettyPrinter(indent=4)
 
 class taskManager:
@@ -48,15 +48,17 @@ class taskManager:
             Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in th efirst place.
         """
         # If the internal ID of the agent is supplied, it can be deleted from the dict directly
-        print("Delete task")
-        print(taskName)
-        if taskID:
-            del self.taskList[taskID]
-
+        if taskID: targetTask = taskID
         # If the human-readable name of the agent is supplied, the attribute needs to be searched for first
-        if taskName:
-            print([taskID for taskID in list(self.taskList) if self.taskList[taskID].name == taskName])
-            del self.taskList[[taskID for taskID in list(self.taskList) if self.taskList[taskID].name == taskName][0]]
+        if taskName: targetTask = [taskID for taskID in list(self.taskList) if self.taskList[taskID].name == taskName][0]
+
+        # First verify the user actually wants to do this
+        deletionPrompt = tk.messagebox.askokcancel(title="Are you sure?", message=f"You are about to delete task '{self.taskList[targetTask].name}' from the simulation. \n\nAre you sure?")
+
+        if deletionPrompt:
+            del self.taskList[targetTask]
+        else:
+            return
 
         # Redraw the agent treeview
         self.parent.contextView.updateTaskTreeView()

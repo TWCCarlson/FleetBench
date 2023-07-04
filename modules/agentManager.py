@@ -1,4 +1,5 @@
 import pprint
+import tkinter as tk
 pp = pprint.PrettyPrinter(indent=4)
 
 class agentManager:
@@ -45,14 +46,17 @@ class agentManager:
             Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in the first place.
         """
         # If the internal ID of the agent is supplied, it can be deleted from the dict directly
-        print("Delete agent")
-        print(agentName)
-        if agentID:
-            del self.agentList[agentID]
-
+        if agentID: targetAgent = agentID
         # If the human-readable name of the agent is supplied, the attribute needs to be searched for in the dict
-        if agentName:
-            del self.agentList[[agentID for agentID in list(self.agentList) if self.agentList[agentID].ID == agentName][0]]
+        if agentName: targetAgent = [agentID for agentID in list(self.agentList) if self.agentList[agentID].ID == agentName][0]
+
+        # First, verify the user actually wants to do this
+        deletionPrompt = tk.messagebox.askokcancel(title="Are you sure?", message=f"You are about to delete agent '{self.agentList[targetAgent].ID}' from the simulation. \n\nAre you sure?")
+
+        if deletionPrompt: 
+            del self.agentList[targetAgent]
+        else:
+            return
 
         # Redraw the agent treeview and the main canvas
         self.parent.contextView.updateAgentTreeView()
