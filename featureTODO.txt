@@ -6,9 +6,7 @@
 - Remove magic numbers in general
 - Main canvas maybe needs numbering for nodes?
 - Add status and a corresponding image to agents and tasks in treeviews
-- Create a toggle for validation that a tile is a pickup/dropoff node
 - Track whether work needs to be saved, fix save button behavior when no session active
-- Agent position spinboxes ignore first typed character—fix
 - Re-examine how the rng seed value is set
 - Pruning pass on functions
 - - When this is done, also implement logging for debug

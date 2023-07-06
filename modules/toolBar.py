@@ -96,7 +96,7 @@ class toolBar(tk.Frame):
         self.agentXPosValue = tk.StringVar()
         self.agentYPosValue = tk.StringVar()
         self.entryXLabel = tk.Label(self.agentDataFrame, text="X Position: ", width=8)
-        validateCommand = self.register(self.validateNumericSpinbox)
+        self.validateAgentPosCoord = self.register(self.validateNumericSpinbox)
         # self.validateAgentXPos = self.register(self.highlightTargetXPos) # Validation
         # self.commandAgentXPos = partial(self.highlightTargetXPos, 'X', 'agentHighlight', self.entryXValue, self.entryYValue)
         self.agentXPosValue.trace_add("write", lambda *args, b=self.agentXPosValue, c=self.agentYPosValue : self.highlightTargetTile('agentHighlight', b, c, *args))
@@ -108,7 +108,7 @@ class toolBar(tk.Frame):
             textvariable=self.agentXPosValue,
             # command=self.commandAgentXPos,   # Triggered on scrolling/spinbox button press
             validate='key',
-            validatecommand=validateCommand
+            validatecommand=(self.validateAgentPosCoord, '%P')
             # validatecommand=(self.validateAgentXPos, '%P', 'agentHighlight') # Triggered on typing
             )
         self.entryYLabel = tk.Label(self.agentDataFrame, text="Y Position: ", width=8)
@@ -123,7 +123,7 @@ class toolBar(tk.Frame):
             textvariable=self.agentYPosValue,
             # command=self.commandAgentYPos,   # Triggered on scrolling/spinbox button press
             validate='key',
-            validatecommand=validateCommand
+            validatecommand=(self.validateAgentPosCoord, '%P')
             # validatecommand=(self.validateAgentYPos, '%P', 'agentHighlight')  # Triggered on typing
         )
 
@@ -485,7 +485,7 @@ class toolBar(tk.Frame):
 
         self.pickupXPosValue = tk.StringVar()
         self.pickupYPosValue = tk.StringVar()
-        validateCommand = self.register(self.validateNumericSpinbox)
+        self.validateTaskPosCoord = self.register(self.validateNumericSpinbox)
         # self.commandPickupXPos = partial(self.highlightTargetXPos, 'X', 'pickupHighlight', self.pickupXPosValue, self.pickupYPosValue)
         # Use a trace on the stringvars to respond with a single function call any time the stringvar value is updated
         # This decouples validation from highlighting
@@ -498,7 +498,7 @@ class toolBar(tk.Frame):
             textvariable=self.pickupXPosValue,
             # command=self.commandPickupXPos,
             validate='key',
-            validatecommand=(validateCommand, '%P'),
+            validatecommand=(self.validateTaskPosCoord, '%P'),
             background='#6fe64e'
         )
         # self.validatePickupYPos = self.register(self.highlightTargetYPos)
@@ -512,7 +512,7 @@ class toolBar(tk.Frame):
             textvariable=self.pickupYPosValue,
             # command=self.commandPickupYPos,
             validate='key',
-            validatecommand=(validateCommand, '%P'),
+            validatecommand=(self.validateTaskPosCoord, '%P'),
             # validatecommand=(self.validatePickupYPos, '%P', 'pickupHighlight', self.pickupXPosValue, self.pickupYPosValue),
             background='#6fe64e'
         )
@@ -529,7 +529,7 @@ class toolBar(tk.Frame):
             textvariable=self.dropoffXPosValue,
             # command=self.commandDropoffXPos,
             validate='key',
-            validatecommand=(validateCommand, '%P'),
+            validatecommand=(self.validateTaskPosCoord, '%P'),
             # validatecommand=(self.validateDropoffXPos, '%P', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue),
             background='cyan'
         )
@@ -544,7 +544,7 @@ class toolBar(tk.Frame):
             textvariable=self.dropoffYPosValue,
             # command=self.commandDropoffYPos,
             validate='key',
-            validatecommand=(validateCommand, '%P'),
+            validatecommand=(self.validateTaskPosCoord, '%P'),
             # validatecommand=(self.validateDropoffYPos, '%P', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue),
             background='cyan'
         )
@@ -553,6 +553,7 @@ class toolBar(tk.Frame):
         self.timeLimitLabel = tk.Label(self.taskSpecsFrame, text="Time limit (Sim steps)")
         self.timeLimitLabel2 = tk.Label(self.taskSpecsFrame, text="0 means unlimited.")
         self.timeLimitValue = tk.StringVar()
+        self.validateTaskTimeLimit = self.register(self.validateNumericSpinbox)
         # self.validateTaskTimeLimit = self.register(self.taskTimeLimitValidation)
         # self.commandTaskTimeLimit = partial(self.taskTimeLimitValidation, 'T')
         self.timeLimitValue.trace_add("write", lambda *args, b=self.timeLimitValue : self.taskTimeLimitValidation(b, *args))
@@ -564,7 +565,7 @@ class toolBar(tk.Frame):
             textvariable=self.timeLimitValue,
             # command=self.commandTaskTimeLimit,
             validate='key',
-            validatecommand=(validateCommand, '%P')
+            validatecommand=(self.validateTaskTimeLimit, '%P')
         )
 
         # Section separators
