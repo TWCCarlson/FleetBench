@@ -1,5 +1,7 @@
 import pprint
 import tkinter as tk
+import logging
+import json
 pp = pprint.PrettyPrinter(indent=4)
 
 class agentManager:
@@ -8,13 +10,13 @@ class agentManager:
     """
     def __init__(self, parent):
         self.parent = parent
-        print("Agent Manager Class gen")
         # Generate agent class value options
         # Generate agent class definitions
         # Generate the agent class with inputs
         self.agentList = {}
         self.agentPositionList = {}
         self.currentAgent = []
+        logging.debug("Class 'agentManager' initialized.")
 
     def createNewAgent(self, **kwargs):
         """
@@ -27,41 +29,52 @@ class agentManager:
                 - className: The type of agent to be loaded
                     Each class may carry certain other properties
         """
+        logging.info(f"Received request for new agent.")
+        logging.debug(f"Requested agent settings: {kwargs}")
         # The length of a dict is always 1 higher than the numeric id
         self.dictLength = len(self.agentList)
         try:
             ID = kwargs.pop("ID")
         except KeyError:
             ID = str(self.dictLength)
+            logging.debug(f"Request does not contain an ID. Agent was automatically assigned ID '{ID}'")
         # Create a new agent and add it to the manager's list
         self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
+        logging.info(f"Agent added to the dict of agents.")
+        logging.debug(f"Simulation agent dict now reads:")
+        for key in self.agentList:
+            logging.debug(f" {vars(self.agentList[key])}")
         self.parent.contextView.updateAgentTreeView()
         self.parent.mapData.updateAgentLocations(self.agentList)
-        for key in self.agentList:
-            pp.pprint(vars(self.agentList[key]))
 
     def deleteAgent(self, agentName=None, agentID=None):
         """
             Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in the first place.
         """
+        logging.info("Received request to delete agent.")
         # If the internal ID of the agent is supplied, it can be deleted from the dict directly
         if agentID: targetAgent = agentID
         # If the human-readable name of the agent is supplied, the attribute needs to be searched for in the dict
         if agentName: targetAgent = [agentID for agentID in list(self.agentList) if self.agentList[agentID].ID == agentName][0]
+        targetAgentName = self.agentList[targetAgent].ID
+        logging.debug(f"Agent requested for deletion: '{targetAgentName}:{targetAgent}'")
 
         # First, verify the user actually wants to do this
         deletionPrompt = tk.messagebox.askokcancel(title="Are you sure?", message=f"You are about to delete agent '{self.agentList[targetAgent].ID}' from the simulation. \n\nAre you sure?")
 
-        if deletionPrompt: 
+        if deletionPrompt:
+            logging.debug(f"User verified deletion of agent: '{targetAgentName}:{targetAgent}'")
             del self.agentList[targetAgent]
         else:
+            logging.info("User cancelled deletion of agent.")
             return
-
+        
         # Redraw the agent treeview and the main canvas
         self.parent.contextView.updateAgentTreeView()
         self.parent.mapData.updateAgentLocations(self.agentList)
         self.parent.mainView.mainCanvas.renderGraphState()
+        logging.debug(f"Agent '{targetAgentName}:{targetAgent}' successfully deleted.")
 
     def packageAgentData(self):
         """
@@ -72,9 +85,9 @@ class agentManager:
                 - Agent orientation
                 - Agent Class
         """
+        logging.info("Received request to package 'agentManager' data.")
         dataPackage = {}
         for agent in self.agentList:
-            pp.pprint(self.agentList[agent])
             agentData = {
                 "ID": self.agentList[agent].ID,
                 "position": self.agentList[agent].position,
@@ -82,7 +95,8 @@ class agentManager:
                 "className": self.agentList[agent].className 
             }
             dataPackage[self.agentList[agent].numID] = agentData
-        pp.pprint(dataPackage)
+            logging.debug(f"Packaged agentData: {agentData}")
+        logging.info("Packaged all 'agentManager' data.")
         return dataPackage
 
 class agentClass:
@@ -91,7 +105,8 @@ class agentClass:
     """
     def __init__(self, parent, **kwargs):
         self.parent = parent
-        print("Create agent")
+        logging.info(f"New 'agentClass' instantiated.")
+        logging.debug(f"Agent settings: {kwargs}")
         self.numID = kwargs.pop("numID")# numeric ID, computer use only
         self.ID = kwargs.pop("ID")      # "human-readable" ID, name
         self.position = kwargs.pop("position")
@@ -130,10 +145,11 @@ class agentClass:
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
+        logging.debug(f"Agent '{self.ID}:{self.numID}' requests highlighting from 'mainCanvas'.")
         self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
 
     def moveUp(self):
-        print("Move agent up")
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move upwards.")
         # Set the target node to be north
         targetNode = (self.position[0], self.position[1]-1)
         self.position = targetNode
@@ -145,10 +161,12 @@ class agentClass:
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
         # Shift the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' moved upwards.")
         self.highlightAgent(multi=False)
         
+        
     def moveLeft(self):
-        print("Move agent left")
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move leftwards.")
         # Set the target node to be west
         targetNode = (self.position[0]-1, self.position[1])
         self.position = targetNode
@@ -160,10 +178,12 @@ class agentClass:
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
         # Shift the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' moved leftwards.")
         self.highlightAgent(multi=False)
+        
 
     def moveRight(self):
-        print("Move agent right")
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move rightwards.")
         # Set the target node to be east
         targetNode = (self.position[0]+1, self.position[1])
         self.position = targetNode
@@ -175,10 +195,12 @@ class agentClass:
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
         # Shift the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' moved rightwards.")
         self.highlightAgent(multi=False)
+        
 
     def moveDown(self):
-        print("Move agent down")
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move downwards.")
         # Set the target node to be south
         targetNode =  (self.position[0], self.position[1]+1)
         self.position = targetNode
@@ -190,9 +212,12 @@ class agentClass:
         # Update the movement buttons with the change
         self.parent.parent.contextView.validateMovementButtonStates()
         # Shift the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' moved downwards.")
         self.highlightAgent(multi=False)
+        
 
     def rotateCW(self):
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to rotate clockwise.")
         # Fetch current orientation as a number from the direction dictionary
         curOrient = self.dirDict[self.orientation]
         # Decrement for CW, modulo for wrapping
@@ -202,8 +227,13 @@ class agentClass:
         # Redraw the canvas to reflect the change
         self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Maintain the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' rotated clockwise.")
+        self.highlightAgent(multi=False)
+        
 
     def rotateCCW(self):
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to rotate counterclockwise.")
         # Fetch current orientation as a number from the direction dictionary
         curOrient = self.dirDict[self.orientation]
         # Decrement for CW, modulo for wrapping
@@ -213,3 +243,7 @@ class agentClass:
         # Redraw the canvas to reflect the change
         self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.mainView.mainCanvas.renderGraphState()
+        # Maintain the highlighting with the change
+        logging.debug(f"Agent '{self.ID}:{self.numID}' rotated counterclockwise.")
+        self.highlightAgent(multi=False)
+        

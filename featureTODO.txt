@@ -16,6 +16,7 @@
 - stupid tkinter problem: can't execute self.parent.mainView.mainCanvas.clearHighlight() in contextview handleAgentSelect without deathloop
 - Unify usage of name/ID/numID
 - Remove print statements, use highly verbose logging
+- Allow agent creation with an empty name field, agentmanager will autogenerate a name
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
