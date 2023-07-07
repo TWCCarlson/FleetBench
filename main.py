@@ -21,10 +21,12 @@ class App(tk.Tk):
 
         # Main window config
         tk.Tk.__init__(self)
+        logging.info("RWS Main Window Established.")
         self.title("Warehousing Simulator")
 
         # RNG Seeding class
         self.randomGenerator = randomGenerator(self)
+        logging.info("Class 'randomGenerator' instantiated.")
 
         # Map information class
         self.mapData = mapDataClass(self)
@@ -71,7 +73,8 @@ class App(tk.Tk):
         self.programLogger = logging.basicConfig(filename='example.log', 
             encoding='utf-8', 
             level=self.loglevel, 
-            format='[%(asctime)s.%(msecs)03d][%(levelname)-8s] Module \'%(module)s\': %(message)s', 
+            format='[{asctime}.{msecs:<3.0f}][{levelname:^8s}] Module \'{module}\': {message}',
+            style='{',
             filemode='w',
             datefmt='%X')
         logging.info("Robot Warehousing Simulator program started.")
