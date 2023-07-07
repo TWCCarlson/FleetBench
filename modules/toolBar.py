@@ -328,7 +328,8 @@ class toolBar(tk.Frame):
     def updateAgentCreationButton(self):
         # Checks if all preconditions for placing an agent on the graph are met
         # Input box validation is done with callbacks
-        if self.validAgentCreationNode and (self.agentNameValid or self.autogenerateNameValue):
+        print(f"Node: {self.validAgentCreationNode} Name: {self.agentNameValid}, Auto: {self.autogenerateNameValue.get()}")
+        if self.validAgentCreationNode and (self.agentNameValid or self.autogenerateNameValue.get()):
             self.confirmCreateAgentButton.config(state=tk.NORMAL)
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
