@@ -151,6 +151,10 @@ class toolBar(tk.Frame):
         self.agentOrientationS = tk.Radiobutton(self.agentOrientationFrame, text="S", variable=self.agentOrientation, value="S")
         self.agentOrientationE = tk.Radiobutton(self.agentOrientationFrame, text="E", variable=self.agentOrientation, value="E")
 
+        # Autogenerate name tickbox
+        self.autogenerateNameValue = tk.IntVar()
+        self.autogenerateNameTickbox = tk.Checkbutton(self.agentDataFrame, text="Autogenerate Name", variable=self.autogenerateNameValue, command=self.updateAgentCreationButton)
+
         # Render
         self.entryXLabel.grid(row=1, column=0, sticky=tk.E)
         self.entryYLabel.grid(row=2, column=0, sticky=tk.E)
@@ -165,6 +169,7 @@ class toolBar(tk.Frame):
         self.agentOrientationS.pack(side=tk.LEFT)
         self.agentOrientationE.pack(side=tk.LEFT)
         self.sep2.grid(row=3, columnspan=4)
+        self.autogenerateNameTickbox.grid(row=4, columnspan=4)
 
         # Separator
         self.sep1 = ttk.Separator(self.agentDataFrame, orient='vertical')
@@ -323,7 +328,7 @@ class toolBar(tk.Frame):
     def updateAgentCreationButton(self):
         # Checks if all preconditions for placing an agent on the graph are met
         # Input box validation is done with callbacks
-        if self.validAgentCreationNode and self.agentNameValid:
+        if self.validAgentCreationNode and (self.agentNameValid or self.autogenerateNameValue):
             self.confirmCreateAgentButton.config(state=tk.NORMAL)
         else:
             self.confirmCreateAgentButton.config(state=tk.DISABLED)
@@ -343,8 +348,15 @@ class toolBar(tk.Frame):
         yPos = eval(self.agentYPosValue.get())
         targetNode = (xPos, yPos)
         agentOrientation = self.agentOrientation.get()
+        if len(self.agentNameValue.get()) == 0 and self.autogenerateNameValue:
+            ID="ag" # Let agentManager generate a name, works because minimum manual name length is 3 characters
+        else:
+            ID=self.agentNameValue.get()
+        
+        print(f"New agent name: {ID}")
+
         self.agentManager.createNewAgent(
-            ID=self.agentNameValue.get(),
+            ID=ID,
             position=targetNode, 
             orientation=agentOrientation, 
             className=self.agentClass.get(),

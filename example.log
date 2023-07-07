@@ -1,35 +1,52 @@
-[10:31:33.454][  INFO  ] Module 'main': Robot Warehousing Simulator program started.
-[10:31:33.455][  INFO  ] Module 'main': Logging started with level: DEBUG
-[10:31:33.551][  INFO  ] Module 'main': RWS Main Window Established.
-[10:31:33.551][  INFO  ] Module 'main': Class 'randomGenerator' instantiated.
-[10:31:33.552][  INFO  ] Module 'main': Information class 'mapDataClass' instantiated.
-[10:31:33.553][ DEBUG  ] Module 'agentManager': Class 'agentManager' initialized.
-[10:31:33.553][  INFO  ] Module 'main': Information class 'agentManager' instantiated.
-[10:31:33.554][  INFO  ] Module 'main': Information class 'taskManager' instantiated.
-[10:31:33.555][  INFO  ] Module 'main': Component class 'appearanceValues' instantiated.
-[10:31:33.567][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[10:31:33.573][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[10:31:33.573][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[10:31:33.577][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[10:31:33.601][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[10:31:33.602][  INFO  ] Module 'main': Cross-class references built.
-[10:31:33.603][  INFO  ] Module 'main': RWS Application Window will render. Default mode: edit.
-[10:31:40.730][  INFO  ] Module 'agentManager': Received request for new agent.
-[10:31:40.730][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One'}
-[10:31:40.730][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
-[10:31:40.730][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (5, 6), 'orientation': 'N', 'className': 'One', 'ID': 'asdfg', 'numID': 0}
-[10:31:40.740][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
-[10:31:40.740][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
-[10:31:40.740][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001E8DA615370>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
-[10:31:40.820][  INFO  ] Module 'agentManager': Received request for new agent.
-[10:31:40.830][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One'}
-[10:31:40.830][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
-[10:31:40.830][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (3, 2), 'orientation': 'N', 'className': 'One', 'ID': 'fsdf', 'numID': 1}
-[10:31:40.840][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
-[10:31:40.840][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
-[10:31:40.840][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001E8DA615370>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
-[10:31:40.840][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001E8DA615370>, 'numID': 1, 'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
-[10:31:42.111][  INFO  ] Module 'agentManager': Received request to package 'agentManager' data.
-[10:31:42.112][ DEBUG  ] Module 'agentManager': Packaged agentData: {'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One'}
-[10:31:42.113][ DEBUG  ] Module 'agentManager': Packaged agentData: {'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One'}
-[10:31:42.120][  INFO  ] Module 'agentManager': Packaged all 'agentManager' data.
+[11:07:20.846][  INFO  ] Module 'main': Robot Warehousing Simulator program started.
+[11:07:20.847][  INFO  ] Module 'main': Logging started with level: DEBUG
+[11:07:20.964][  INFO  ] Module 'main': RWS Main Window Established.
+[11:07:20.964][  INFO  ] Module 'main': Class 'randomGenerator' instantiated.
+[11:07:20.965][  INFO  ] Module 'main': Information class 'mapDataClass' instantiated.
+[11:07:20.966][ DEBUG  ] Module 'agentManager': Class 'agentManager' initialized.
+[11:07:20.966][  INFO  ] Module 'main': Information class 'agentManager' instantiated.
+[11:07:20.967][  INFO  ] Module 'main': Information class 'taskManager' instantiated.
+[11:07:20.967][  INFO  ] Module 'main': Component class 'appearanceValues' instantiated.
+[11:07:20.982][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
+[11:07:20.990][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
+[11:07:20.991][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
+[11:07:20.995][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
+[11:07:21.190][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
+[11:07:21.220][  INFO  ] Module 'main': Cross-class references built.
+[11:07:21.230][  INFO  ] Module 'main': RWS Application Window will render. Default mode: edit.
+[11:07:36.505][  INFO  ] Module 'agentManager': Received request for new agent.
+[11:07:36.505][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One'}
+[11:07:36.505][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
+[11:07:36.505][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (5, 6), 'orientation': 'N', 'className': 'One', 'ID': 'asdfg', 'numID': 0}
+[11:07:36.505][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
+[11:07:36.506][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
+[11:07:36.506][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:36.507][  INFO  ] Module 'agentManager': Received request for new agent.
+[11:07:36.507][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One'}
+[11:07:36.507][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
+[11:07:36.507][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (3, 2), 'orientation': 'N', 'className': 'One', 'ID': 'fsdf', 'numID': 1}
+[11:07:36.507][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
+[11:07:36.508][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
+[11:07:36.508][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:36.508][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 1, 'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:42.842][  INFO  ] Module 'agentManager': Received request for new agent.
+[11:07:42.843][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'ag', 'position': (5, 3), 'orientation': 'N', 'className': 'One'}
+[11:07:42.843][ DEBUG  ] Module 'agentManager': Request does not contain an ID. Agent was automatically assigned ID '2'
+[11:07:42.843][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
+[11:07:42.843][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (5, 3), 'orientation': 'N', 'className': 'One', 'ID': '2', 'numID': 2}
+[11:07:42.843][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
+[11:07:42.843][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
+[11:07:42.844][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:42.844][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 1, 'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:42.844][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 2, 'ID': '2', 'position': (5, 3), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:52.466][  INFO  ] Module 'agentManager': Received request for new agent.
+[11:07:52.466][ DEBUG  ] Module 'agentManager': Requested agent settings: {'ID': 'ag', 'position': (4, 4), 'orientation': 'W', 'className': 'One'}
+[11:07:52.466][ DEBUG  ] Module 'agentManager': Request does not contain an ID. Agent was automatically assigned ID '3'
+[11:07:52.466][  INFO  ] Module 'agentManager': New 'agentClass' instantiated.
+[11:07:52.466][ DEBUG  ] Module 'agentManager': Agent settings: {'position': (4, 4), 'orientation': 'W', 'className': 'One', 'ID': '3', 'numID': 3}
+[11:07:52.467][  INFO  ] Module 'agentManager': Agent added to the dict of agents.
+[11:07:52.467][ DEBUG  ] Module 'agentManager': Simulation agent dict now reads:
+[11:07:52.467][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 0, 'ID': 'asdfg', 'position': (5, 6), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:52.467][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 1, 'ID': 'fsdf', 'position': (3, 2), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:52.467][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 2, 'ID': '2', 'position': (5, 3), 'orientation': 'N', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
+[11:07:52.467][ DEBUG  ] Module 'agentManager':  {'parent': <modules.agentManager.agentManager object at 0x000001667FF62550>, 'numID': 3, 'ID': '3', 'position': (4, 4), 'orientation': 'W', 'className': 'One', 'dirDict': {'N': 0, 'W': 1, 'S': 2, 'E': 3}}
