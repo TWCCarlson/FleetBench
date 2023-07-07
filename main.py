@@ -12,9 +12,13 @@ from modules.simulationManager import simulationConfigManager
 from modules.simulationWindow import simulationWindow
 from modules.simulationProcess import simulationProcess
 from config.appearanceValues import appearanceValues
+import logging
 
 class App(tk.Tk):
     def __init__(self):
+        # Begin process logging
+        self.initLogging()
+
         # Main window config
         tk.Tk.__init__(self)
         self.title("Warehousing Simulator")
@@ -53,6 +57,25 @@ class App(tk.Tk):
 
         # Render the app
         self.mainloop()
+
+    def initLogging(self):
+        self.loglevel = logging.DEBUG
+        self.loglevelReference = {
+            0 :"NOTSET",
+            10:"DEBUG",
+            20:"INFO",
+            30:"WARNING",
+            40:"ERROR",
+            50:"CRITICAL"
+        }
+        self.programLogger = logging.basicConfig(filename='example.log', 
+            encoding='utf-8', 
+            level=self.loglevel, 
+            format='[%(asctime)s.%(msecs)03d][%(levelname)-8s] Module \'%(module)s\': %(message)s', 
+            filemode='w',
+            datefmt='%X')
+        logging.info("Robot Warehousing Simulator program started.")
+        logging.info(f"Logging started with level: {self.loglevelReference[self.loglevel]}")
 
     def simulationConfiguration(self):
         self.simulationConfigWindow = simulationConfigManager(self)
