@@ -132,7 +132,8 @@ class mapDataClass:
         self.mapLoadedBool = True
         self.parent.toolBar.enableAgentCreation()
         self.parent.toolBar.enableTaskCreation()
-        
+        self.parent.contextView.enableSimulationConfiguration()
+
         # for node in self.mapGraph:
         #     pp.pprint(eval(node))
 

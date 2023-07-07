@@ -15,7 +15,7 @@
 - Unify usage of dropoff vs deposit
 - stupid tkinter problem: can't execute self.parent.mainView.mainCanvas.clearHighlight() in contextview handleAgentSelect without deathloop
 - Unify usage of name/ID/numID
-
+- Remove print statements, use highly verbose logging
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
@@ -44,4 +44,32 @@ Graph structure:
         'agent': <Agent Object>
         'task': <Task Object>
     }
-    maybe include 'reservations': {AgentID: weight/how many turns/etc}
+
+
+
+
+Does simulation deserve its own window?
+ + Clean interface
+ + Fresh datastructure
+ + Decomplicates the programming slightly
+ - Probably need a new canvas setup, takes time to create
+ - Diminshes the usefulness of the main screen
+ - + Relegate main screen to an 'edit screen'? It can still render and modify things. Could be useful for adjusting a simulation.
+ + Frees up UI space to render more, and more relevant information
+ - Needs new graphics, takes time
+ - All methods needed are already written, tbh, wastes all that effort
+ - + But they are sort of convoluted and may slow down simulation
+
+ All the cons seem to be "takes more time"
+ The pros seem to be genuinely useful
+
+ Decision: make a new window
+
+ Use a simplified canvas UI (same techniques, simpler graphics)
+ Use the same graph datastrcuture (it's pretty small in memory, but keep tabs on other ways to store it)
+ Overlays for planned movements and how the algorithm is thinking (thus depends on which algo is selected for the simulation)
+ Live algorithm switching? (which one is better for this instance?)
+ Statistics and reporting should get their own window, probably
+ Live agent/task representation? Green for task done, yellow for agent busy, etc.?
+ Ability to export the current "situation" directly back to the main program window for editing (ship over the graph and task/agent lists)
+ Replay mode needs buttons and a way to scroll around the timeline

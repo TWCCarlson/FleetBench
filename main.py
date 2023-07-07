@@ -8,7 +8,9 @@ from modules.infoBox import infoBox
 from modules.agentManager import agentManager
 from modules.taskManager import taskManager
 from modules.randomGenerator import randomGenerator
-from modules.simulationManager import simulationManager
+from modules.simulationManager import simulationConfigManager
+from modules.simulationWindow import simulationWindow
+from modules.simulationProcess import simulationProcess
 from config.appearanceValues import appearanceValues
 
 class App(tk.Tk):
@@ -27,7 +29,7 @@ class App(tk.Tk):
         # Task information manager class
         self.taskManager = taskManager(self)
         # Simulation configuration information class
-        self.simulationManager = simulationManager(self)
+        # self.simulationManager = simulationConfigManager(self)
 
         # Window components
         # Appearance
@@ -51,4 +53,14 @@ class App(tk.Tk):
 
         # Render the app
         self.mainloop()
+
+    def simulationConfiguration(self):
+        self.simulationConfigWindow = simulationConfigManager(self)
+
+    def launchSimulator(self):
+        print("Simulation Launched!")
+        self.simulationConfigWindow.grab_release()
+        self.simulationProcess = simulationProcess(self)
+        self.simulationWindow = simulationWindow(self)
+
 app = App()

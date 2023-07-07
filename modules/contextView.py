@@ -577,12 +577,19 @@ class contextView(tk.Frame):
     def createSimulationInformationInterface(self):
         self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Information")
         self.contextLabelFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
-        self.configureSimulationButton = tk.Button(self.contextLabelFrame, text="Simulation Details", width=20,  command=self.openSimulationInformationWindow)
+        self.configureSimulationButton = tk.Button(self.contextLabelFrame, text="Simulation Details", width=20,  command=self.openSimulationInformationWindow, state=tk.DISABLED)
         self.contextLabelFrame.columnconfigure(0, weight=1)
         self.configureSimulationButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
 
+        if self.parent.mapData.mapLoadedBool == True:
+            self.configureSimulationButton.config(state=tk.NORMAL)
+
+    def enableSimulationConfiguration(self):
+        self.configureSimulationButton.config(state=tk.NORMAL)
+
     def openSimulationInformationWindow(self):
         print("Simulation Info window opened!")
+        self.parent.simulationConfiguration()
 
 class contextViewState:
     """
