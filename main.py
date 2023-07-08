@@ -99,7 +99,7 @@ def initLogging():
     programLogger = logging.basicConfig(filename='example.log', 
         encoding='utf-8', 
         level=logLevel, 
-        format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}] \'{module}\'[{lineno}]:({funcName}) {message}',
+        format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}][\'{module}\'][{lineno}:{funcName}] {message}',
         style='{',
         filemode='w',
         datefmt='%X')
