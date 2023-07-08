@@ -1,20 +1,22 @@
-[01:25:18.488][  INFO  ] Module 'main': Robot Warehousing Simulator program started.
-[01:25:18.490][ TRACE  ] Module 'main': Test
-[01:25:18.490][  INFO  ] Module 'main': Logging started with level: TRACE
-[01:25:18.587][  INFO  ] Module 'main': RWS Main Window Established.
-[01:25:18.587][  INFO  ] Module 'randomGenerator': Class 'randomGeneratorState' initialized, with default seed 123456789.
-[01:25:18.588][ DEBUG  ] Module 'randomGenerator': Random generator engine seeded with 123456789.
-[01:25:18.588][  INFO  ] Module 'randomGenerator': Class 'randomGenerator' initialized.
-[01:25:18.588][  INFO  ] Module 'main': Class 'randomGenerator' instantiated.
-[01:25:18.589][  INFO  ] Module 'main': Information class 'mapDataClass' instantiated.
-[01:25:18.589][ DEBUG  ] Module 'agentManager': Class 'agentManager' initialized.
-[01:25:18.589][  INFO  ] Module 'main': Information class 'agentManager' instantiated.
-[01:25:18.590][  INFO  ] Module 'main': Information class 'taskManager' instantiated.
-[01:25:18.590][  INFO  ] Module 'main': Component class 'appearanceValues' instantiated.
-[01:25:18.603][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[01:25:18.609][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[01:25:18.610][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[01:25:18.612][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[01:25:18.634][  INFO  ] Module 'main': Component class 'mapDataClass' instantiated.
-[01:25:18.637][  INFO  ] Module 'main': Cross-class references built.
-[01:25:18.637][  INFO  ] Module 'main': RWS Application Window will render. Default mode: edit.
+[05:18:23.650][  INFO  ] 'main'[106]:(initLogging) Logging started with level: TRACE
+[05:18:23.660][  INFO  ] 'main'[19]:(__init__) Robot Warehousing Simulator program started.
+[05:18:23.250][  INFO  ] 'main'[22]:(__init__) RWS Main Window Established.
+[05:18:23.251][  INFO  ] 'randomGenerator'[47]:(__init__) Class 'randomGeneratorState' initialized, with default seed 123456789.
+[05:18:23.251][ DEBUG  ] 'randomGenerator'[12]:(__init__) Random generator engine seeded with 123456789.
+[05:18:23.251][  INFO  ] 'randomGenerator'[13]:(__init__) Class 'randomGenerator' initialized.
+[05:18:23.251][  INFO  ] 'main'[27]:(__init__) Class 'randomGenerator' instantiated successfully.
+[05:18:23.252][  INFO  ] 'main'[31]:(__init__) Information class 'mapDataClass' instantiated successfully.
+[05:18:23.252][ DEBUG  ] 'agentManager'[19]:(__init__) Class 'agentManager' initialized.
+[05:18:23.252][  INFO  ] 'main'[34]:(__init__) Information class 'agentManager' instantiated successfully.
+[05:18:23.253][  INFO  ] 'main'[37]:(__init__) Information class 'taskManager' instantiated successfully.
+[05:18:23.254][  INFO  ] 'main'[42]:(__init__) Component class 'appearanceValues' instantiated successfully.
+[05:18:23.268][  INFO  ] 'main'[45]:(__init__) Component class 'mapDataClass' instantiated successfully.
+[05:18:23.276][  INFO  ] 'main'[48]:(__init__) Component class 'mapDataClass' instantiated successfully.
+[05:18:23.276][  INFO  ] 'main'[51]:(__init__) Component class 'mapDataClass' instantiated successfully.
+[05:18:23.280][  INFO  ] 'main'[54]:(__init__) Component class 'mapDataClass' instantiated successfully.
+[05:18:23.316][  INFO  ] 'main'[57]:(__init__) Component class 'mapDataClass' instantiated successfully.
+[05:18:23.319][  INFO  ] 'main'[64]:(__init__) Cross-class references built successfully.
+[05:18:23.320][  INFO  ] 'main'[67]:(__init__) RWS Application Window will render. Default mode: edit.
+[05:19:07.220][ DEBUG  ] 'randomGenerator'[26]:(updateCurrentSeed) Request received to update the seed value for 'randomGenerator' to: 1234
+[05:19:07.220][  INFO  ] 'randomGenerator'[29]:(updateCurrentSeed) 'randomGenerator' seed value updated.
+[05:19:07.220][ DEBUG  ] 'randomGenerator'[30]:(updateCurrentSeed) New value: 1234
