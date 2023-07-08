@@ -1,19 +1,22 @@
-[06:38:13.992][  INFO  ]['main'][106:initLogging] Logging started with level: TRACE
-[06:38:13.992][  INFO  ]['main'][19:__init__] Robot Warehousing Simulator program started.
-[06:38:14.840][  INFO  ]['main'][22:__init__] RWS Main Window Established.
-[06:38:14.850][  INFO  ]['randomGenerator'][47:__init__] Class 'randomGeneratorState' initialized, with default seed 123456789.
-[06:38:14.850][ DEBUG  ]['randomGenerator'][12:__init__] Random generator engine seeded with 123456789.
-[06:38:14.850][  INFO  ]['randomGenerator'][13:__init__] Class 'randomGenerator' initialized.
-[06:38:14.850][  INFO  ]['main'][27:__init__] Class 'randomGenerator' instantiated successfully.
-[06:38:14.860][  INFO  ]['main'][31:__init__] Information class 'mapDataClass' instantiated successfully.
-[06:38:14.860][ DEBUG  ]['agentManager'][19:__init__] Class 'agentManager' initialized.
-[06:38:14.860][  INFO  ]['main'][34:__init__] Information class 'agentManager' instantiated successfully.
-[06:38:14.870][  INFO  ]['main'][37:__init__] Information class 'taskManager' instantiated successfully.
-[06:38:14.870][  INFO  ]['main'][42:__init__] Component class 'appearanceValues' instantiated successfully.
-[06:38:14.990][  INFO  ]['main'][45:__init__] Component class 'mapDataClass' instantiated successfully.
-[06:38:14.104][  INFO  ]['main'][48:__init__] Component class 'mapDataClass' instantiated successfully.
-[06:38:14.104][  INFO  ]['main'][51:__init__] Component class 'mapDataClass' instantiated successfully.
-[06:38:14.107][  INFO  ]['main'][54:__init__] Component class 'mapDataClass' instantiated successfully.
-[06:38:14.131][  INFO  ]['main'][57:__init__] Component class 'mapDataClass' instantiated successfully.
-[06:38:14.133][  INFO  ]['main'][64:__init__] Cross-class references built successfully.
-[06:38:14.133][  INFO  ]['main'][67:__init__] RWS Application Window will render. Default mode: edit.
+[07:13:18.250][  INFO  ]['main'][107:initLogging] Logging started with level: TRACE
+[07:13:18.252][  INFO  ]['main'][19:__init__] Robot Warehousing Simulator program started.
+[07:13:18.432][  INFO  ]['main'][22:__init__] RWS Main Window Established.
+[07:13:18.432][ TRACE  ]['main'][155:logToRoot] Attempting to create 'randomGenerator' class . . .
+[07:13:18.432][ TRACE  ]['main'][155:logToRoot] Invoked by function '__init__'
+[07:13:18.433][ DEBUG  ]['randomGenerator'][11:__init__] Invoked by function '__init__'
+[07:13:18.434][  INFO  ]['randomGenerator'][51:__init__] Class 'randomGeneratorState' initialized, with default seed 123456789.
+[07:13:18.434][ DEBUG  ]['randomGenerator'][16:__init__] Random generator engine seeded with 123456789.
+[07:13:18.434][  INFO  ]['randomGenerator'][17:__init__] Class 'randomGenerator' initialized.
+[07:13:18.434][  INFO  ]['main'][28:__init__] Class 'randomGenerator' instantiated successfully.
+[07:13:18.435][  INFO  ]['main'][32:__init__] Information class 'mapDataClass' instantiated successfully.
+[07:13:18.436][ DEBUG  ]['agentManager'][19:__init__] Class 'agentManager' initialized.
+[07:13:18.436][  INFO  ]['main'][35:__init__] Information class 'agentManager' instantiated successfully.
+[07:13:18.436][  INFO  ]['main'][38:__init__] Information class 'taskManager' instantiated successfully.
+[07:13:18.437][  INFO  ]['main'][43:__init__] Component class 'appearanceValues' instantiated successfully.
+[07:13:18.453][  INFO  ]['main'][46:__init__] Component class 'mapDataClass' instantiated successfully.
+[07:13:18.459][  INFO  ]['main'][49:__init__] Component class 'mapDataClass' instantiated successfully.
+[07:13:18.460][  INFO  ]['main'][52:__init__] Component class 'mapDataClass' instantiated successfully.
+[07:13:18.465][  INFO  ]['main'][55:__init__] Component class 'mapDataClass' instantiated successfully.
+[07:13:18.502][  INFO  ]['main'][58:__init__] Component class 'mapDataClass' instantiated successfully.
+[07:13:18.504][  INFO  ]['main'][65:__init__] Cross-class references built successfully.
+[07:13:18.504][  INFO  ]['main'][68:__init__] RWS Application Window will render. Default mode: edit.

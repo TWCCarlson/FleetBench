@@ -1,11 +1,15 @@
 import random
 import logging
+import sys
 
 class randomGenerator:
     """
         Class which stores and uses a seeded RNG system to enable repeatable decisionmaking by agents
     """
     def __init__(self, parent):
+        logging.trace(f"Invoked by function '{sys._getframe(1).f_code.co_name}'")
+        logging.debug(f"Invoked by function '{sys._getframe(1).f_code.co_name}'")
+        print(f"{sys._getframe(1).f_code.co_firstlineno}")
         self.parent = parent
         self.randomGeneratorState = randomGeneratorState(self)
         random.seed(self.randomGeneratorState.currentSeed)

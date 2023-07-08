@@ -23,6 +23,7 @@ class App(tk.Tk):
         self.title("Warehousing Simulator")
 
         # RNG Seeding class
+        logging.debug("Attempting to create 'randomGenerator' class . . .")
         self.randomGenerator = randomGenerator(self)
         logging.info("Class 'randomGenerator' instantiated successfully.")
 
@@ -81,22 +82,21 @@ class App(tk.Tk):
 def initLogging():
     loglevelReference = {
         0 :"NOTSET",
-        5 :"TRACE",
         10:"DEBUG",
         20:"INFO",
         30:"WARNING",
         40:"ERROR",
         50:"CRITICAL"
     }
-    addLoggingLevel('TRACE', logging.DEBUG - 5)
-    logLevel = logging.TRACE
-    # self.logLevel = logging.DEBUG
-    # self.logLevel = logging.INFO
-    # self.logLevel = logging.WARNING
-    # self.logLevel = logging.ERROR
-    # self.logLevel = logging.CRITICAL
+    # addLoggingLevel('TRACE', logging.DEBUG - 5)
+    # logLevel = logging.TRACE
+    logLevel = logging.DEBUG
+    # logLevel = logging.INFO
+    # logLevel = logging.WARNING
+    # logLevel = logging.ERROR
+    # logLevel = logging.CRITICAL
 
-    programLogger = logging.basicConfig(filename='example.log', 
+    logging.basicConfig(filename='example.log', 
         encoding='utf-8', 
         level=logLevel, 
         format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}][\'{module}\'][{lineno}:{funcName}] {message}',
