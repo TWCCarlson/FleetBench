@@ -151,7 +151,7 @@ class agentClass:
         self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
 
     def moveUp(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move upwards.")
+        logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' upwards.")
         # Set the target node to be north
         targetNode = (self.position[0], self.position[1]-1)
         self.position = targetNode
@@ -168,7 +168,7 @@ class agentClass:
         
         
     def moveLeft(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move leftwards.")
+        logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' leftwards.")
         # Set the target node to be west
         targetNode = (self.position[0]-1, self.position[1])
         self.position = targetNode
@@ -185,7 +185,7 @@ class agentClass:
         
 
     def moveRight(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move rightwards.")
+        logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' rightwards.")
         # Set the target node to be east
         targetNode = (self.position[0]+1, self.position[1])
         self.position = targetNode
@@ -202,7 +202,7 @@ class agentClass:
         
 
     def moveDown(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to move downwards.")
+        logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' downwards.")
         # Set the target node to be south
         targetNode =  (self.position[0], self.position[1]+1)
         self.position = targetNode
@@ -219,7 +219,7 @@ class agentClass:
         
 
     def rotateCW(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to rotate clockwise.")
+        logging.debug(f"User tried to rotate agent '{self.ID}:{self.numID}' clockwise.")
         # Fetch current orientation as a number from the direction dictionary
         curOrient = self.dirDict[self.orientation]
         # Decrement for CW, modulo for wrapping
@@ -235,7 +235,7 @@ class agentClass:
         
 
     def rotateCCW(self):
-        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to rotate counterclockwise.")
+        logging.debug(f"User tried to rotate agent '{self.ID}:{self.numID}' counter-clockwise.")
         # Fetch current orientation as a number from the direction dictionary
         curOrient = self.dirDict[self.orientation]
         # Decrement for CW, modulo for wrapping

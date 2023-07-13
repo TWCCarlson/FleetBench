@@ -5,16 +5,19 @@ from functools import partial
 from PIL import Image, ImageDraw, ImageTk
 pp = pprint.PrettyPrinter(indent=4)
 import networkx as nx
+import logging
 
 class mainView(tk.Frame):
     """
         The primary view of the warehouse, drawn with tk.Canvas layers and organized into a reliable stack
     """
     def __init__(self, parent):
+        logging.debug("Main View Canvas UI initializing . . .")
         self.parent = parent
 
         # Map data reference
         self.mapData = self.parent.mapData.mapGraph
+        logging.debug("Map data reference built.")
 
         # Fetch styling
         self.appearanceValues = self.parent.appearance
@@ -22,6 +25,7 @@ class mainView(tk.Frame):
         frameWidth = self.appearanceValues.mainViewWidth
         frameBorderWidth = self.appearanceValues.frameBorderWidth
         frameRelief = self.appearanceValues.frameRelief
+        logging.debug("Style information retrieved.")
 
         # Declare frame
         tk.Frame.__init__(self, parent, 
@@ -29,55 +33,68 @@ class mainView(tk.Frame):
             width=frameWidth, 
             borderwidth=frameBorderWidth, 
             relief=frameRelief)
+        logging.debug("Containing frame settings constructed.")
 
         # Render frame within the app window context
         self.grid_propagate(False)
         self.grid(row=1, column=1, sticky=tk.N)
+        logging.debug("Containing frame rendered.")
         
         # Build the canvas containing the display information
+        logging.debug("Building the canvas . . .")
         self.mainCanvas = mainCanvas(self, self.appearanceValues)
 
         # Initialize scrolling behavior
         self.initScrolling()
+        logging.debug("Main Canvas UI element finished building.")
 
     def buildReferences(self):
         # Build references to classes declared after this one
         self.contextView = self.parent.contextView
         self.agentManager = self.parent.agentManager
+        logging.debug("References built.")
 
     def initScrolling(self):
         # Create scrollbar components
         self.ybar = tk.Scrollbar(self, orient="vertical")
         self.xbar = tk.Scrollbar(self, orient="horizontal")
+        logging.debug("Scrollbar component classes built.")
 
         # Bind the scrollbars to the canvas
         self.ybar["command"] = self.mainCanvas.yview
         self.xbar["command"] = self.mainCanvas.xview
+        logging.debug("Bound scrollbars to canvas viewspace.")
 
         # Adjust positioning, size relative to grid
         self.ybar.grid(column=1, row=0, sticky="ns")
         self.xbar.grid(column=0, row=1, sticky="ew")
+        logging.debug("Rendered canvas scrollbars.")
 
         # Make canvas update scrollbar position to match its view
         self.mainCanvas["yscrollcommand"] = self.ybar.set
         self.mainCanvas["xscrollcommand"] = self.xbar.set
+        logging.debug("Main canvas scroll commands bound to scrollbars.")
 
         # Bind mousewheel to interact with the scrollbars
         # Only do this when the cursor is inside this frame
         self.bind('<Enter>', self.bindMousewheel)
         self.bind('<Leave>', self.unbindMousewheel)
+        logging.debug("Mouse input capture bounds established for Main Canvas.")
 
         # Reset the view
         self.mainCanvas.xview_moveto("0.0")
         self.mainCanvas.yview_moveto("0.0")
+        logging.debug("Scrollbar, Canvas position default set.")
 
     def bindMousewheel(self, event):
         self.bind_all("<MouseWheel>", self.mousewheelAction)
         self.bind_all("<Shift-MouseWheel>", self.shiftMousewheelAction)
+        logging.debug("Bound mousewheel inputs to scrollbar.")
 
     def unbindMousewheel(self, event):
         self.unbind_all("<MouseWheel>")
         self.unbind_all("<Shift-MouseWheel>")
+        logging.debug("Released mousewheel input bindings due to cursor leaving the canvas.")
 
     def mousewheelAction(self, event):
         self.mainCanvas.yview_scroll(int(-1*(event.delta/120)), "units")
@@ -91,6 +108,8 @@ class mainCanvas(tk.Canvas):
         Probably needs organizational refactor
     """
     def __init__(self, parent, appearanceValues):
+        logging.info("Initializing the main canvas class . . .")
+
         tk.Canvas.__init__(self, parent)
         self.parent = parent
         self.appearanceValues = appearanceValues
@@ -99,12 +118,14 @@ class mainCanvas(tk.Canvas):
         self["height"] = self.appearanceValues.canvasDefaultHeight
         self["scrollregion"] = (0,0,self["width"], self["height"])
         self.canvasTileSize = self.appearanceValues.canvasTileSize
+        logging.info("Main Canvas UI element style settings built.")
 
         # Render canvas within the mainView frame context
         # Give it size priority to fill the whole frame
         self.parent.columnconfigure(0, weight=1)
         self.parent.rowconfigure(0, weight=1)
         self.grid(column=0, row=0, sticky=tk.N+tk.S+tk.E+tk.W)
+        logging.info("Rendered Main Canvas in main app.")
 
         # Container for highlighted tiles
         self.images = {}
@@ -117,6 +138,7 @@ class mainCanvas(tk.Canvas):
         # self.create_rectangle(0, 0, self["height"], self["width"], fill="red")
         # +1 for the extra line, +1 for making range inclusive
         # Horizontal Lines
+        logging.debug("Rendering Main Canvas gridlines . . .")
         for i in range(math.floor(int(self["height"])/self.canvasTileSize)+1):
             self.create_line(0, i*self.canvasTileSize, self["width"], i*self.canvasTileSize, fill=self.appearanceValues.canvasGridlineColor)
         # Vertical lines
@@ -127,11 +149,12 @@ class mainCanvas(tk.Canvas):
         tileSize = self.appearanceValues.canvasTileSize
         # In: the tile count value for location of the coord
         # Out: the canvas pixel value for location of the coord
-        coord = coord * tileSize + 0.5 * tileSize
-        return coord
+        canvasCoord = coord * tileSize + 0.5 * tileSize
+        logging.debug(f"Converted tile coordinate '{coord}' to canvas coordinate '{canvasCoord}'")
+        return canvasCoord
 
     def renderGraphState(self):
-        print("render map data")
+        logging.info("Re-rendering all graph state data.")
         graphData = self.parent.mapData
         # Input: NetworkX graph
         # Output: render the tiles of the map, including
@@ -144,40 +167,41 @@ class mainCanvas(tk.Canvas):
         tileSize = self.appearanceValues.canvasTileSize
         nodeSizeRatio = self.appearanceValues.canvasTileCircleRatio
         edgeWidth = self.appearanceValues.canvasEdgeWidth
-        # Clear current canvas 
+        logging.info("Fetched style reference values.")
+        # Clear current canvas
+        logging.info("Attempting to clear the canvas for re-render . . .") 
         self.clearMainCanvas()
         # Draw tiles, being sure to tag them for ordering and overlaying
+        logging.info("Attempting to re-render grid lines . . .")
         self.drawGridlines()
+        logging.info("Attempting to re-render graph data nodes . . .")
         self.renderNodes(graphData, tileSize, nodeSizeRatio)
+        logging.info("Attempting to re-render graph data edges . . .")
         self.renderEdges(graphData, edgeWidth)
+        logging.info("Attempting to re-render unconnected graph data edges . . .")
         self.renderDanglingEdges(graphData, tileSize, edgeWidth)
+        logging.info("Attempting to re-render agentManager agents . . .")
         self.renderAgents(graphData, tileSize)
+        logging.info("Attempting to build hover info . . .")
         self.generateHoverInfo(graphData, tileSize)
+        logging.info("Sorting re-rendered layers for visibility . . .")
         self.sortCanvasLayers()
+        logging.info("Managing layer visibility according to infoBox settings . . .")
         self.checkLayerVisibility()
+        logging.info("Canvas re-render finished.")
         
     def renderNodes(self, graphData, tileSize, nodeSizeRatio):
         # Display nodes in graph
         for node in graphData.nodes.data():
-            # print(nx.get_node_attributes(graphData, node))
-            # print(node)
+            logging.debug(f"Attempting to draw node: {node}")
             # Break down the data
             nodeData = node[1]
             nodePosX = nodeData["pos"]["X"]
             nodePosY = nodeData["pos"]["Y"]
             nodeType = nodeData["type"]
 
-            # print("=========")
-            # print(node[1])
-            # nx.set_node_attributes(graphData, ' ', node[0])
-            # attr = {node[0]: {'agent': 'exists'}}
-            # node[1]['agent'] = 'exists'
-            # nx.set_node_attributes(graphData, attr)
-            # pp.pprint(graphData.nodes.data())
-            # del graphData.nodes[node[0]]['agent']
-            # pp.pprint(graphData.nodes.data())
-
             # Identify the center of the canvas tile
+            logging.debug("Identifying canvas coordinate of node:")
             nodePosGraphX = self.graphCoordToCanvas(nodePosX)
             nodePosGraphY = self.graphCoordToCanvas(nodePosY)
             
@@ -197,6 +221,7 @@ class mainCanvas(tk.Canvas):
             elif nodeType == "rest":
                 fillColor = "brown"
                 tags = ["node", "restNode"]
+            logging.debug(f"Node type '{nodeType}' is assigned tags: {tags}")
 
             # Draw the node
             self.create_oval(
@@ -207,10 +232,13 @@ class mainCanvas(tk.Canvas):
                 fill = fillColor,
                 tags=tags
             )
+            logging.debug("Node drawn successfully.")
+        logging.info("Rendered all graphData nodes.")
 
     def renderEdges(self, graphData, edgeWidth):
         # Display connected edges
         for edge in graphData.edges():
+            logging.debug(f"Attempting to draw edge: {edge}")
             # Break the edge into its 2 nodes
             firstPoint = edge[0]
             secondPoint = edge[1]
@@ -222,8 +250,10 @@ class mainCanvas(tk.Canvas):
             secondPosY = eval(secondPoint)[1]
 
             # Find the center of the relevant tiles on the canvas
+            logging.debug("Identifying canvas coordinates the edge begins at:")
             firstPosGraphX = self.graphCoordToCanvas(firstPosX)
             firstPosGraphY = self.graphCoordToCanvas(firstPosY)
+            logging.debug("Identifying canvas coordinates the edge ends at:")
             secondPosGraphX = self.graphCoordToCanvas(secondPosX)
             secondPosGraphY = self.graphCoordToCanvas(secondPosY)
 
@@ -237,6 +267,8 @@ class mainCanvas(tk.Canvas):
                 width = edgeWidth,
                 tags=["edge"]
             )
+            logging.debug("Edge drawn successfully.")
+        logging.info("Rendered all connected graphData edges.")
 
     def renderDanglingEdges(self, graphData, tileSize, edgeWidth):
         # Display dangling edges
@@ -247,6 +279,7 @@ class mainCanvas(tk.Canvas):
             nodePosX = nodeData["pos"]["X"]
             nodePosY = nodeData["pos"]["Y"]
             nodeEdges = nodeData["edgeDirs"]
+            logging.debug(f"Checking node '{nodeName}' for unconnected edges in the graph.")
             # If the node has an edge in a direction
             if nodeEdges["N"] == 1:
                 # Calculate what the node it is trying to connect to should be
@@ -256,7 +289,8 @@ class mainCanvas(tk.Canvas):
                 # if edgeTarget in graphData.neighbors(nodeName):
                     pass
                 else:
-                     # Draw the line if it dangles and tag it appropriately
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
+                    # Draw the line if it dangles and tag it appropriately
                     nodePosGraphX = self.graphCoordToCanvas(nodePosX)
                     nodePosGraphY = self.graphCoordToCanvas(nodePosY)
                     self.create_line(
@@ -268,6 +302,7 @@ class mainCanvas(tk.Canvas):
                         width=edgeWidth,
                         tags=["danglingEdge"]
                     )
+                    logging.debug("Unconnected edge drawn.")
             if nodeEdges["E"] == 1:
                 # Calculate what the node it is trying to connect to should be
                 edgeTarget = "(" + str(nodePosX+1) + ", " + str(nodePosY) + ")"
@@ -275,6 +310,7 @@ class mainCanvas(tk.Canvas):
                 if graphData.has_edge(nodeName, edgeTarget):
                     pass
                 else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
                     # Draw the line if it dangles and tag it appropriately
                     nodePosGraphX = self.graphCoordToCanvas(nodePosX)
                     nodePosGraphY = self.graphCoordToCanvas(nodePosY)
@@ -287,6 +323,7 @@ class mainCanvas(tk.Canvas):
                         width=edgeWidth,
                         tags=["danglingEdge"]
                     )
+                    logging.debug("Unconnected edge drawn.")
             if nodeEdges["W"] == 1:
                 # Calculate what the node it is trying to connect to should be
                 edgeTarget = "(" + str(nodePosX-1) + ", " + str(nodePosY) + ")"
@@ -294,6 +331,7 @@ class mainCanvas(tk.Canvas):
                 if edgeTarget in graphData.neighbors(nodeName):
                     pass
                 else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
                     # Draw the line if it dangles and tag it appropriately
                     nodePosGraphX = self.graphCoordToCanvas(nodePosX)
                     nodePosGraphY = self.graphCoordToCanvas(nodePosY)
@@ -306,6 +344,7 @@ class mainCanvas(tk.Canvas):
                         width=edgeWidth,
                         tags=["danglingEdge"]
                     )
+                    logging.debug("Unconnected edge drawn.")
             if nodeEdges["S"] == 1:
                 # Calculate what the node it is trying to connect to should be
                 edgeTarget = "(" + str(nodePosX) + ", " + str(nodePosY+1) + ")"
@@ -313,6 +352,7 @@ class mainCanvas(tk.Canvas):
                 if edgeTarget in graphData.neighbors(nodeName):
                     pass
                 else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
                     # Draw the line if it dangles and tag it appropriately
                     nodePosGraphX = self.graphCoordToCanvas(nodePosX)
                     nodePosGraphY = self.graphCoordToCanvas(nodePosY)
@@ -325,17 +365,18 @@ class mainCanvas(tk.Canvas):
                         width=edgeWidth,
                         tags=["danglingEdge"]
                     )
+                    logging.debug("Unconnected edge drawn.")
+        logging.info("Rendered all unconnected graphData edges.")
 
     def renderAgents(self, graphData, tileSize):
         # Renders agent positions and orientations
-        print("render agents")
 
         # Render the agent position direct from the graph object
-        # pp.pprint(graphData.nodes(data=True))
         for node in graphData.nodes(data=True):
             if 'agent' in graphData.nodes.data()[node[0]]:
                 # Extract the reference to the agent object with a shallow copy
                 agentRef = graphData.nodes.data()[node[0]]['agent']
+                logging.debug(f"Node '{node[0]}' contains agent '{agentRef.ID}'.")
                 # Extract position data, convert to canvas coordinates and centralize
                 nodePosX = agentRef.position[0]
                 centerPosX = nodePosX * tileSize + 0.5 * tileSize
@@ -367,6 +408,7 @@ class mainCanvas(tk.Canvas):
                     fill='orange',
                     tags=tag
                 )
+                logging.debug("Agent representation rendered.")
 
                 # Arrow tags should include a sorting tag
                 tag.append("agentOrientation")
@@ -382,16 +424,17 @@ class mainCanvas(tk.Canvas):
                     fill='white',
                     width=4
                 )
-                # print(f"{node} contains agent")
+                logging.debug("Agent orientation rendered.")
             else:
                 # print(f"{node} does not contain an agent")
                 pass
+        logging.info("Rendered all agents in agentManager.")
 
     def agentClickHighlighter(self, agentName, agentID, event):
         # Remove previous highlighting
+        logging.debug("Handling click on agent in main canvas.")
         self.clearHighlight()
-
-        print(f"agentName: {agentName}, agentID: {agentID}")
+        logging.debug(f"Clicked agentName: {agentName}, agentID: {agentID}")
 
         # Find iid for specified agent in the treeview
         agentIID = self.parent.contextView.agentTreeView.tag_has(agentName)
@@ -399,15 +442,14 @@ class mainCanvas(tk.Canvas):
         # Set the selection to include the agent
         # self.parent.contextView.objectTreeView.see(agentIID)
         self.parent.contextView.agentTreeView.selection_set(agentIID)
+        logging.debug("Agent treeView updated to reflect user selection.")
 
         # Highlight the agent
         agentRef = self.parent.agentManager.agentList.get(agentID)
-        print(agentRef)
         agentRef.highlightAgent(multi=False)
 
         # Update the selection tracker
         self.parent.parent.agentManager.currentAgent = agentID
-        print(self.parent.parent.agentManager.currentAgent)
         
         # Update movement choices for the selected agent
         self.parent.parent.contextView.validateMovementButtonStates()
@@ -416,7 +458,7 @@ class mainCanvas(tk.Canvas):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
         # Place one in each cell of the grid that contains a node
         for node in graphData.nodes.data():
-            # pp.pprint(node)
+            logging.debug(f"Generating hover info for node '{node}'.")
             # Break down the data
             nodeData = node[1]
             nodePosX = nodeData["pos"]["X"]
@@ -433,14 +475,17 @@ class mainCanvas(tk.Canvas):
                 anchor=tk.NW,
                 tags=["infoTile"]
             )
+            logging.debug("Mouse capture tile generated.")
             # If there is an agent in the node, include it in the hoverinfo text
             if 'agent' in nodeData:
                 nodeAgentName = nodeData['agent'].ID
                 nodeAgentID = nodeData['agent'].numID
                 hoverString = f"{str(node[0])}: {nodeType.capitalize()}, Agent Name: {nodeAgentName}"
+                logging.debug("Node contains an agent, ID added to hover info.")
 
                 # Further, make clicks on this hovertile select the agent
                 self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentName, nodeAgentID))
+                logging.debug("Bound clicks on the capture tile to the agent.")
             else:
                 hoverString = f"{str(node[0])}: {nodeType.capitalize()}"
 
@@ -448,6 +493,8 @@ class mainCanvas(tk.Canvas):
             # Tkinter automatically passes the event object to the handler
             self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
             self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, hoverString))
+            logging.debug("Mouseover events bound.")
+        logging.info("Generated all information hover tiles.")
             
     def infoHoverEnter(self, hoverString, event):
         self.infoBoxFrame = self.parent.parent.infoBox.infoBoxFrame
@@ -474,7 +521,7 @@ class mainCanvas(tk.Canvas):
         objs = self.find_withtag("infoTile")
         for obj in objs:
             self.lift(obj)
-        print("sort canvas")
+        logging.info("Canvas object layers sorted.")
         # self.setAllLayersVisible()
 
     def setAllLayersVisible(self):
@@ -492,6 +539,7 @@ class mainCanvas(tk.Canvas):
         self.infoBoxButtons.nodeTick.select()
         self.infoBoxButtons.agentTick.select()
         self.infoBoxButtons.agentOrientationTick.select()
+        logging.info("All layers set to be visible on the main canvas.")
 
     def checkLayerVisibility(self):
         layerStates = {
@@ -503,13 +551,13 @@ class mainCanvas(tk.Canvas):
         }
         for layer in layerStates:
             self.setLayerVisibility(layer, layerStates[layer])
+        logging.info("Updated layer visibilities to match user settings.")
 
     def clearMainCanvas(self):
-        print("wipe canvas")
         self.delete("all")
+        logging.info("Main canvas cleared.")
 
     def setLayerVisibility(self, layerTag, desiredState):
-        # print(f"Layer '{layerTag}' set to '{desiredState}'")
         objs = self.find_withtag(layerTag)
         if desiredState == True:
             for obj in objs:
@@ -517,6 +565,7 @@ class mainCanvas(tk.Canvas):
         elif desiredState == False:
             for obj in objs:
                 self.itemconfigure(obj, state='hidden')
+        logging.debug(f"Layer '{layerTag}' set to '{desiredState}'")
 
     def toggleLayerVisibility(self, layerTag, state):
         # Find all the objects with the matching tag
@@ -530,6 +579,7 @@ class mainCanvas(tk.Canvas):
             state = True
             for obj in objs:
                 self.itemconfigure(obj, state='normal')
+        logging.debug(f"Layer '{layerTag}' toggled from '{state}' to '{not state}'.")
         return state
 
     def toggleDanglingEdgeVisibility(self):
@@ -548,12 +598,10 @@ class mainCanvas(tk.Canvas):
         self.agentOrientationVisibility = self.toggleLayerVisibility("agentOrientation", self.agentOrientationVisibility)
 
     def highlightTile(self, tileIDX, tileIDY, color, multi, highlightType):
-        # print("highlight: (" + str(tileIDX) + ", " + str(tileIDY) + ")")
-        # print(f"With: {color}, multi={multi}, and type {highlightType}")
         # Clear the old highlights before drawing this singular highlight
         if multi == False:
             self.clearHighlight(highlightType)
-            # print(f"cleared old highlight of type {highlightType}")
+            
         # Draw a translucent highlight over the indicated cell for user guidance
         # tileSize = self.appearanceValues.canvasTileSize
         if isinstance(tileIDX, str):
@@ -580,6 +628,9 @@ class mainCanvas(tk.Canvas):
                 alpha=0.3,
                 tags=["highlight", highlightType]
             )
+        logging.debug(f"Highlighted tile: ({str(tileIDX)}, {str(tileIDY)})")
+        logging.debug(f"With: {color}, multi={multi}, and type {highlightType}")
+
         # Re-sort the layers so the infolayer is not hidden by the highlight
         self.sortCanvasLayers()
 
@@ -591,6 +642,8 @@ class mainCanvas(tk.Canvas):
             objs = self.find_withtag("highlight")
             for obj in objs:
                 self.delete(obj)
+            logging.debug(f"Cleared all highlights.")
+
         # If a type is specified, only delete highlights of that type
         else:
             objs = self.find_withtag(highlightType)
@@ -599,6 +652,7 @@ class mainCanvas(tk.Canvas):
             for image in list(self.images.keys()):
                 if highlightType in self.images[image]:
                     del self.images[image]
+            logging.debug(f"Cleared old highlight of type {highlightType}")
 
     def create_rect(self, x1, y1, x2, y2, **kwargs):
         # https://stackoverflow.com/questions/54637795/how-to-make-a-tkinter-canvas-rectangle-transparent

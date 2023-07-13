@@ -7,14 +7,12 @@ class randomGenerator:
         Class which stores and uses a seeded RNG system to enable repeatable decisionmaking by agents
     """
     def __init__(self, parent):
-        logging.trace(f"Invoked by function '{sys._getframe(1).f_code.co_name}'")
-        logging.debug(f"Invoked by function '{sys._getframe(1).f_code.co_name}'")
-        print(f"{sys._getframe(1).f_code.co_firstlineno}")
+        logging.debug(f"Random generator engine class initializing . . .")
         self.parent = parent
         self.randomGeneratorState = randomGeneratorState(self)
         random.seed(self.randomGeneratorState.currentSeed)
         logging.debug(f"Random generator engine seeded with {self.randomGeneratorState.currentSeed}.")
-        logging.info("Class 'randomGenerator' initialized.")
+        logging.info("Class 'randomGenerator' finished initializing.")
 
     def randomChoice(self, sequence):
         # Make a choice out of a sequence at random using the seeded generator
@@ -38,14 +36,14 @@ class randomGenerator:
             Package data for replicating the current session
                 - currentSeed
         """
-        logging.info("Received request to package 'randomGenerator' data.")
+        logging.debug("Received request to package 'randomGenerator' data.")
         dataPackage = {}
         dataPackage["currentSeed"] = self.randomGeneratorState.currentSeed
-        logging.debug(f"Packaged agentData: {dataPackage}")
+        logging.debug(f"Packaged 'randomGenerator' data: {dataPackage}")
         logging.info("Packaged all 'randomGenerator' data")
         return dataPackage
 
 class randomGeneratorState:
     def __init__(self, parent):
         self.currentSeed = 123456789 # Default value
-        logging.info(f"Class 'randomGeneratorState' initialized, with default seed {self.currentSeed}.")
+        logging.info(f"Class 'randomGeneratorState' initialized with default seed: {self.currentSeed}")

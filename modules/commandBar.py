@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 import pickle
 import pprint
+import logging
 pp = pprint.PrettyPrinter(indent=4)
 
 class commandBar(tk.Menu):
@@ -14,13 +15,15 @@ class commandBar(tk.Menu):
         commandBarState will be the decoupled state data of the element
     """
     def __init__(self, parent):
+        logging.debug("Command Bar UI class initializing . . .")
         self.parent = parent
         tk.Menu.__init__(self, parent)
 
         self.parent.config(menu=self)
         self.fileCommand = FileCommands(self)
-
+        logging.info("Command Bar sub-element 'File Menu' built.")
         self.commandBarState = commandBarState(self)
+        logging.info("Command Bar UI built successfully.")
 
 class commandBarState:
     """
@@ -46,48 +49,50 @@ class FileCommands(tk.Menu):
         self.add_command(label="Open Session", command=self.openSession)
         self.add_command(label="Save Session", command=self.saveSession)
         self.add_command(label="Quit Session", command=self.quitSession)
+        logging.debug("File Menu actions built successfully.")
 
         # Render the menu
         self.parent.add_cascade(label="File", menu=self)
+        logging.debug("File Menu rendered successfully.")
 
     def newSession(self):
+        logging.info("User attempting to create new session.")
         # Prompt save
         self.promptSave()
         # Create a new session
         self.promptLoadMap()
-        print("New Session")
+        logging.info("User started a new session.")
 
     def promptLoadMap(self):
+        logging.debug("Checking if user will load a new map . . .")
         messageBox = tk.messagebox.askquestion(title = "New Session",
             message="Load a map? This will close the current session.")
         if messageBox=="yes":
-            print("Load new map")
+            logging.info("User will supply new session map data.")
             self.refMapData.ingestMapFromJSON()
 
     def openSession(self):
         # Open a saved session
         self.promptSave()
-        print("Open Session")
+        logging.info("User attempting to open a saved session.")
         
         # Prompt for which saved file to load
         fid = tk.filedialog.askopenfilename()
-        # print(fid)
+        logging.debug(f"User wants to open session datafile: {fid}")
         # Read the data using pickle
         with open(fid, 'rb') as inp:
             data = pickle.load(inp)
-        # pp.pprint(data)
-
-        # Insert the data into the relevant locations
-        # self.parent.parent.mapData.mapGraph = data["mapDataClass"]
-        # self.parent.parent.agentManager = data["agentManager"]
-        # self.parent.parent.taskManager = data["taskManager"]
-        # self.parent.parent.randomGenerator.randomGeneratorState = data["randomGenerator"]
+        # logging.debug(f"{data}")
         
         # Reconstruct the map from the data
         graphData = data["mapDataClass"]
+        logging.debug("Received graphData:")
+        logging.debug(f"{graphData}")
         self.parent.parent.mapData.loadMapToNetworkX(graphData)
+        logging.info("Loaded new map data to session map graph.")
 
         # Reconstruct the agents from the data
+        logging.debug("Received new agentData:")
         for agent in data["agentManager"]:
             ID = data["agentManager"][agent]["ID"]
             position = data["agentManager"][agent]["position"]
@@ -99,8 +104,10 @@ class FileCommands(tk.Menu):
                 orientation=orientation, 
                 className=className
                 )
+        logging.info("Loaded new agent data to session state.")
 
         # Reconstruct the tasks from the data
+        logging.debug("Received new taskData:")
         for task in data["taskManager"]:
             taskName = data["taskManager"][task]["name"]
             pickupPosition = data["taskManager"][task]["pickupPosition"]
@@ -112,24 +119,29 @@ class FileCommands(tk.Menu):
                 dropoffPosition=dropoffPosition,
                 timeLimit=timeLimit
                 )
+        logging.info("Loaded new task data to session state.")
         
         # Reconstruct the current Random Generator data
+        logging.debug("Received new random generator engine data:")
         self.parent.parent.randomGenerator.randomGeneratorState.currentSeed = data["randomGenerator"]["currentSeed"]
+        logging.info("Loaded new random generator engine state.")
 
         # Rerender the main canvas
         self.parent.parent.mainView.mainCanvas.renderGraphState()
+        logging.info("New session state rendered successfully.")
 
     def promptSave(self):
         # Create a message box asking to save the current session
-        print("Save?")
+        logging.info("Checking if user wants to save the current session . . .")
         messageBox = tk.messagebox.askquestion(title = "Save work?",
             message="Save current session?")
         if messageBox=="yes":
+            logging.debug("User chose to save the current session.")
             self.saveSession()
 
     def saveSession(self):
         # Save a session
-        print("Save Session")
+        logging.info("Attempting to save the current session.")
         # self.parent = parent causes classes to become unpickleable, but the structure needs to exist
         # Therefore rely on subclasses containing the data
         itemsToSave = {
@@ -138,11 +150,14 @@ class FileCommands(tk.Menu):
             "taskManager": self.parent.parent.taskManager.packageTaskData(),
             "randomGenerator" : self.parent.parent.randomGenerator.packageRandomGeneratorData(),
         }
+        logging.info("Save data collected.")
+        logging.debug(f"{itemsToSave}")
         fid = tk.filedialog.asksaveasfilename(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
-        print(fid)
+        logging.debug(f"User requested data be saved to: {fid}")
         with open(fid, 'wb') as out:
             pickle.dump(itemsToSave, out, pickle.HIGHEST_PROTOCOL)
+        logging.info("Session data saved.")
 
     def quitSession(self):
         # Close the current session
-        print("Quit Session")
+        logging.info("User attempting to close out the session.")

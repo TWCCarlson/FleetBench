@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import RIDGE
+import logging
 
 class appearanceValues():
     def __init__(self, parent):
@@ -38,3 +39,5 @@ class appearanceValues():
         # Frame style
         self.frameBorderWidth = 5
         self.frameRelief = RIDGE
+
+        logging.info("Appearance configuration settings loaded.")

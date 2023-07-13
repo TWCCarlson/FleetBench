@@ -4,6 +4,7 @@ import pprint
 import modules.tk_extensions as tk_e
 from sys import getsizeof
 pp = pprint.PrettyPrinter(indent=4)
+import logging
 # import networkx as nx
 # import matplotlib.pyplot as plt
 
@@ -20,20 +21,24 @@ class contextView(tk.Frame):
         frameWidth = self.appearanceValues.contextViewWidth
         frameBorderWidth = self.appearanceValues.frameBorderWidth
         frameRelief = self.appearanceValues.frameRelief
+        logging.debug("Fetched styling settings.")
         # Declare frame
         tk.Frame.__init__(self, parent, height=frameHeight, 
             width=frameWidth, 
             borderwidth=frameBorderWidth, 
             relief=frameRelief)
+        logging.debug("Containing frame settings built.")
 
         # Render frame
         self.grid_propagate(False)
         self.grid(row=0, column=2, rowspan=2, sticky=tk.N)
+        logging.debug("Containing frame rendered.")
 
         # Create the simulation information and configuration access pane
         self.createSimulationInformationInterface()
 
         # Create Manual Movement Interface
+        logging.info("Creating movement interface in contextView . . .")
         self.createMovementInterface()
 
         # Create treeView
@@ -48,12 +53,7 @@ class contextView(tk.Frame):
         # Saveable data
         self.contextViewState = contextViewState(self)
 
-    def tempFunc(self):
-        pp.pprint(self.parent.mapData.mapGraph.nodes(data=True))
-        pp.pprint(self.parent.mapData.mapGraph.edges(data=True))
-        pp.pprint(self.parent.agentManager.agentList)
-        pp.pprint(self.parent.taskManager.taskList)
-        self.parent.mapData.packageMapData()
+        logging.info("Context View UI Class initialized.")
 
     def createTreeViewNotebook(self):
         """
@@ -62,10 +62,12 @@ class contextView(tk.Frame):
             "Tasks" 
             "Statistics"
         """
+        logging.debug("Building notebook of treeView pages . . .")
         # Create the notebook object
         self.objectListNotebook = ttk.Notebook(self)
         self.objectListNotebook.grid(row=2, column=0, sticky=tk.S+tk.W+tk.E)
         self.rowconfigure(2, weight=1)
+        logging.debug("Notebook rendered.")
 
         # Create the "Agents" tab using a Frame and then generating its treeView
         self.agentListFrame = tk.Frame(self.objectListNotebook)
@@ -80,24 +82,30 @@ class contextView(tk.Frame):
         self.objectListNotebook.add(self.taskListFrame, text="Tasks")
         self.objectListNotebook.add(self.statsListFrame, text="Statistics")
 
+        logging.info("All treeView pages added to notebook.")
+
     def createAgentTreeView(self):
+        logging.debug("Creating agentTreeView page . . .")
         self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}
         self.agentTreeView = ttk.Treeview(self.agentListFrame, selectmode='browse')
         self.agentTreeView.grid(row=0, column=0, sticky=tk.S+tk.W+tk.E)
         self.agentTreeView["height"] = 20
         self.agentTreeView["columns"] = list(self.columnList.keys())
         self.agentListFrame.columnconfigure(0, weight=1)
+        logging.debug(f"Rendered treeView with columns: {self.columnList}")
 
         self.agentTreeView.heading('#0', text='A') # Activity status icon column
         self.agentTreeView.column('#0', width=35, stretch=0)
         for col in self.columnList:
             self.agentTreeView.heading(col, text=col)
             self.agentTreeView.column(col, width=self.columnList[col], stretch=True)
+        logging.debug("Constructed all column configurations in agentTreeView.")
 
         # Event bindings
         self.agentTreeView.bind('<Motion>', 'break') # Prevents resizing
         self.agentListFrame.bind('<Enter>', self.bindAgentClicks)
         self.agentListFrame.bind('<Leave>', self.unbindAgentClicks)
+        logging.debug("Bound mouse events to agentTreeView")
 
         # Initialize scrolling
         self.initAgentTreeScrolling()
@@ -105,37 +113,51 @@ class contextView(tk.Frame):
         # Build right click context menu
         self.agentMenu = tk_e.agentTreeViewMenu(self)
         self.agentMenu.add_entry(label="Delete", command=self.parent.agentManager.deleteAgent)
+        logging.debug("Built right click context-sensitive menu in the agentTreeView.")
+
+        logging.info("agentTreeView finished rendering.")
         
     def initAgentTreeScrolling(self):
+        logging.debug("Building scrolling capability in the agentTreeView.")
         # Create scrollbar components
         self.agentTreeView.ybar = tk.Scrollbar(self.agentListFrame, orient="vertical")
         self.agentTreeView.xbar = tk.Scrollbar(self.agentListFrame, orient="horizontal")
+        logging.debug("Scrollbars instantiated in the agentTreeView.")
 
         # Bind the scrollbars to the canvas
         self.agentTreeView.ybar["command"] = self.agentTreeView.yview
         self.agentTreeView.xbar["command"] = self.agentTreeView.xview
+        logging.debug("Scrollbars bound to agentTreeView.")
 
         # Adjust positioning, size relative to grid
         self.agentTreeView.ybar.grid(row=0, column=1, sticky=tk.N+tk.S)
         self.agentTreeView.xbar.grid(row=1, column=0, sticky=tk.E+tk.W)
+        logging.debug("Scrollbars rendered into agentTreeView containing frame.")
 
         # Make canvas update scrollbar position to match its view
         self.agentTreeView["yscrollcommand"] = self.agentTreeView.ybar.set
         self.agentTreeView["xscrollcommand"] = self.agentTreeView.xbar.set
+        logging.debug("Bound agentTreeView scroll commands to the scrollbars.")
 
         # Bind mousewheel to interact with the scrollbars
         # Only do this when the cursor is inside this frame
         self.agentTreeView.bind('<Enter>', self.bindMousewheel)
         self.agentTreeView.bind('<Leave>', self.unbindMousewheel)
+        logging.debug("Bound mouse events to capture scrolling in the agentTreeView.")
 
         # Reset the view
         self.agentTreeView.xview_moveto("0.0")
         self.agentTreeView.yview_moveto("0.0")
+        logging.debug("Set default agentTreeView scroll levels.")
+
+        logging.info("Finished building agentTreeView scrolling.")
         
     def updateAgentTreeView(self):
+        logging.debug("Received request to refresh the agentTreeView. . .")
         # Clear the treeview then regenerate it
         for row in self.agentTreeView.get_children():
             self.agentTreeView.delete(row)
+        logging.debug("Cleared the agentTreeView.")
 
         # Access the list of all agents and rebuild the treeView based on their states
         for agent in self.parent.agentManager.agentList:
@@ -151,6 +173,9 @@ class contextView(tk.Frame):
                 values=[agentID, agentPosition, agentClass],
                 tags=["agent", agentNumID, agentID]
             )
+            logging.debug(f"Add to agentTreeView: {self.agentTreeView.item(agentID, 'values')}")
+        
+        logging.info("Updated agentTreeView with current agentManager state.")
 
     def bindAgentClicks(self, *event):
         self.agentClickBindFunc = self.agentTreeView.bind('<Button-1>', self.handleAgentSelect)
@@ -174,35 +199,40 @@ class contextView(tk.Frame):
             self.parent.agentManager.agentList.get(agentID).highlightAgent(multi=False)
             # Update agentManager's currentAgent prop
             self.parent.agentManager.currentAgent = agentID
-            print(self.parent.agentManager.currentAgent)
+            logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
             # Trigger movement button state validation
             self.validateMovementButtonStates()
 
     def handleAgentRClick(self, event):
         # Give focus to the right clicked element
+        logging.debug("User right clicked an agent in the agentTreeView.")
         self.handleAgentSelect(event)
 
         # Create the popup menu
         self.agentMenu.popup(event.x, event.y, event.x_root, event.y_root)
 
     def createTaskTreeView(self):
+        logging.debug("Building taskTreeView page . . .")
         self.columnList = {'Name': 50, 'Pickup': 50, 'Dropoff': 50, 'Time Limit': 40}
         self.taskTreeView = ttk.Treeview(self.taskListFrame, selectmode='browse')
         self.taskTreeView.grid(row=0, column=0, sticky=tk.S+tk.W+tk.E)
         self.taskTreeView["height"] = 20
         self.taskTreeView["columns"] = list(self.columnList.keys())
         self.taskListFrame.columnconfigure(0, weight=1)
+        logging.debug(f"Rendered treeview with columns: {self.columnList}")
 
         self.taskTreeView.heading('#0', text='A')
         self.taskTreeView.column('#0', width=35, stretch=0)
         for col in self.columnList:
             self.taskTreeView.heading(col, text=col)
             self.taskTreeView.column(col, width=self.columnList[col], stretch=True)
+        logging.debug("Constructed all column configurations in taskTreeView.")
 
         # Event bindings
         self.taskTreeView.bind('<Motion>', 'break') # Prevents resizing
         self.taskTreeView.bind('<Enter>', self.bindTaskClicks)
         self.taskTreeView.bind('<Leave>', self.unbindTaskClicks)
+        logging.debug("Bound mouse events to taskTreeView")
 
         # Initialize scrolling
         self.initTaskTreeScrolling()
@@ -210,37 +240,51 @@ class contextView(tk.Frame):
         # Build right click context menu
         self.taskMenu = tk_e.taskTreeViewMenu(self)
         self.taskMenu.add_entry(label="Delete", command=self.parent.taskManager.deleteTask)
+        logging.debug("Built right click context-sensitive menu in the taskTreeView.")
+
+        logging.info("taskTreeView finished rendering.")
 
     def initTaskTreeScrolling(self):
+        logging.debug("Building scrolling capability in the taskTreeView.")
         # Create scrollbar components
         self.taskTreeView.ybar = tk.Scrollbar(self.taskListFrame, orient="vertical")
         self.taskTreeView.xbar = tk.Scrollbar(self.taskListFrame, orient="horizontal")
+        logging.debug("Scrollbars instantiated in the taskTreeView.")
 
         # Bind the scrollbars to the canvas
         self.taskTreeView.ybar["command"] = self.taskTreeView.yview
         self.taskTreeView.xbar["command"] = self.taskTreeView.xview
+        logging.debug("Scrollbars bound to taskTreeView.")
 
         # Adjust positioning, size relative to grid
         self.taskTreeView.ybar.grid(row=0, column=1, sticky=tk.N+tk.S)
         self.taskTreeView.xbar.grid(row=1, column=0, sticky=tk.E+tk.W)
+        logging.debug("Scrollbars rendered into taskTreeView containing frame.")
 
         # Make canvas update scrollbar position to match its view
         self.taskTreeView["yscrollcommand"] = self.taskTreeView.ybar.set
         self.taskTreeView["xscrollcommand"] = self.taskTreeView.xbar.set
+        logging.debug("Bound taskTreeView scroll commands to the scrollbars.")
 
         # Bind mousewheel to interact with the scrollbars
         # Only do this when the cursor is inside this frame
         self.taskListFrame.bind('<Enter>', self.bindMousewheel)
         self.taskListFrame.bind('<Leave>', self.unbindMousewheel)
+        logging.debug("Bound mouse events to capture scrolling in the taskTreeView.")
 
         # Reset the view
         self.taskTreeView.xview_moveto("0.0")
         self.taskTreeView.yview_moveto("0.0")
+        logging.debug("Set default taskTreeView scroll levels.")
+
+        logging.info("Finished building taskTreeView scrolling.")
 
     def updateTaskTreeView(self):
+        logging.debug("Received request to refresh the taskTreeView . . .")
         # Clear the treeview then regenerate it
         for row in self.taskTreeView.get_children():
             self.taskTreeView.delete(row)
+        logging.debug("Cleared the taskTreeView.")
 
         # Access the list of all tasks and rebuild the treeView based on their states
         for task in self.parent.taskManager.taskList:
@@ -257,6 +301,9 @@ class contextView(tk.Frame):
                 values=[taskName, taskPickupPosition, taskDropoffPosition, taskTimeLimit],
                 tags=["task", taskNumID, taskName]
             )
+            logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
+
+        logging.info("Updated taskTreeView with current taskManager state.")
 
     def bindTaskClicks(self, *event):
         self.taskClickBindFunc = self.taskTreeView.bind('<Button-1>', self.handleTaskSelect)
@@ -280,82 +327,15 @@ class contextView(tk.Frame):
             self.parent.taskManager.taskList.get(taskID).highlightTask(False)
             # Update taskManager's currentTask prop
             self.parent.taskManager.currentTask = taskID
-            print(self.parent.taskManager.currentTask)
+            logging.debug(f"User clicked on task '{taskID}' in taskTreeView.")
 
     def handleTaskRClick(self, event):
         # Give focus to the right clicked element
+        logging.debug("User right clicked a task in the taskTreeView.")
         self.handleTaskSelect(event)
 
         # Create the popup menu
         self.taskMenu.popup(event.x, event.y, event.x_root, event.y_root)
-
-    def createTreeView(self):
-        self.columnList = {'Name': 50, 'Position': 50, 'Class': 50, 'Task': 40}
-        # Tree view is a stupid fucking widget
-        # https://stackoverflow.com/questions/39609865/how-to-set-width-of-treeview-in-tkinter-of-python
-        # Create it once, with a single column of nonzero width but all other columns declared, to set the width ???????
-        # Then update the object to lock in the requested space
-        # Finally reup with everything actually used
-        treeViewWidth = self.appearanceValues.contextViewWidth - self.appearanceValues.frameBorderWidth*2 - 21
-        self.objectTreeView = ttk.Treeview(self, selectmode='browse')
-        self.objectTreeView.grid(row=2, column=0, sticky=tk.S+tk.W+tk.E)
-        self.objectTreeView["height"] = 20
-        self.objectTreeView["columns"] = list(self.columnList.keys()) # list() must be used for this widget
-        # self.objectTreeView.column('#0', width=int(treeViewWidth))
-        # Set other columns to be zero-width for simplicity
-        # for col in self.columnList:
-        #     self.objectTreeView.column(col, width=0)
-        self.objectTreeView.update()
-
-        # Set the real column dimensions
-        self.objectTreeView.heading('#0', text='im')
-        self.objectTreeView.column('#0', width=62, stretch=0)
-        # Stretch=True can be used to fill the available space evenly using every column that can stretch
-        for col in self.columnList:
-            self.objectTreeView.heading(col, text=col)
-            self.objectTreeView.column(col, width=self.columnList[col], stretch=True)
-
-        # Insert parent rows
-        self.objectTreeView.insert(parent="",
-            index=0,
-            iid='agentParentRow',
-            open=False,
-            tags=['agentParentRow'],
-            text="Agents"
-        )
-
-        # Prevent column resizing:
-        # https://stackoverflow.com/questions/45358408/how-to-disable-manual-resizing-of-tkinters-treeview-column/46120502#46120502
-        self.objectTreeView.bind('<Button-1>', self.handleClick)
-        self.objectTreeView.bind('<Motion>', self.motionIntercept)
-        # This event captures too much
-        # self.objectTreeView.bind('<<TreeviewSelect>>', self.handleSelect)
-
-    def initScrolling(self):
-        # Create scrollbar components
-        self.objectTreeView.ybar = tk.Scrollbar(self, orient="vertical")
-        self.objectTreeView.xbar = tk.Scrollbar(self, orient="horizontal")
-
-        # Bind the scrollbars to the canvas
-        self.objectTreeView.ybar["command"] = self.objectTreeView.yview
-        self.objectTreeView.xbar["command"] = self.objectTreeView.xview
-
-        # Adjust positioning, size relative to grid
-        self.objectTreeView.ybar.grid(row=2, column=1, sticky="ns")
-        self.objectTreeView.xbar.grid(row=3, column=0, sticky="ew")
-
-        # Make canvas update scrollbar position to match its view
-        self.objectTreeView["yscrollcommand"] = self.objectTreeView.ybar.set
-        self.objectTreeView["xscrollcommand"] = self.objectTreeView.xbar.set
-
-        # Bind mousewheel to interact with the scrollbars
-        # Only do this when the cursor is inside this frame
-        self.objectTreeView.bind('<Enter>', self.bindMousewheel)
-        self.objectTreeView.bind('<Leave>', self.unbindMousewheel)
-
-        # Reset the view
-        self.objectTreeView.xview_moveto("0.0")
-        self.objectTreeView.yview_moveto("0.0")
 
     def bindMousewheel(self, event):
         self.bind_all("<MouseWheel>", self.mousewheelAction)
@@ -376,84 +356,16 @@ class contextView(tk.Frame):
             # Prevent click interacting with this region
             return "break"
 
-    def updateTreeView(self):
-        # Clear the treeview to regenerate it
-        # Only remove children of the parent rows
-        parentRows = self.objectTreeView.get_children()
-        rows = self.objectTreeView.get_children(parentRows)
-        for row in rows:
-            self.objectTreeView.delete(row)
-
-        # Grabs the list of all agents from the agent manager and generates treeview entries based on their states
-        self.treeViewAgentList = self.parent.agentManager.agentList
-        for agent in self.treeViewAgentList:
-            # Extract relevant data
-            agentData = self.treeViewAgentList.get(agent)
-            agentNumID = agentData.numID
-            agentID = agentData.ID
-            agentPosition = str(agentData.position)
-            agentClass = agentData.className
-            self.objectTreeView.insert(parent="agentParentRow",
-                index='end',
-                iid=agentID,
-                text='A'+str(agentNumID),
-                values=[agentID, agentPosition, agentClass],
-                tags=["agent", agentNumID, agentID]
-            )
-
-    def handleClick(self, event):
-        # Header clicks:
-        if self.objectTreeView.identify_region(event.x, event.y) == "separator":
-            # Prevent click interacting with this region
-            return
-        else:
-            self.handleSelect(event)
-
-    def handleSelect(self, event):
-        # Identify the row clicked on
-        selectedRow = self.objectTreeView.focus()
-        # If the row describes a category
-        if selectedRow in self.objectTreeView.tag_has("agentParentRow"):
-            # parentRow = self.objectTreeView.item(selectedRow)
-            rowChildren = self.objectTreeView.get_children(selectedRow)
-            # Highlight all agents
-            for row in rowChildren:
-                rowData = self.objectTreeView.item(row)
-                # Clear existing highlights
-                self.parent.mainView.mainCanvas.clearHighlight()
-                # Highlight the selected agent
-                agentID = rowData["tags"][1]
-                agentRef = self.parent.agentManager.agentList.get(agentID)
-                agentRef.highlightAgent(multi=True)
-                # Update the selection
-                self.parent.agentManager.currentAgent = agentID
-                print(self.parent.agentManager.currentAgent)
-                # Update movement choices for the selected agent
-                self.validateMovementButtonStates()
-
-        # If the row describes an agent
-        if selectedRow in self.objectTreeView.tag_has("agent"):
-            # Clear existing highlights
-            self.parent.mainView.mainCanvas.clearHighlight()
-            rowData = self.objectTreeView.item(selectedRow)
-            # Highlight the selected agent
-            agentID = rowData["tags"][1]
-            agentRef = self.parent.agentManager.agentList.get(agentID)
-            agentRef.highlightAgent(multi=False)
-            # Update the selection
-            self.parent.agentManager.currentAgent = agentID
-            print(self.parent.agentManager.currentAgent)
-            # Update movement choices for the selected agent
-            self.validateMovementButtonStates()
-
     def createMovementInterface(self):
         self.movementFrame = tk.LabelFrame(self, text="Manual Movement")
+        logging.debug("Created movement interface containing frame.")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.movementFrame.grid(row=1, column=0, sticky=tk.E+tk.W, padx=4, columnspan=2)
         self.movementFrame.columnconfigure(0, weight=1)
         # self.movementFrame.columnconfigure(1, weight=1)
         self.movementFrame.columnconfigure(2, weight=1)
+        logging.debug("Rendered movement interface containing frame.")
 
         ## Movement buttons
         # These should probably not be hotkeyed — its an extra state to manage without much benefit. 
@@ -485,6 +397,7 @@ class contextView(tk.Frame):
         self.delete = tk.Button(self.movementFrame, text="Del", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.deleteAgent, background='red')
         self.delete.grid(row=2, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SE)
+        logging.info("Rendered all movement interface action buttons.")
 
     def validateMovementButtonStates(self):
         # Retrieve the current agent's object
@@ -493,6 +406,7 @@ class contextView(tk.Frame):
 
         # Extract the agent's postion
         agentPosition = agentRef.position
+        logging.debug(f"Verify movement interface state for agent '{agentID}' in position {agentPosition}")
 
         # Check whether edges exist in the cardinal directions from the agent's current tile to the next
         candidateNodeDict = {
@@ -525,6 +439,7 @@ class contextView(tk.Frame):
             self.moveRight.config(state=tk.NORMAL, background='#4ddb67')
         else:
             self.moveRight.config(state=tk.DISABLED, background='#fc7f03')
+        logging.info("Validated all movement interface button states.")
 
     def moveAgentUp(self):
         # Retrieve the current agent's object
@@ -569,10 +484,10 @@ class contextView(tk.Frame):
         agentRef.rotateCCW()
 
     def pauseAgent(self):
-        print("Agent paused")
+        logging.info("User paused the agent.")
 
     def deleteAgent(self):
-        print("Agent deleted")
+        logging.info("User deleted the agent.")
 
     def createSimulationInformationInterface(self):
         self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Information")
@@ -580,14 +495,17 @@ class contextView(tk.Frame):
         self.configureSimulationButton = tk.Button(self.contextLabelFrame, text="Simulation Details", width=20,  command=self.openSimulationInformationWindow, state=tk.DISABLED)
         self.contextLabelFrame.columnconfigure(0, weight=1)
         self.configureSimulationButton.grid(row=0, column=0, pady=4, padx=4, columnspan=1)
+        logging.debug("Simulation Configuration interface rendered.")
 
         if self.parent.mapData.mapLoadedBool == True:
             self.configureSimulationButton.config(state=tk.NORMAL)
 
     def enableSimulationConfiguration(self):
         self.configureSimulationButton.config(state=tk.NORMAL)
+        logging.info("Session map loaded, enabling simulation configuration.")
 
     def openSimulationInformationWindow(self):
+        print(self.nonExistantValue)
         print("Simulation Info window opened!")
         self.parent.simulationConfiguration()
 

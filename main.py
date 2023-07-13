@@ -13,12 +13,51 @@ from modules.simulationWindow import simulationWindow
 from modules.simulationProcess import simulationProcess
 from config.appearanceValues import appearanceValues
 import logging
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+import inspect
+import traceback
+import functools
+
+def log(func):
+    # logging decorator
+    @functools.wraps(func)
+    def wrapper_log(*args, **kwargs):
+        msg = ' '.join(map(str, args))
+        print("==========")
+        pp.pprint(msg)
+        print("==========")
+        level = kwargs.get('level', logging.ERROR)
+        if level == logging.INFO:
+            logging.info(msg)
+        elif level == logging.ERROR:
+            logging.error(msg)
+            traceback.print_exc()
+
+    return wrapper_log
+
+# Code stolen from: https://stackoverflow.com/questions/38464351/saving-exceptions-in-tkinter-using-python
+@log
+def print_to_log(s):
+    pass
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    # pp.pprint(traceback.print_exc())
+    # pp.pprint(inspect.getmembers(traceback.tb_frame))
+    # prints traceback in the log
+    message = ''.join(traceback.format_exception(exc_type,
+                                                 exc_value,
+                                                 exc_traceback))
+    print_to_log(message)
 
 class App(tk.Tk):
     def __init__(self):
         logging.info("Robot Warehousing Simulator program started.")
         # Main window config
+        logging.debug("Attempting to create RWS Main Window . . .")
         tk.Tk.__init__(self)
+        # Setup custom exception handling
+        self.report_callback_exception=handle_exception
         logging.info("RWS Main Window Established.")
         self.title("Warehousing Simulator")
 
@@ -26,40 +65,44 @@ class App(tk.Tk):
         logging.debug("Attempting to create 'randomGenerator' class . . .")
         self.randomGenerator = randomGenerator(self)
         logging.info("Class 'randomGenerator' instantiated successfully.")
-
         # Map information class
+        logging.debug("Attempting to create 'mapData' class . . .")
         self.mapData = mapDataClass(self)
         logging.info("Information class 'mapDataClass' instantiated successfully.")
         # Agent information manager class
+        logging.debug("Attempting to create 'agentManager' class . . .")
         self.agentManager = agentManager(self)
         logging.info("Information class 'agentManager' instantiated successfully.")
         # Task information manager class
+        logging.debug("Attempting to create 'taskManager' class . . .")
         self.taskManager = taskManager(self)
         logging.info("Information class 'taskManager' instantiated successfully.")
 
         # Window components
         # Appearance
+        logging.debug("Attempting to create 'appearanceValues' class . . .")
         self.appearance = appearanceValues(self)
         logging.info("Component class 'appearanceValues' instantiated successfully.")
         # Command bar: load, save, options
+        logging.debug("Attempting to create 'commandBar' class . . .")
         self.commandBar = commandBar(self)
-        logging.info("Component class 'mapDataClass' instantiated successfully.")
+        logging.info("Component class 'commandBar' instantiated successfully.")
         # Left pane contains choices and buttons
         self.toolBar = toolBar(self)
-        logging.info("Component class 'mapDataClass' instantiated successfully.")
-        # Central pane info box
-        self.infoBox = infoBox(self)
-        logging.info("Component class 'mapDataClass' instantiated successfully.")
+        logging.info("Component class 'toolBar' instantiated successfully.")
         # Central pane contains the graph display
         self.mainView = mainView(self)
-        logging.info("Component class 'mapDataClass' instantiated successfully.")
+        logging.info("Component class 'mainView' instantiated successfully.")
+        # Central pane info box
+        self.infoBox = infoBox(self)
+        logging.info("Component class 'infoBox' instantiated successfully.")
         # Right pane contains contextual information pane
         self.contextView = contextView(self)
-        logging.info("Component class 'mapDataClass' instantiated successfully.")
+        logging.info("Component class 'contextView' instantiated successfully.")
 
         # Build cross-class references
         self.mapData.buildReferences()
-        self.infoBox.buildReferences()
+        # self.infoBox.buildReferences()
         self.toolBar.buildReferences()
         self.mainView.buildReferences()
         logging.info("Cross-class references built successfully.")
@@ -88,8 +131,6 @@ def initLogging():
         40:"ERROR",
         50:"CRITICAL"
     }
-    # addLoggingLevel('TRACE', logging.DEBUG - 5)
-    # logLevel = logging.TRACE
     logLevel = logging.DEBUG
     # logLevel = logging.INFO
     # logLevel = logging.WARNING
@@ -99,14 +140,11 @@ def initLogging():
     logging.basicConfig(filename='example.log', 
         encoding='utf-8', 
         level=logLevel, 
-        format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}][\'{module}\'][{lineno}:{funcName}] {message}',
+        format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}][\'{module}\'][{lineno:>4n}:{funcName}] {message}',
         style='{',
         filemode='w',
         datefmt='%X')
     logging.info(f"Logging started with level: {loglevelReference[logLevel]}")
-
-    # Quick and dirty workaround for correctly logging {module} as the invoking module
-    # Before, when in logging_extensions.py, the module would be logging_extensions
     
 def addLoggingLevel(levelName, levelNum, methodName=None):
     """
