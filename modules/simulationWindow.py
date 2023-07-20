@@ -5,6 +5,7 @@ class simulationWindow(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-
+        # Arrest the focus of the user away from the rest of the app
         self.focus()
+        self.state('zoomed')
         self.grab_set()

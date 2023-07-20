@@ -40,4 +40,24 @@ class appearanceValues():
         self.frameBorderWidth = 5
         self.frameRelief = RIDGE
 
+        """
+            Simulation window values
+        """
+        # Simulation Main Canvas Style
+        self.simulationWindowWidth = 0.75 * screen_width
+        self.simulationWindowHeight = screen_height - window_unusable
+
+        # Simulation info box style
+        self.simulationInfoBoxWidth = 0.75 * screen_width
+        self.simulationInfoBoxHeight = 0.032 * screen_height
+        self.simulationInfoBoxFont = ('Segoe UI', 11, 'bold')
+
+        # Simulation control panel style
+        self.simulationControlBoxWidth = 0.25 * screen_width
+        self.simulationControlBoxHeight = 0.2 * (screen_height - window_unusable)
+
+        # Simulation information panel style
+        self.simulationInfoPanelWidth = 0.25 * screen_width
+        self.simulationInfoPanelHeight = 0.8 * (screen_height - window_unusable)
+
         logging.info("Appearance configuration settings loaded.")

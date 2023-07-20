@@ -24,4 +24,5 @@ class simulationConfigurationState:
     # Holds the current state of the simulation config
     def __init__(self, parent):
         self.parent = parent
+        self.testVal = 50
         print("Simulation State Default Init")

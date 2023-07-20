@@ -112,13 +112,15 @@ class App(tk.Tk):
         self.mainloop()
 
     def simulationConfiguration(self):
-        logging.trace(f"Call to 'simulationConfiguration' ")
         self.simulationConfigWindow = simulationConfigManager(self)
         logging.info("Configuration class 'simulationConfigManager' instantiated.")
 
     def launchSimulator(self):
         logging.debug("Simulation lanuch requested.")
         self.simulationConfigWindow.grab_release()
+        self.simulationConfigWindow.withdraw()
+        # self.simulationConfigWindow.deiconify()
+        print(self.simulationConfigWindow.simulationConfigurationState.testVal)
         self.simulationProcess = simulationProcess(self)
         self.simulationWindow = simulationWindow(self)
 
