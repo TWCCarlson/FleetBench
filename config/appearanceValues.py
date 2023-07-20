@@ -52,6 +52,13 @@ class appearanceValues():
         # Simulation Main Canvas Style
         self.simulationMainViewWidth = 0.8 * screen_width
         self.simulationMainViewHeight = screen_height - self.simulationInfoBoxHeight
+        self.simCanvasBackgroundColor = "white"
+        self.simCanvasDefaultWidth = 2000
+        self.simCanvasDefaultHeight = 2000
+        self.simCanvasTileSize = 48
+        self.simCanvasTileCircleRatio = 0.28
+        self.simCanvasGridlineColor = "light gray"
+        self.simCanvasEdgeWidth = 4
 
         # Simulation control panel style
         self.simulationControlBoxWidth = 0.2 * screen_width
