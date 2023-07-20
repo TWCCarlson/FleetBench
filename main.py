@@ -8,9 +8,9 @@ from modules.infoBox import infoBox
 from modules.agentManager import agentManager
 from modules.taskManager import taskManager
 from modules.randomGenerator import randomGenerator
-from modules.simulationManager import simulationConfigManager
-from modules.simulationWindow import simulationWindow
-from modules.simulationProcess import simulationProcess
+from simmodules.simulationManager import simulationConfigManager
+from simmodules.simulationWindow import simulationWindow
+from simmodules.simulationProcess import simulationProcess
 from config.appearanceValues import appearanceValues
 import logging
 import pprint
@@ -120,7 +120,6 @@ class App(tk.Tk):
         self.simulationConfigWindow.grab_release()
         self.simulationConfigWindow.withdraw()
         # self.simulationConfigWindow.deiconify()
-        print(self.simulationConfigWindow.simulationConfigurationState.testVal)
         self.simulationProcess = simulationProcess(self)
         self.simulationWindow = simulationWindow(self)
 

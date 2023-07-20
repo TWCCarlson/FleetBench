@@ -1,11 +1,12 @@
 import tkinter as tk
+import logging
 
 class simulationConfigManager(tk.Toplevel):
     # Window for managing the state of the simulation configuration
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        print("Simulation Configuration Manager Class gen")
+        logging.info("Simulation Configuration Manager Class gen")
         self.title("Simulation Configuration Window")
         self.focus()     # "Select" the window
         self.grab_set()  # Forcefully keep attention on the window
@@ -24,5 +25,4 @@ class simulationConfigurationState:
     # Holds the current state of the simulation config
     def __init__(self, parent):
         self.parent = parent
-        self.testVal = 50
-        print("Simulation State Default Init")
+        logging.info("Simulation State Default Init")
