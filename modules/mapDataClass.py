@@ -1,4 +1,3 @@
-from pprint import PrettyPrinter
 import tkinter as tk
 from tkinter import filedialog
 import json
@@ -133,7 +132,7 @@ class mapDataClass:
         logging.debug(f"Main Canvas dimensions updated: canvasWidth={self.dimensionX+1}, canvasHeight={self.dimensionY+1}")
 
         try:
-            pos = {node: eval(node) for node in self.mapGraph}
+            # pos = {node: eval(node) for node in self.mapGraph}
             # tsm = TSM(self.mapGraph, pos)
             # tsm.display()
             # plt.subplot(111)

@@ -120,8 +120,9 @@ class App(tk.Tk):
         self.simulationConfigWindow.grab_release()
         self.simulationConfigWindow.withdraw()
         # self.simulationConfigWindow.deiconify()
-        self.simulationProcess = simulationProcess(self)
         self.simulationWindow = simulationWindow(self)
+        self.simulationProcess = simulationProcess(self)
+        
 
 def initLogging():
     loglevelReference = {

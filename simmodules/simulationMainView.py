@@ -75,4 +75,18 @@ class simCanvas(tk.Canvas):
         for i in range(math.floor(int(self["width"])/self.canvasTileSize)+1):
             self.create_line(i*self.canvasTileSize, 0, i*self.canvasTileSize, self["height"], fill=self.appearanceValues.simCanvasGridlineColor)
         
+    def setCanvasDimensions(self, tileWidth, tileHeight):
+        # Adjusts the canvas to have passed dimensions (in number of tiles)
+        canvasWidth = tileWidth * self.appearanceValues.simCanvasTileSize
+        canvasHeight = tileHeight * self.appearanceValues.simCanvasTileSize
+        self["width"] = canvasWidth
+        self["height"] = canvasHeight
+        self["scrollregion"] = (0, 0, canvasWidth, canvasHeight)
+        
+        # Re-render the map to display the change
+        self.renderGraphState()
+        logging.debug(f"Main Canvas dimensions updated: canvasWidth={tileWidth}, canvasHeight={tileHeight}")
+
+    def renderGraphState(self):
+        pass
 
