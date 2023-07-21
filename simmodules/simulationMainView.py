@@ -88,5 +88,13 @@ class simCanvas(tk.Canvas):
         logging.debug(f"Main Canvas dimensions updated: canvasWidth={tileWidth}, canvasHeight={tileHeight}")
 
     def renderGraphState(self):
+        # Reset the canvas to being empty before redrawing
+        self.clearMainCanvas()
+        # Render grid lines
+        self.drawGridlines()
         pass
 
+    def clearMainCanvas(self):
+        # Destroys all entities on the canvas
+        self.delete("all")
+        logging.info("Main simulation canvas cleared.")
