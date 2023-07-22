@@ -162,10 +162,16 @@ class simCanvas(tk.Canvas):
         pp.pprint(mapGraph)
 
         # Render grid lines
+        logging.info("Attempting to render simulation canvas gridlines . . .")
         self.drawGridlines()
 
         # Render the mapGraph nodes
+        logging.info("Attempting to render simulation map nodes . . .")
         self.renderNodes(mapGraph, tileSize, nodeSizeRatio)
+
+        # Render the mapGraph connected edges
+        logging.info("Attempting to render simulation map connected edges . . .")
+        self.renderEdges(mapGraph, edgeWidth)
 
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
@@ -221,3 +227,37 @@ class simCanvas(tk.Canvas):
             logging.debug("Node drawn on the successfully.")
         logging.info("Rendered all graphData nodes to the simulation canvas.")
 
+    def renderEdges(self, graphData, edgeWidth):
+        # Display connected edges
+        for edge in graphData.edges():
+            logging.debug(f"Attempting to draw edge: {edge}")
+            # Break the edge into its 2 nodes
+            firstPoint = edge[0]
+            secondPoint = edge[1]
+
+            # Break the string into a tuple and pull out the coordinates
+            firstPosX = eval(firstPoint)[0]
+            firstPosY = eval(firstPoint)[1]
+            secondPosX = eval(secondPoint)[0]
+            secondPosY = eval(secondPoint)[1]
+
+            # Find the center of the relevant tiles on the canvas
+            logging.debug("Identifying canvas coordinates the edge begins at:")
+            firstPosGraphX = self.graphCoordToCanvas(firstPosX)
+            firstPosGraphY = self.graphCoordToCanvas(firstPosY)
+            logging.debug("Identifying canvas coordinates the edge ends at:")
+            secondPosGraphX = self.graphCoordToCanvas(secondPosX)
+            secondPosGraphY = self.graphCoordToCanvas(secondPosY)
+
+            # Draw the edge
+            self.create_line(
+                firstPosGraphX,
+                firstPosGraphY,
+                secondPosGraphX,
+                secondPosGraphY,
+                fill = "blue",
+                width = edgeWidth,
+                tags=["edge"]
+            )
+            logging.debug("Edge drawn successfully.")
+        logging.info("Rendered all connected graphData edges.")
