@@ -12,7 +12,7 @@ class simInfoBox(tk.Frame):
         self.parent = parent
 
         # Fetch frame style configuration
-        self.appearanceValues = self.parent.parent.appearance
+        self.appearanceValues = self.parent.parent.parent.appearance
         frameHeight = self.appearanceValues.simulationInfoBoxHeight
         frameWidth = self.appearanceValues.simulationInfoBoxWidth
         frameBorderWidth = self.appearanceValues.frameBorderWidth

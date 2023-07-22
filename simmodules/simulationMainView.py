@@ -1,6 +1,8 @@
 import tkinter as tk
 import math
 import logging
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class simMainView(tk.Frame):
     """
@@ -12,7 +14,7 @@ class simMainView(tk.Frame):
         self.parent = parent
 
         # Fetch styling configuration
-        self.appearanceValues = self.parent.parent.appearance
+        self.appearanceValues = self.parent.parent.parent.appearance
         frameHeight = self.appearanceValues.simulationMainViewHeight
         frameWidth = self.appearanceValues.simulationMainViewWidth
         frameBorderWidth = self.appearanceValues.frameBorderWidth
@@ -133,19 +135,89 @@ class simCanvas(tk.Canvas):
         self["width"] = canvasWidth
         self["height"] = canvasHeight
         self["scrollregion"] = (0, 0, canvasWidth, canvasHeight)
-        
-        # Re-render the map to display the change
-        self.renderGraphState()
         logging.debug(f"Main Canvas dimensions updated: canvasWidth={tileWidth}, canvasHeight={tileHeight}")
+
+    def graphCoordToCanvas(self, coord):
+        # Converts the tile number to the canvas pixel number
+        # In: integer id of a tile
+        # Out: central pixel of the corresponding location in the canvas
+        tileSize = self.appearanceValues.simCanvasTileSize
+        canvasCoord = coord * tileSize + 0.5 * tileSize
+        logging.debug(f"Converted tile coordinate '{coord}' to canvas coordinate '{canvasCoord}'")
+        return canvasCoord
 
     def renderGraphState(self):
         # Reset the canvas to being empty before redrawing
         self.clearMainCanvas()
+        logging.info("Cleared simulation main canvas for re-rendering.")
+
+        # Retrieve mainView styling information
+        tileSize = self.appearanceValues.simCanvasTileSize
+        nodeSizeRatio = self.appearanceValues.simCanvasTileCircleRatio
+        edgeWidth = self.appearanceValues.simCanvasEdgeWidth
+        logging.info("Fetched style reference values.")
+
+        # Retrieve the graph information
+        mapGraph = self.parent.parent.parent.simulationProcess.simGraphData.simMapGraph
+        pp.pprint(mapGraph)
+
         # Render grid lines
         self.drawGridlines()
-        pass
+
+        # Render the mapGraph nodes
+        self.renderNodes(mapGraph, tileSize, nodeSizeRatio)
 
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
         self.delete("all")
         logging.info("Main simulation canvas cleared.")
+
+    def renderNodes(self, mapGraph, tileSize, nodeSizeRatio):
+        # Iterate through the graph and draw nodes onto the simulation main view canvas
+        for node in mapGraph.nodes.data():
+            logging.debug(f"Simulation attempting to draw node: {node}")
+
+            # Extract data
+            nodeData = node[1]
+            nodePosX = nodeData["pos"]["X"]
+            nodePosY = nodeData["pos"]["Y"]
+            nodeType = nodeData["type"]
+
+            # Locate the canvas position of the tile
+            nodePosGraphX = self.graphCoordToCanvas(nodePosX)
+            nodePosGraphY = self.graphCoordToCanvas(nodePosY)
+
+            # Set the node style
+            if nodeType == "edge":
+                fillColor = "blue"
+                tags = ["node", "openNode"]
+            elif nodeType == "charge":
+                fillColor = "yellow"
+                tags = ["node", "chargeNode"]
+            elif nodeType == "deposit":
+                fillColor = "light green"
+                tags = ["node", "depositNode"]
+            elif nodeType == "pickup":
+                fillColor = "light blue"
+                tags = ["node", "pickupNode"]
+            elif nodeType == "rest":
+                fillColor = "brown"
+                tags = ["node", "restNode"]
+            elif nodeType == "void":
+                # Do nothing
+                logging.debug(f"Simulation node is of type 'void', ignoring . . .")
+                continue
+            logging.debug(f"Simulation node type '{nodeType}' is assigned tags: {tags}")
+
+            # Draw the node onto the simulation canvas
+            self.create_oval(
+                nodePosGraphX - nodeSizeRatio * tileSize,
+                nodePosGraphY - nodeSizeRatio * tileSize,
+                nodePosGraphX + nodeSizeRatio * tileSize,
+                nodePosGraphY + nodeSizeRatio * tileSize,
+                fill=fillColor,
+                tags=tags
+            )
+            logging.debug("Node drawn on the successfully.")
+        logging.info("Rendered all graphData nodes to the simulation canvas.")
+

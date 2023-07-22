@@ -41,7 +41,7 @@ class simAgentManager:
 
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
-        dataPackage = self.parent.parent.agentManager.packageAgentData()
+        dataPackage = self.parent.parent.parent.agentManager.packageAgentData()
         # Populate the agent condition into the 
         for agent in dataPackage:
             ID = dataPackage[agent]["ID"]

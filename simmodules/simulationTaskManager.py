@@ -36,7 +36,7 @@ class simTaskManager:
 
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
-        dataPackage = self.parent.parent.taskManager.packageTaskData()
+        dataPackage = self.parent.parent.parent.taskManager.packageTaskData()
         # Reconstruct the tasks from the data
         for task in dataPackage:
             taskName = dataPackage[task]["name"]

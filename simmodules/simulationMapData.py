@@ -20,7 +20,7 @@ class simGraphManager:
 
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window
-        dataPackage = self.parent.parent.mapData.packageMapData()
+        dataPackage = self.parent.parent.parent.mapData.packageMapData()
 
         # Process the data and load it into networkX
         for node in dataPackage:

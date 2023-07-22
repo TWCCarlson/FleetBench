@@ -120,9 +120,24 @@ class App(tk.Tk):
         self.simulationConfigWindow.grab_release()
         self.simulationConfigWindow.withdraw()
         # self.simulationConfigWindow.deiconify()
+        self.simulationManager = simulationManager(self)
+        # self.simulationWindow = simulationWindow(self)
+        # self.simulationProcess = simulationProcess(self)
+
+class simulationManager:
+    """
+        Containing class to group referencing in the simulation classes
+    """
+    def __init__(self, parent):
+        self.parent = parent
+
+        # Display classes
         self.simulationWindow = simulationWindow(self)
-        self.simulationProcess = simulationProcess(self)
         
+        # Information classes
+        self.simulationProcess = simulationProcess(self)
+
+        self.simulationWindow.simMainView.simCanvas.renderGraphState()
 
 def initLogging():
     loglevelReference = {

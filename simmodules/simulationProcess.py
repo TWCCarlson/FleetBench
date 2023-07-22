@@ -19,3 +19,5 @@ class simulationProcess():
         # Build simulation task manager
         self.simTaskManager = simTaskManager(self)
         logging.info("Simulation Info Class 'simTaskManager' instantiated successfully.")
+
+        # self.parent.simulationWindow.simMainView.simCanvas.
