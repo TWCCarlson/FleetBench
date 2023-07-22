@@ -86,7 +86,7 @@ class taskManager:
         logging.info("Received request to package 'taskManager' data.")
         dataPackage = {}
         for task in self.taskList:
-            pp.pprint(self.taskList[task])
+            # pp.pprint(self.taskList[task])
             taskData = {
                 "name": self.taskList[task].name,
                 "pickupPosition": self.taskList[task].pickupPosition,

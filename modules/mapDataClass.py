@@ -219,6 +219,6 @@ class mapDataClass:
             logging.debug(f"Adding {node} to data package:")
             # nodeData = node[1]
             # pp.pprint(nodeData)
-        pp.pprint(dataPackage)
+        # pp.pprint(dataPackage)
         logging.info("Packaged all mapData.")
         return dataPackage
