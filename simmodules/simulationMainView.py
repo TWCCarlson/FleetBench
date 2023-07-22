@@ -173,6 +173,10 @@ class simCanvas(tk.Canvas):
         logging.info("Attempting to render simulation map connected edges . . .")
         self.renderEdges(mapGraph, edgeWidth)
 
+        # Render the mapGraph unconnected edges
+        logging.info("Attempting to render simulation map unconnected edges . . .")
+        self.renderDanglingEdges(mapGraph, tileSize, edgeWidth)
+
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
         self.delete("all")
@@ -261,3 +265,101 @@ class simCanvas(tk.Canvas):
             )
             logging.debug("Edge drawn successfully.")
         logging.info("Rendered all connected graphData edges.")
+
+    def renderDanglingEdges(self, graphData, tileSize, edgeWidth):
+        # Render edges that are in the mapfile but not connected to another node
+        for node in graphData.nodes.data():
+            # Break out the data
+            nodeName = node[0]
+            nodeData = node[1]
+            nodePosX = nodeData["pos"]["X"]
+            nodePosY = nodeData["pos"]["Y"]
+            nodeEdges = nodeData["edgeDirs"]
+            logging.debug(f"Checking node '{nodeName}' for unconnected edges in the graph.")
+            # If the node has an edge in a direction
+            if nodeEdges["N"] == 1:
+                # Calculate what the node it is trying to connect to should be
+                edgeTarget = "(" + str(nodePosX) + ", " + str(nodePosY-1) + ")"
+                # Check that node is not connected to target by a real edge
+                if graphData.has_edge(nodeName, edgeTarget):
+                # if edgeTarget in graphData.neighbors(nodeName):
+                    pass
+                else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
+                    # Draw the line if it dangles and tag it appropriately
+                    nodePosGraphX = self.graphCoordToCanvas(nodePosX)
+                    nodePosGraphY = self.graphCoordToCanvas(nodePosY)
+                    self.create_line(
+                        nodePosGraphX,
+                        nodePosGraphY,
+                        nodePosGraphX,
+                        nodePosGraphY - 0.5*tileSize,
+                        fill="green",
+                        width=edgeWidth,
+                        tags=["danglingEdge"]
+                    )
+                    logging.debug("Unconnected edge drawn.")
+            if nodeEdges["E"] == 1:
+                # Calculate what the node it is trying to connect to should be
+                edgeTarget = "(" + str(nodePosX+1) + ", " + str(nodePosY) + ")"
+                # Check that node is not connected to target by a real edge
+                if graphData.has_edge(nodeName, edgeTarget):
+                    pass
+                else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
+                    # Draw the line if it dangles and tag it appropriately
+                    nodePosGraphX = self.graphCoordToCanvas(nodePosX)
+                    nodePosGraphY = self.graphCoordToCanvas(nodePosY)
+                    self.create_line(
+                        nodePosGraphX,
+                        nodePosGraphY,
+                        nodePosGraphX + 0.5*tileSize,
+                        nodePosGraphY,
+                        fill="green",
+                        width=edgeWidth,
+                        tags=["danglingEdge"]
+                    )
+                    logging.debug("Unconnected edge drawn.")
+            if nodeEdges["W"] == 1:
+                # Calculate what the node it is trying to connect to should be
+                edgeTarget = "(" + str(nodePosX-1) + ", " + str(nodePosY) + ")"
+                # Check that node is not connected to target by a real edge
+                if edgeTarget in graphData.neighbors(nodeName):
+                    pass
+                else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
+                    # Draw the line if it dangles and tag it appropriately
+                    nodePosGraphX = self.graphCoordToCanvas(nodePosX)
+                    nodePosGraphY = self.graphCoordToCanvas(nodePosY)
+                    self.create_line(
+                        nodePosGraphX,
+                        nodePosGraphY,
+                        nodePosGraphX - 0.5*tileSize,
+                        nodePosGraphY,
+                        fill="green",
+                        width=edgeWidth,
+                        tags=["danglingEdge"]
+                    )
+                    logging.debug("Unconnected edge drawn.")
+            if nodeEdges["S"] == 1:
+                # Calculate what the node it is trying to connect to should be
+                edgeTarget = "(" + str(nodePosX) + ", " + str(nodePosY+1) + ")"
+                # Check that node is not connected to target by a real edge
+                if edgeTarget in graphData.neighbors(nodeName):
+                    pass
+                else:
+                    logging.debug(f"'{nodeName}' has an unconnected edge toward '{edgeTarget}'.")
+                    # Draw the line if it dangles and tag it appropriately
+                    nodePosGraphX = self.graphCoordToCanvas(nodePosX)
+                    nodePosGraphY = self.graphCoordToCanvas(nodePosY)
+                    self.create_line(
+                        nodePosGraphX,
+                        nodePosGraphY,
+                        nodePosGraphX,
+                        nodePosGraphY + 0.5*tileSize,
+                        fill="green",
+                        width=edgeWidth,
+                        tags=["danglingEdge"]
+                    )
+                    logging.debug("Unconnected edge drawn.")
+        logging.info("Rendered all unconnected graphData edges.")
