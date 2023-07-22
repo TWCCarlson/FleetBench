@@ -221,6 +221,10 @@ class mainCanvas(tk.Canvas):
             elif nodeType == "rest":
                 fillColor = "brown"
                 tags = ["node", "restNode"]
+            elif nodeType == "void":
+                # Do nothing
+                logging.debug(f"Node is of type 'void', ignoring . . .")
+                continue
             logging.debug(f"Node type '{nodeType}' is assigned tags: {tags}")
 
             # Draw the node
