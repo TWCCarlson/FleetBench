@@ -374,7 +374,6 @@ class mainCanvas(tk.Canvas):
 
     def renderAgents(self, graphData, tileSize):
         # Renders agent positions and orientations
-
         # Render the agent position direct from the graph object
         for node in graphData.nodes(data=True):
             if 'agent' in graphData.nodes.data()[node[0]]:

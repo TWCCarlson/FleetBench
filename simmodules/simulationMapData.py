@@ -100,3 +100,23 @@ class simGraphManager:
         canvasHeight = (self.simMapDimensionY+1)
         self.simMapCanvas.setCanvasDimensions(canvasWidth, canvasHeight)
         logging.info("All new simulation mapData finished loading.")
+
+    def updateAgentLocations(self, agentList):
+        logging.debug("Updating agent locations in the simulation mapGraph . . .")
+
+        # Remove all agents from the graph
+        for node in self.simMapGraph.nodes(data=True):
+            if 'agent' in self.simMapGraph.nodes.data()[node[0]]:
+                logging.debug(f"Remove agent '{self.simMapGraph.nodes.data()[node[0]]['agent'].ID}:{self.simMapGraph.nodes.data()[node[0]]['agent'].numID}' from simulation node '{node[0]}'.")
+                del self.simMapGraph.nodes.data()[node[0]]['agent']
+            else:
+                pass
+
+        # Insert agents from the agent list back into the graph
+        for agent in agentList:
+            agentPosition = agentList[agent].position
+            targetNode = f"({agentPosition[0]}, {agentPosition[1]})"
+            self.simMapGraph.nodes[targetNode]['agent'] = agentList[agent]
+            logging.debug(f"Inserted agent '{agentList[agent].ID}:{agent}' into simulation mapGraph node '{targetNode}'.")
+
+        logging.info("Agent data in simulation mapGraph updated.")

@@ -37,6 +37,9 @@ class simAgentManager:
         # Create a new agent and add it to the manager's list
         self.latestAgent = simAgentClass(self, **kwargs, ID=ID, numID=self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
+
+        # Insert the agent into the simulation map data
+        self.parent.simGraphData.updateAgentLocations(self.agentList)
         logging.info(f"Agent added to the dict of agents")
 
     def retrieveInitialSimState(self):

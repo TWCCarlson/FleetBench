@@ -177,6 +177,10 @@ class simCanvas(tk.Canvas):
         logging.info("Attempting to render simulation map unconnected edges . . .")
         self.renderDanglingEdges(mapGraph, tileSize, edgeWidth)
 
+        # Render the location of all agents
+        logging.info("Attempting to render simulation agent positions . . .")
+        self.renderAgents(mapGraph, tileSize)
+
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
         self.delete("all")
@@ -363,3 +367,65 @@ class simCanvas(tk.Canvas):
                     )
                     logging.debug("Unconnected edge drawn.")
         logging.info("Rendered all unconnected graphData edges.")
+
+    def renderAgents(self, graphData, tileSize):
+        print("Render agents")
+        # Renders agent positions and orientations
+        # Render the agent position direct from the graph object
+        for node in graphData.nodes(data=True):
+            if 'agent' in graphData.nodes.data()[node[0]]:
+                # Extract the reference to the agent object with a shallow copy
+                agentRef = graphData.nodes.data()[node[0]]['agent']
+                logging.debug(f"Node '{node[0]}' contains agent '{agentRef.ID}'.")
+                # Extract position data, convert to canvas coordinates and centralize
+                nodePosX = agentRef.position[0]
+                centerPosX = nodePosX * tileSize + 0.5 * tileSize
+                nodePosY = agentRef.position[1]
+                centerPosY = nodePosY * tileSize + 0.5 * tileSize
+                # Extract the agent orientation
+                agentOrientation = agentRef.orientation
+                # Tag the agent for layer sorting
+                tag = ["agent" + str(agentRef.ID), "agent"]
+                # Dictionary of points for the polygon
+                dirDict = {
+                    "N": (centerPosX, centerPosY - 0.4 * tileSize),
+                    "W": (centerPosX - 0.4 * tileSize, centerPosY),
+                    "S": (centerPosX, centerPosY + 0.4 * tileSize),
+                    "E": (centerPosX + 0.4 * tileSize, centerPosY)
+                }
+                # Draw the polygon representing the agent
+                self.create_polygon(
+                    dirDict["N"][0],
+                    dirDict["N"][1],
+                    dirDict["W"][0],
+                    dirDict["W"][1],
+                    dirDict["S"][0],
+                    dirDict["S"][1],
+                    dirDict["E"][0],
+                    dirDict["E"][1],
+                    outline='black',
+                    width = 2,
+                    fill='orange',
+                    tags=tag
+                )
+                logging.debug("Agent representation rendered.")
+
+                # Arrow tags should include a sorting tag
+                tag.append("agentOrientation")
+
+                # Draw the orientation arrow
+                self.create_line(
+                    dirDict[agentOrientation][0],
+                    dirDict[agentOrientation][1],
+                    centerPosX,
+                    centerPosY,
+                    arrow = tk.FIRST,
+                    tags=tag,
+                    fill='white',
+                    width=4
+                )
+                logging.debug("Agent orientation rendered.")
+            else:
+                # print(f"{node} does not contain an agent")
+                pass
+        logging.info("Rendered all agents in agentManager.")
