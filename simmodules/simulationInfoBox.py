@@ -54,23 +54,23 @@ class infoBoxFrame(tk.Frame):
         # Create checkboxes for each canvas layer
         self.danglingEdgeTick = tk.Checkbutton(self.parent, text='Dangling Edges', 
                 variable=self.danglingEdgeVisibility, onvalue=1, offvalue=0,
-                # command=self.setDanglingEdgeVisibility
+                command=self.setDanglingEdgeVisibility
                 )
         self.edgeTick = tk.Checkbutton(self.parent, text='Edges', 
                 variable=self.edgeVisibility, onvalue=1, offvalue=0,
-                # command=self.setEdgeVisibility
+                command=self.setEdgeVisibility
                 )
         self.nodeTick = tk.Checkbutton(self.parent, text='Nodes', 
                 variable=self.nodeVisibility, onvalue=1, offvalue=0,
-                # command=self.setNodeVisibility
+                command=self.setNodeVisibility
                 )
         self.agentTick = tk.Checkbutton(self.parent, text='Agents',
                 variable=self.agentVisibility, onvalue=1, offvalue=0,
-                # command=self.setAgentVisibility
+                command=self.setAgentVisibility
                 )
         self.agentOrientationTick = tk.Checkbutton(self.parent, text='Agent Orientation',
                 variable=self.agentOrienationVisibility, onvalue=1, offvalue=0,
-                # command=self.setAgentOrientationVisibility
+                command=self.setAgentOrientationVisibility
                 )
         logging.debug("Created canvas layer visibility toggles.`")
 
@@ -94,3 +94,28 @@ class infoBoxFrame(tk.Frame):
         self.parent.columnconfigure(5, weight=1)
         self.hoverInfo.grid(row=0, column=5, sticky=tk.E)
         logging.debug("Rendered canvas layer hover info display.")
+
+    def setDanglingEdgeVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        logging.debug("Requesting 'danglingEdge' visibility toggle.")
+        self.parent.parent.simMainView.simCanvas.toggleDanglingEdgeVisibility()
+
+    def setEdgeVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        logging.debug("Requesting 'edge' visibility toggle.")
+        self.parent.parent.simMainView.simCanvas.toggleEdgeVisibility()
+
+    def setNodeVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        logging.debug("Requesting 'node' visibility toggle.")
+        self.parent.parent.simMainView.simCanvas.toggleNodeVisibility()
+
+    def setAgentVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        logging.debug("Requesting 'agent' visibility toggle.")
+        self.parent.parent.simMainView.simCanvas.toggleAgentVisibility()
+
+    def setAgentOrientationVisibility(self):
+        # Call the canvas function for toggling the state of the layer
+        logging.debug("Requesting 'agentOrientation' visibility toggle.")
+        self.parent.parent.simMainView.simCanvas.toggleAgentOrientationVisibility()

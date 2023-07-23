@@ -120,6 +120,9 @@ class simCanvas(tk.Canvas):
         # Draw gridlines
         self.drawGridlines()
 
+        # Set default layer visibilities
+        self.setAllLayersVisible()
+
     def drawGridlines(self):
         # Drawn for every linewidth in appearanceValues
         logging.debug("Rendering Simulation Main Canvas gridlines . . .")
@@ -190,6 +193,12 @@ class simCanvas(tk.Canvas):
         # Sort canvas objects into the correct layer viewing order
         logging.info("Attempting to sort canvas layers . . .")
         self.sortCanvasLayers()
+
+        # Check whether a layer should be visible
+        logging.info("Setting layer visibility on simulation main canvas . . .")
+        self.checkLayerVisibility()
+
+        logging.info("Canvas re-render finished.")
 
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
@@ -507,3 +516,75 @@ class simCanvas(tk.Canvas):
         for obj in objs:
             self.lift(obj)
         logging.info("Canvas object layers sorted.")
+
+    def setAllLayersVisible(self):
+        # Mark layer states
+        self.danglingEdgeVisibility = True
+        self.edgeVisibility = True
+        self.nodeVisibility = True
+        self.agentVisibility = True
+        self.agentOrientationVisibility = True
+
+        # Update the checkboxes
+        self.infoBoxButtons = self.parent.parent.simInfoBox.simInfoBoxFrame
+        self.infoBoxButtons.danglingEdgeTick.select()
+        self.infoBoxButtons.edgeTick.select()
+        self.infoBoxButtons.nodeTick.select()
+        self.infoBoxButtons.agentTick.select()
+        self.infoBoxButtons.agentOrientationTick.select()
+        logging.info("All layers set to be visible on the main canvas.")
+
+    def checkLayerVisibility(self):
+        # Check all desired state values
+        layerStates = {
+            "danglingEdge": self.danglingEdgeVisibility,
+            "edge": self.edgeVisibility,
+            "node": self.nodeVisibility,
+            "agent": self.agentVisibility,
+            "agentOrientation": self.agentOrientationVisibility
+        }
+        # Iterate, setting the state to match the desired value
+        for layer in layerStates:
+            self.setLayerVisibility(layer, layerStates[layer])
+        logging.info("Updated layer visibilities to match user settings.")
+
+    def setLayerVisibility(self, layerTag, desiredState):
+        # Unify the visibility state of all objects with layerTag to match desiredState
+        objs = self.find_withtag(layerTag)
+        if desiredState == True:
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+        elif desiredState == False:
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        logging.debug(f"Layer '{layerTag}' set to '{desiredState}'")
+
+    def toggleLayerVisibility(self, layerTag, state):
+        # Find all the objects with the matching tag
+        objs = self.find_withtag(layerTag)
+        # Toggle their state and visibility
+        if state == True:
+            state = False
+            for obj in objs:
+                self.itemconfigure(obj, state='hidden')
+        else:
+            state = True
+            for obj in objs:
+                self.itemconfigure(obj, state='normal')
+        logging.debug(f"Layer '{layerTag}' toggled from '{state}' to '{not state}'.")
+        return state
+
+    def toggleDanglingEdgeVisibility(self):
+        self.danglingEdgeVisibility = self.toggleLayerVisibility("danglingEdge", self.danglingEdgeVisibility)
+
+    def toggleEdgeVisibility(self):
+        self.edgeVisibility = self.toggleLayerVisibility("edge", self.edgeVisibility)
+
+    def toggleNodeVisibility(self):
+        self.nodeVisibility = self.toggleLayerVisibility("node", self.nodeVisibility)
+
+    def toggleAgentVisibility(self):
+        self.agentVisibility = self.toggleLayerVisibility("agent", self.agentVisibility)
+
+    def toggleAgentOrientationVisibility(self):
+        self.agentOrientationVisibility = self.toggleLayerVisibility("agentOrientation", self.agentOrientationVisibility)
