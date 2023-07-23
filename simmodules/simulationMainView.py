@@ -3,6 +3,8 @@ import math
 import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
+from functools import partial
+from PIL import Image, ImageDraw, ImageTk
 
 class simMainView(tk.Frame):
     """
@@ -180,6 +182,10 @@ class simCanvas(tk.Canvas):
         # Render the location of all agents
         logging.info("Attempting to render simulation agent positions . . .")
         self.renderAgents(mapGraph, tileSize)
+
+        # Create mouse hover info elements
+        logging.info("Attempting to render simulation hover info . . .")
+        self.generateHoverInfo(mapGraph, tileSize)
 
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
@@ -429,3 +435,49 @@ class simCanvas(tk.Canvas):
                 # print(f"{node} does not contain an agent")
                 pass
         logging.info("Rendered all agents in agentManager.")
+
+    def generateHoverInfo(self, graphData, tileSize):
+        # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
+        # Place one in each cell of the grid that contains a node
+        for node in graphData.nodes.data():
+            logging.debug(f"Generating hover info for node '{node}'.")
+            # Break down the data
+            nodeData = node[1]
+            nodePosX = nodeData["pos"]["X"]
+            nodePosY = nodeData["pos"]["Y"]
+            nodeType = nodeData["type"]
+            # Create the transparent object
+            # Use PIL workaround to create a transparent image, tk.Canvas does not support alpha channels (????)
+            tileImage = Image.new('RGBA', (tileSize, tileSize), (255, 255, 255, 0))
+            tileImage = ImageTk.PhotoImage(tileImage)
+            tileObject = self.create_image(
+                nodePosX * tileSize,
+                nodePosY * tileSize,
+                image=tileImage,
+                anchor=tk.NW,
+                tags=["infoTile"]
+            )
+            logging.debug("Mouse capture tile generated.")
+            # If there is an agent in the node, include it in the hoverinfo text
+            if 'agent' in nodeData:
+                nodeAgentName = nodeData['agent'].ID
+                nodeAgentID = nodeData['agent'].numID
+                hoverString = f"{str(node[0])}: {nodeType.capitalize()}, Agent Name: {nodeAgentName}"
+                logging.debug("Node contains an agent, ID added to hover info.")
+
+                # Further, make clicks on this hovertile select the agent
+                # self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentName, nodeAgentID))
+                # logging.debug("Bound clicks on the capture tile to the agent.")
+            else:
+                hoverString = f"{str(node[0])}: {nodeType.capitalize()}"
+
+            # Assign the mouseover event to it
+            # Tkinter automatically passes the event object to the handler
+            self.tag_bind(tileObject, "<Leave>", partial(self.infoHoverEnter, ". . ."))
+            self.tag_bind(tileObject, "<Enter>", partial(self.infoHoverEnter, hoverString))
+            logging.debug("Mouseover events bound.")
+        logging.info("Generated all information hover tiles.")
+
+    def infoHoverEnter(self, hoverString, event):
+        self.infoBoxFrame = self.parent.parent.simInfoBox.simInfoBoxFrame
+        self.infoBoxFrame.hoverInfoText.set(hoverString)
