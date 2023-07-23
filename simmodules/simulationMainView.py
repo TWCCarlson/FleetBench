@@ -187,6 +187,10 @@ class simCanvas(tk.Canvas):
         logging.info("Attempting to render simulation hover info . . .")
         self.generateHoverInfo(mapGraph, tileSize)
 
+        # Sort canvas objects into the correct layer viewing order
+        logging.info("Attempting to sort canvas layers . . .")
+        self.sortCanvasLayers()
+
     def clearMainCanvas(self):
         # Destroys all entities on the canvas
         self.delete("all")
@@ -481,3 +485,25 @@ class simCanvas(tk.Canvas):
     def infoHoverEnter(self, hoverString, event):
         self.infoBoxFrame = self.parent.parent.simInfoBox.simInfoBoxFrame
         self.infoBoxFrame.hoverInfoText.set(hoverString)
+
+    def sortCanvasLayers(self):
+        # Moves all layers to a default order
+        # Search for all objects with a specific tag, pull them to the top in the correct order
+
+        # Node objects
+        objs = self.find_withtag("node")
+        for obj in objs:
+            self.lift(obj)
+        # Agent objects
+        objs = self.find_withtag("agent")
+        for obj in objs:
+            self.lift(obj)
+        # Agent orientation indicator objects
+        objs = self.find_withtag("agentOrientation")
+        for obj in objs:
+            self.lift(obj)
+        # Invisible infoTile layer objects
+        objs = self.find_withtag("infoTile")
+        for obj in objs:
+            self.lift(obj)
+        logging.info("Canvas object layers sorted.")
