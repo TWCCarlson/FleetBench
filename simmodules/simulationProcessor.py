@@ -1,6 +1,12 @@
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 class simProcessor:
-    def __init__(self, parent):
+    def __init__(self, parent, simulationSettings):
         self.parent = parent
+        self.simulationSettings = simulationSettings
+
+        self.simulateStep()
 
     def simulateStep(self):
         """
@@ -14,4 +20,5 @@ class simProcessor:
             Render the new state
             - Update statistics
         """
-        
+        # Check what the currently in use algorithm is
+        algorithmSelection = self.simulationSettings["algorithmSelection"].get()

@@ -505,7 +505,7 @@ class contextView(tk.Frame):
         logging.info("Session map loaded, enabling simulation configuration.")
 
     def openSimulationInformationWindow(self):
-        print("Simulation Info window opened!")
+        # print("Simulation Info window opened!")
         self.parent.simulationConfiguration()
 
 class contextViewState:

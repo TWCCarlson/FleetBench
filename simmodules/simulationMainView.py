@@ -164,7 +164,6 @@ class simCanvas(tk.Canvas):
 
         # Retrieve the graph information
         mapGraph = self.parent.parent.parent.simulationProcess.simGraphData.simMapGraph
-        pp.pprint(mapGraph)
 
         # Render grid lines
         logging.info("Attempting to render simulation canvas gridlines . . .")
@@ -388,7 +387,6 @@ class simCanvas(tk.Canvas):
         logging.info("Rendered all unconnected graphData edges.")
 
     def renderAgents(self, graphData, tileSize):
-        print("Render agents")
         # Renders agent positions and orientations
         # Render the agent position direct from the graph object
         for node in graphData.nodes(data=True):

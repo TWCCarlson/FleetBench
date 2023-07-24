@@ -6,7 +6,7 @@ import logging
 
 class simulationProcess():
     # Process used for running the simulation, exposes data to the window for rendering display
-    def __init__(self, parent):
+    def __init__(self, parent, simulationSettings):
         self.parent = parent
 
         # Build simulation graph data store
@@ -22,5 +22,5 @@ class simulationProcess():
         logging.info("Simulation Info Class 'simTaskManager' instantiated successfully.")
 
         # Build simulation executor
-        self.simProcessor = simProcessor(self)
+        self.simProcessor = simProcessor(self, simulationSettings)
         logging.info("Simulation Execution Class 'simProcessor' instantiated successfully.")

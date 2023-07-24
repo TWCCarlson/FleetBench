@@ -130,12 +130,12 @@ class simulationManager:
     """
     def __init__(self, parent, simulationSettings):
         self.parent = parent
-        pp.pprint(simulationSettings)
+        # pp.pprint(simulationSettings)
         # Display classes
         self.simulationWindow = simulationWindow(self)
         
         # Information classes
-        self.simulationProcess = simulationProcess(self)
+        self.simulationProcess = simulationProcess(self, simulationSettings)
 
         self.simulationWindow.simMainView.simCanvas.renderGraphState()
 

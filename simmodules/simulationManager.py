@@ -25,7 +25,7 @@ class simulationConfigManager(tk.Toplevel):
             Packages the current simulation configuration for saving
         """
         dataPackage = {}
-        dataPackage["algorithmSelection"] = self.algorithmChoiceState.get()
+        dataPackage["algorithmSelection"] = self.algorithmChoiceState
 
         return dataPackage
     
@@ -34,6 +34,7 @@ class simulationConfigManager(tk.Toplevel):
         options = [
             "Dummy"
         ]
+
         # Set a default selection - maybe skip this to force a choice
         self.algorithmChoiceState = self.simulationConfigurationState.algorithmSelectionStringVar
         self.algorithmChoiceState.set(options[0])
