@@ -137,10 +137,13 @@ class simulationManager:
         # Information classes
         self.simulationProcess = simulationProcess(self, simulationSettings)
 
+        self.buildReferences()
+
         self.simulationWindow.simMainView.simCanvas.renderGraphState()
 
-        self.simulationProcess.simProcessor.simulateStep()
-        self.simulationProcess.simProcessor.simulateStep()
+    def buildReferences(self):
+        # Build necessary references for inner classes
+        self.simulationWindow.simControlPanel.buildReferences()
 
 def initLogging():
     loglevelReference = {
@@ -151,8 +154,8 @@ def initLogging():
         40:"ERROR",
         50:"CRITICAL"
     }
-    logLevel = logging.DEBUG
-    # logLevel = logging.INFO
+    # logLevel = logging.DEBUG
+    logLevel = logging.INFO
     # logLevel = logging.WARNING
     # logLevel = logging.ERROR
     # logLevel = logging.CRITICAL

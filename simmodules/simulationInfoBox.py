@@ -32,7 +32,7 @@ class simInfoBox(tk.Frame):
 
         # Render the frame
         self.grid_propagate(False)
-        self.grid(row=0, column=1, sticky=tk.N)
+        self.grid(row=0, column=0, sticky=tk.N)
         logging.info("Info Box UI elements rendered into simulation window.")
 
 class infoBoxFrame(tk.Frame):
