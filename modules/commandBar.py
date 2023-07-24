@@ -71,18 +71,23 @@ class FileCommands(tk.Menu):
             logging.info("User will supply new session map data.")
             self.refMapData.ingestMapFromJSON()
 
-    def openSession(self):
-        # Open a saved session
-        self.promptSave()
-        logging.info("User attempting to open a saved session.")
-        
+    def openSession(self, **kwargs):  
         # Prompt for which saved file to load
-        fid = tk.filedialog.askopenfilename()
+        if kwargs['fid']:
+            logging.info("User launched in debug mode with default session loaded.")
+            fid = kwargs.pop("fid")
+        else:
+            # Open a saved session
+            self.promptSave()
+            logging.info("User attempting to open a saved session.")
+            fid = tk.filedialog.askopenfilename()
+        
         logging.debug(f"User wants to open session datafile: {fid}")
         # Read the data using pickle
         with open(fid, 'rb') as inp:
             data = pickle.load(inp)
         # logging.debug(f"{data}")
+        # if 
         
         # Reconstruct the map from the data
         graphData = data["mapDataClass"]
