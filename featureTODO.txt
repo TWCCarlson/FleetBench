@@ -80,3 +80,14 @@ Does simulation deserve its own window?
  Live agent/task representation? Green for task done, yellow for agent busy, etc.?
  Ability to export the current "situation" directly back to the main program window for editing (ship over the graph and task/agent lists)
  Replay mode needs buttons and a way to scroll around the timeline
+
+Simulation structure
+ Check for selected algorithm
+ Feed algorithm all the simulation state information
+ - Iterate over agents, top->bottom? bottom->top? some kind of adaptive technique? short distances to go first? long first?
+ Collect algorithm Orders
+ Validate any interactions
+ - Pickup, dropoff, resting, task completion
+ Record the history for replay
+ Render the new state
+ - Update statistics

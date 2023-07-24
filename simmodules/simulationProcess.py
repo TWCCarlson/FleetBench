@@ -1,6 +1,7 @@
 from simmodules.simulationMapData import simGraphManager
 from simmodules.simulationAgentManager import simAgentManager
 from simmodules.simulationTaskManager import simTaskManager
+from simmodules.simulationProcessor import simProcessor
 import logging
 
 class simulationProcess():
@@ -20,4 +21,6 @@ class simulationProcess():
         self.simTaskManager = simTaskManager(self)
         logging.info("Simulation Info Class 'simTaskManager' instantiated successfully.")
 
-        # self.parent.simulationWindow.simMainView.simCanvas.
+        # Build simulation executor
+        self.simProcessor = simProcessor(self)
+        logging.info("Simulation Execution Class 'simProcessor' instantiated successfully.")
