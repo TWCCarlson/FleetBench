@@ -115,12 +115,12 @@ class App(tk.Tk):
         self.simulationConfigWindow = simulationConfigManager(self)
         logging.info("Configuration class 'simulationConfigManager' instantiated.")
 
-    def launchSimulator(self):
+    def launchSimulator(self, simulationSettings):
         logging.debug("Simulation lanuch requested.")
         self.simulationConfigWindow.grab_release()
         self.simulationConfigWindow.withdraw()
         # self.simulationConfigWindow.deiconify()
-        self.simulationManager = simulationManager(self)
+        self.simulationManager = simulationManager(self, simulationSettings)
         # self.simulationWindow = simulationWindow(self)
         # self.simulationProcess = simulationProcess(self)
 
@@ -128,9 +128,9 @@ class simulationManager:
     """
         Containing class to group referencing in the simulation classes
     """
-    def __init__(self, parent):
+    def __init__(self, parent, simulationSettings):
         self.parent = parent
-
+        pp.pprint(simulationSettings)
         # Display classes
         self.simulationWindow = simulationWindow(self)
         
