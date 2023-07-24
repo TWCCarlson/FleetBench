@@ -139,6 +139,9 @@ class simulationManager:
 
         self.simulationWindow.simMainView.simCanvas.renderGraphState()
 
+        self.simulationProcess.simProcessor.simulateStep()
+        self.simulationProcess.simProcessor.simulateStep()
+
 def initLogging():
     loglevelReference = {
         0 :"NOTSET",

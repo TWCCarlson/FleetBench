@@ -166,7 +166,6 @@ class agentClass:
         logging.debug(f"Agent '{self.ID}:{self.numID}' moved upwards.")
         self.highlightAgent(multi=False)
         
-        
     def moveLeft(self):
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' leftwards.")
         # Set the target node to be west

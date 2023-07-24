@@ -72,3 +72,35 @@ class simAgentClass:
         self.position = kwargs.pop("position")
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
+
+        # Build useful references
+        self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
+
+        # Dict of directions and their numerical values
+        # Used for rotation + = CCW, - = CW
+        self.dirDict = {
+            "N" : 0,
+            "W" : 1,
+            "S" : 2,
+            "E" : 3
+        }
+
+    def validateCandidateMove(self, targetNode):
+        """
+            Used to check whether an agent can move to a target node
+            - There must be an edge between current node and target node
+            - There cannot be an agent in the target node, if the config specifies no agent overlap
+        """
+        currentNode = f"({self.position[0]}, {self.position[1]})"
+        targetNode = f"({targetNode[0]}, {targetNode[1]})"
+        logging.debug(f"Checking if currentNode '{currentNode}' and '{targetNode}' share an edge . . .")
+        edgeExists = self.mapGraphRef.has_edge(currentNode, targetNode)
+        logging.debug(f"Edge existence: {edgeExists}")
+        return edgeExists
+    
+    def executeMove(self, targetNode):
+        """
+            Move the agent to the targetNode, to be done only after the move is valid
+        """
+        logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        self.position = targetNode # Set it as a tuple

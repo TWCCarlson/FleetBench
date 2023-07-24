@@ -91,3 +91,10 @@ Simulation structure
  Record the history for replay
  Render the new state
  - Update statistics
+
+Configuration Options list
+ Algorithm to be used in simulation
+ Agents can share same node
+ Pickup and dropoff are independent 'turn' actions?
+ Rate at which tasks are generated
+ 
