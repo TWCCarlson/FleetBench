@@ -111,7 +111,8 @@ class App(tk.Tk):
         logging.info("RWS Application Window will render. Default mode: edit.")
 
         # Debug session load
-        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test")
+        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test_manytask")
 
         self.mainloop()
 

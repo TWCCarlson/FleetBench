@@ -23,6 +23,8 @@
 - logging for earlier modules in the load order should get redone some day
 - fix the way marked empty tiles are loaded in from new mapfiles
 - make code more portable by moving references to other classes to functions and passing references to functions
+- Make ui clearing functions accept the target frame to make code more DRY
+- There are two ways selecting an agent is being handled, unify it into one method 
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

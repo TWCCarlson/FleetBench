@@ -4,6 +4,8 @@ import networkx as nx
 import modules.exceptions as RWSE
 from functools import partial
 import logging
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class toolBar(tk.Frame):
     """
@@ -500,6 +502,7 @@ class toolBar(tk.Frame):
 
     def agentManagePrompt(self):
         logging.debug("Creating agent management prompt UI elements.")
+        self.clearAgentManagementUI()
         # Create a button that starts prompting the user
         self.manageAgentButton = tk.Button(self.agentManageFrame,
             command=self.agentManagementUI, text="Manage Agent . . .", width=15,
@@ -510,32 +513,48 @@ class toolBar(tk.Frame):
         self.manageAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
         logging.debug("Agent management UI reset to initial state.")
 
+    def enableAgentManagement(self):
+        # Enable the management interface
+        self.manageAgentButton.config(state=tk.NORMAL)
 
-        # # Create a label for the task assignment drop down
-        # self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
-
-        # # Create the drop down menu
-        # taskList = self.taskManager.taskList
-        # print(taskList)
-        # self.agentTaskStringVar = tk.StringVar()
-        # self.agentTaskStringVar.set(taskList[0])
-        # self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
-
-        # self.agentTaskAssignmentLabel.grid(row=0, column=0)
+    def clearAgentManagementUI(self):
+        # Destroys all the task creation ui elements
+        for widget in self.agentManageFrame.winfo_children():
+            widget.destroy()
+        # Reset column/row weights
+        for row in range(self.agentManageFrame.grid_size()[0]):
+            self.agentManageFrame.rowconfigure(row, weight=0)
+        for col in range(self.agentManageFrame.grid_size()[1]):
+            self.agentManageFrame.columnconfigure(col, weight=0)
+        logging.debug("Removed all UI elements from the task creation frame.")
 
     def agentManagementUI(self):
         logging.debug("Creating agent management UI elements.")
+        self.clearAgentManagementUI()
+
+        # Display the currently managed agent
+        currentAgent = self.parent.agentManager.currentAgent
+        agentData = self.parent.agentManager.agentList[currentAgent]
+        pp.pprint(agentData)
+        self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentData.numID}:{agentData.ID} at {agentData.position}")
+        self.managedAgentLabel.grid(row=0, column=0)
+
         # Create a label for the task assignment drop down
         self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
+        self.agentTaskAssignmentLabel.grid(row=1, column=0)
 
         # Create the drop down menu
         taskList = self.taskManager.taskList
-        print(taskList)
-        self.agentTaskStringVar = tk.StringVar()
-        self.agentTaskStringVar.set(taskList[0])
-        self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
-
-        self.agentTaskAssignmentLabel.grid(row=0, column=0)
+        self.agentManageFrame.columnconfigure(1, weight=1)
+        if taskList:
+            # There are tasks to choose from
+            self.agentTaskStringVar = tk.StringVar()
+            self.agentTaskStringVar.set(taskList[0])
+            self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
+            self.agentTaskAssignmentLabel.grid(row=1, column=1)
+        else:
+            self.agentNoTasksAvailableLabel = tk.Label(self.agentManageFrame, text="No tasks available to assign!")
+            self.agentNoTasksAvailableLabel.grid(row=1, column=1)
 
     def taskCreationPrompt(self):
         logging.debug("Creating task creation prompt UI elements.")   

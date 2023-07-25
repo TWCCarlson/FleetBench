@@ -199,6 +199,7 @@ class contextView(tk.Frame):
             self.parent.agentManager.agentList.get(agentID).highlightAgent(multi=False)
             # Update agentManager's currentAgent prop
             self.parent.agentManager.currentAgent = agentID
+            self.parent.toolBar.enableAgentManagement(agentID)
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
             # Trigger movement button state validation
             self.validateMovementButtonStates()

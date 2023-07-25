@@ -457,6 +457,9 @@ class mainCanvas(tk.Canvas):
         # Update movement choices for the selected agent
         self.parent.parent.contextView.validateMovementButtonStates()
 
+        # Enable management of the agent state in the toolBar
+        self.parent.parent.toolBar.enableAgentManagement()
+
     def generateHoverInfo(self, graphData, tileSize):
         # Use an object in the canvas to capture the mouse cursor, it will need to be updated with the information relevant to the tile
         # Place one in each cell of the grid that contains a node
