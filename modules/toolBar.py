@@ -535,26 +535,51 @@ class toolBar(tk.Frame):
         # Display the currently managed agent
         currentAgent = self.parent.agentManager.currentAgent
         agentData = self.parent.agentManager.agentList[currentAgent]
-        pp.pprint(agentData)
         self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentData.numID}:{agentData.ID} at {agentData.position}")
-        self.managedAgentLabel.grid(row=0, column=0)
+        self.managedAgentLabel.grid(row=0, column=0, columnspan=2, stick=tk.W)
 
         # Create a label for the task assignment drop down
         self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
         self.agentTaskAssignmentLabel.grid(row=1, column=0)
+
+        # Create an action button to assign the task
+        self.agentTaskAssignmentButton = tk.Button(self.agentManageFrame,
+            command=self.parent.taskManager.assignTaskToAgent, text="Assign Task", width=10,
+            state=tk.DISABLED
+            )
+        self.agentTaskAssignmentButton.grid(row=1, column=2, padx=4, pady=4)
 
         # Create the drop down menu
         taskList = self.taskManager.taskList
         self.agentManageFrame.columnconfigure(1, weight=1)
         if taskList:
             # There are tasks to choose from
+            taskOptions = ()
+            for task in taskList:
+                taskOptions = (*taskOptions, taskList[task].name)
             self.agentTaskStringVar = tk.StringVar()
-            self.agentTaskStringVar.set(taskList[0])
-            self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
-            self.agentTaskAssignmentLabel.grid(row=1, column=1)
+            self.agentTaskAssignmentOptionMenu = ttk.Combobox(self.agentManageFrame, width=20, textvariable=self.agentTaskStringVar)
+            self.agentTaskAssignmentOptionMenu['values'] = taskOptions
+
+            # Render the menu
+            self.agentTaskAssignmentOptionMenu.grid(row=1, column=1)
+            self.agentTaskAssignmentOptionMenu.bind("<<ComboboxSelected>>", self.prepSelectedTaskForAssignment)
         else:
+            # There are no tasks to choose from
             self.agentNoTasksAvailableLabel = tk.Label(self.agentManageFrame, text="No tasks available to assign!")
             self.agentNoTasksAvailableLabel.grid(row=1, column=1)
+
+    def prepSelectedTaskForAssignment(self, event):
+        # Find the task object ID
+        selectedTaskOption = self.agentTaskStringVar.get()
+        selectedTaskID = next((taskID for taskID, task in self.taskManager.taskList.items() if task.name == selectedTaskOption))
+        self.taskManager.taskList[selectedTaskID].highlightTask(multi=False)
+        
+        # Save the task into an attribute for external access
+        self.manageAgentTargetTask = selectedTaskID
+
+        # Enable the assignment action button
+        self.agentTaskAssignmentButton.configure(state=tk.ACTIVE)
 
     def taskCreationPrompt(self):
         logging.debug("Creating task creation prompt UI elements.")   

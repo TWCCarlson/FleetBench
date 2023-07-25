@@ -74,6 +74,12 @@ class taskManager:
         self.parent.mainView.mainCanvas.renderGraphState()
         logging.info(f"Task '{targetTaskName}:{targetTaskID}' successfully deleted.")
 
+    def assignTaskToAgent(self):
+        # Retrieve the managed agent and target task IDs
+        agentID = self.parent.agentManager.currentAgent
+        taskID = self.parent.toolBar.manageAgentTargetTask
+        
+
     def packageTaskData(self):
         """
             Package reconstruction data for replicating the current state of the task manager

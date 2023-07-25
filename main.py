@@ -24,9 +24,9 @@ def log(func):
     @functools.wraps(func)
     def wrapper_log(*args, **kwargs):
         msg = ' '.join(map(str, args))
-        print("==========")
-        pp.pprint(msg)
-        print("==========")
+        # print("==========")
+        # pp.pprint(msg)
+        # print("==========")
         level = kwargs.get('level', logging.ERROR)
         if level == logging.INFO:
             logging.info(msg)
