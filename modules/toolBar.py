@@ -34,9 +34,6 @@ class toolBar(tk.Frame):
         self.grid_propagate(False)
         self.grid(row=0, column=0, rowspan=2, sticky=tk.N)
         logging.debug("Containing frame rendered into main app.")
-        
-        # Establish buttons and inputs
-        self.initUI()
 
     def buildReferences(self):
         self.mainView = self.parent.mainView
@@ -44,6 +41,9 @@ class toolBar(tk.Frame):
         self.agentManager = self.parent.agentManager
         self.taskManager = self.parent.taskManager
         logging.debug("Quick structure references built.")
+
+        # Establish buttons and inputs
+        self.initUI()
 
     def initUI(self):
         logging.debug("Creating tool bar ui elements . . .")
@@ -56,15 +56,21 @@ class toolBar(tk.Frame):
         self.agentCreationPrompt()
         logging.info("Agent generator UI created successfully.")
 
+        # Create a labeled container for manual agent manipulation
+        self.agentManageFrame = tk.LabelFrame(self, text="Agent Manager")
+        self.agentManageFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.agentManagePrompt()
+        logging.info("Agent Manager UI created successfully.")
+
         # Create a labeled container for the task generator
         self.taskFrame = tk.LabelFrame(self, text="Task Generator")
-        self.taskFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.taskFrame.grid(row=2, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.taskCreationPrompt()
         logging.info("Task generator UI created successfully.")
 
         # Create a labeled container for the rng system
         self.randomSeedFrame = tk.LabelFrame(self, text="RNG System Seed")
-        self.randomSeedFrame.grid(row=2, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.randomSeedFrame.grid(row=3, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.createRandomSeedPane()
         logging.info("Random generator engine configuration UI created successfully.")
 
@@ -491,6 +497,45 @@ class toolBar(tk.Frame):
         logging.debug("Updating the current random generator engine seed display value . . .")
         currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
         self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
+
+    def agentManagePrompt(self):
+        logging.debug("Creating agent management prompt UI elements.")
+        # Create a button that starts prompting the user
+        self.manageAgentButton = tk.Button(self.agentManageFrame,
+            command=self.agentManagementUI, text="Manage Agent . . .", width=15,
+            state=tk.DISABLED)
+        
+        # Render the button, centered in the frame
+        self.agentManageFrame.columnconfigure(0, weight=1)
+        self.manageAgentButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
+        logging.debug("Agent management UI reset to initial state.")
+
+
+        # # Create a label for the task assignment drop down
+        # self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
+
+        # # Create the drop down menu
+        # taskList = self.taskManager.taskList
+        # print(taskList)
+        # self.agentTaskStringVar = tk.StringVar()
+        # self.agentTaskStringVar.set(taskList[0])
+        # self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
+
+        # self.agentTaskAssignmentLabel.grid(row=0, column=0)
+
+    def agentManagementUI(self):
+        logging.debug("Creating agent management UI elements.")
+        # Create a label for the task assignment drop down
+        self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
+
+        # Create the drop down menu
+        taskList = self.taskManager.taskList
+        print(taskList)
+        self.agentTaskStringVar = tk.StringVar()
+        self.agentTaskStringVar.set(taskList[0])
+        self.agentTaskAssignmentOptionMenu = tk.OptionMenu(self.agentManageFrame, self.agentTaskStringVar, *taskList)
+
+        self.agentTaskAssignmentLabel.grid(row=0, column=0)
 
     def taskCreationPrompt(self):
         logging.debug("Creating task creation prompt UI elements.")   
