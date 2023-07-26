@@ -78,6 +78,17 @@ class agentManager:
         self.parent.mainView.mainCanvas.renderGraphState()
         logging.debug(f"Agent '{targetAgentName}:{targetAgent}' successfully deleted.")
 
+    def assignTaskToAgent(self):
+        agentRef = self.currentAgent
+        taskID = self.parent.toolBar.manageAgentTargetTask
+        taskRef = self.parent.taskManager.taskList[taskID]
+
+        # Assign the task to the agent
+        agentRef.currentTask = taskRef
+
+        # Update the agent treeView to reflect the changes
+        self.parent.contextView.updateAgentTreeView()
+
     def packageAgentData(self):
         """
             Package reconstruction data for replicating the current state of the agent manager
@@ -114,6 +125,7 @@ class agentClass:
         self.position = kwargs.pop("position")
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
+        self.currentTask = None
 
         # Add the agent to the position list for reference in tileHover
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]

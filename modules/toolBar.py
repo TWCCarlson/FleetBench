@@ -533,9 +533,8 @@ class toolBar(tk.Frame):
         self.clearAgentManagementUI()
 
         # Display the currently managed agent
-        currentAgent = self.parent.agentManager.currentAgent
-        agentData = self.parent.agentManager.agentList[currentAgent]
-        self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentData.numID}:{agentData.ID} at {agentData.position}")
+        agentRef = self.parent.agentManager.currentAgent
+        self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentRef.numID}:{agentRef.ID} at {agentRef.position}")
         self.managedAgentLabel.grid(row=0, column=0, columnspan=2, stick=tk.W)
 
         # Create a label for the task assignment drop down
@@ -544,7 +543,7 @@ class toolBar(tk.Frame):
 
         # Create an action button to assign the task
         self.agentTaskAssignmentButton = tk.Button(self.agentManageFrame,
-            command=self.parent.taskManager.assignTaskToAgent, text="Assign Task", width=10,
+            command=self.assignSelectedTask, text="Assign Task", width=10,
             state=tk.DISABLED
             )
         self.agentTaskAssignmentButton.grid(row=1, column=2, padx=4, pady=4)
@@ -580,6 +579,20 @@ class toolBar(tk.Frame):
 
         # Enable the assignment action button
         self.agentTaskAssignmentButton.configure(state=tk.ACTIVE)
+
+    def assignSelectedTask(self):
+        # Execute the task assignment
+        self.parent.taskManager.assignAgentToTask()
+        self.parent.agentManager.assignTaskToAgent()
+
+        # Reset the UI
+        self.agentManagePrompt()
+
+        # Clear highlights on the mainView
+        self.parent.mainView.mainCanvas.clearHighlight()
+
+        # Re-render the app state
+        self.parent.mainView.mainCanvas.renderGraphState()
 
     def taskCreationPrompt(self):
         logging.debug("Creating task creation prompt UI elements.")   

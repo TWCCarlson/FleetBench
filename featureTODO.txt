@@ -27,6 +27,8 @@
 - There are two ways selecting an agent is being handled, unify it into one method
 - Prevent creation of tasks with names already in use
 - Autogenerate task name
+- Agent managed assignment should enforce 1 agent per task and warn the user if task is already assigned to an agent
+- Clicks on tasks or agents in  treeView should highlight assignees/assigned task tiles
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

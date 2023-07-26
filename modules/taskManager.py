@@ -74,11 +74,20 @@ class taskManager:
         self.parent.mainView.mainCanvas.renderGraphState()
         logging.info(f"Task '{targetTaskName}:{targetTaskID}' successfully deleted.")
 
-    def assignTaskToAgent(self):
+    def assignAgentToTask(self):
         # Retrieve the managed agent and target task IDs
-        agentID = self.parent.agentManager.currentAgent
+        agentRef = self.parent.agentManager.currentAgent
         taskID = self.parent.toolBar.manageAgentTargetTask
-        
+        taskRef = self.taskList[taskID]
+
+        # Assign the agent to the task
+        taskRef.assignee = agentRef
+
+        # Update the task treeView to reflect the changes
+        self.parent.contextView.updateTaskTreeView()
+
+        # # Assign the task to the agent
+        # self.parent.agentManager.agentList[agentRef.numID].currentTask = taskRef
 
     def packageTaskData(self):
         """
@@ -161,6 +170,7 @@ class taskClass:
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
+        self.assignee = None
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:
