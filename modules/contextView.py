@@ -200,10 +200,13 @@ class contextView(tk.Frame):
             rowData = self.agentTreeView.item(selectedRow)
             # Hightlight the selected agent
             agentID = rowData["tags"][1]
-            self.parent.agentManager.agentList.get(agentID).highlightAgent(multi=False)
+            agentRef = self.parent.agentManager.agentList.get(agentID)
+            agentRef.highlightAgent(multi=False)
+            if agentRef.currentTask:
+                agentRef.currentTask.highlightTask(multi=False)
             # Update agentManager's currentAgent prop
-            self.parent.agentManager.currentAgent = agentID
-            self.parent.toolBar.enableAgentManagement(agentID)
+            self.parent.agentManager.currentAgent = agentRef
+            self.parent.toolBar.enableAgentManagement()
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
             # Trigger movement button state validation
             self.validateMovementButtonStates()
@@ -329,7 +332,10 @@ class contextView(tk.Frame):
             rowData = self.taskTreeView.item(selectedRow)
             # Hightlight the selected tasks's pickup and dropoff points
             taskID = rowData["tags"][1]
-            self.parent.taskManager.taskList.get(taskID).highlightTask(False)
+            taskRef = self.parent.taskManager.taskList.get(taskID)
+            taskRef.highlightTask(multi=False)
+            if taskRef.assignee:
+                taskRef.assignee.highlightAgent(multi=False)
             # Update taskManager's currentTask prop
             self.parent.taskManager.currentTask = taskID
             logging.debug(f"User clicked on task '{taskID}' in taskTreeView.")
