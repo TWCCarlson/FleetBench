@@ -73,7 +73,7 @@ class FileCommands(tk.Menu):
 
     def openSession(self, **kwargs):  
         # Prompt for which saved file to load
-        if kwargs['fid']:
+        if "fid" in kwargs:
             logging.info("User launched in debug mode with default session loaded.")
             fid = kwargs.pop("fid")
         else:
@@ -103,11 +103,16 @@ class FileCommands(tk.Menu):
             position = data["agentManager"][agent]["position"]
             orientation = data["agentManager"][agent]["orientation"]
             className = data["agentManager"][agent]["className"]
+            try:
+                currentTask = data["agentManager"][agent]["currentTask"]
+            except KeyError:
+                currentTask = None
             self.parent.parent.agentManager.createNewAgent(
                 ID=ID, 
                 position=position, 
                 orientation=orientation, 
-                className=className
+                className=className,
+                currentTask=currentTask
                 )
         logging.info("Loaded new agent data to session state.")
 
@@ -118,14 +123,23 @@ class FileCommands(tk.Menu):
             pickupPosition = data["taskManager"][task]["pickupPosition"]
             dropoffPosition = data["taskManager"][task]["dropoffPosition"]
             timeLimit = data["taskManager"][task]["timeLimit"]
+            try:
+                assignee = data["taskManager"][task]["assignee"]
+            except KeyError:
+                assignee = None
             self.parent.parent.taskManager.createNewTask(
                 taskName=taskName,
                 pickupPosition=pickupPosition,
                 dropoffPosition=dropoffPosition,
-                timeLimit=timeLimit
+                timeLimit=timeLimit,
+                assignee=assignee
                 )
         logging.info("Loaded new task data to session state.")
         
+        # Building task/agent interdependencies
+        self.parent.parent.agentManager.fixAssignments()
+        self.parent.parent.taskManager.fixAssignments()
+
         # Reconstruct the current Random Generator data
         logging.debug("Received new random generator engine data:")
         self.parent.parent.randomGenerator.randomGeneratorState.currentSeed = data["randomGenerator"]["currentSeed"]

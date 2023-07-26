@@ -28,6 +28,8 @@
 - Prevent creation of tasks with names already in use
 - Autogenerate task name
 - Agent managed assignment should enforce 1 agent per task and warn the user if task is already assigned to an agent
+- Might want to change the currenTask/assignee values to be IDs instead of object references
+    However this is mightily convenient for not having to search dicts for values->keys later
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

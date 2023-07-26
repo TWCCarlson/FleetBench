@@ -89,6 +89,16 @@ class taskManager:
         # # Assign the task to the agent
         # self.parent.agentManager.agentList[agentRef.numID].currentTask = taskRef
 
+    def fixAssignments(self):
+        # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
+        for task in self.taskList:
+            print(self.taskList[task].assignee)
+            if self.taskList[task].assignee:
+                self.taskList[task].assignee = self.parent.agentManager.agentList[self.taskList[task].assignee]
+
+        # Update the treeView to reflect the change
+        self.parent.contextView.updateTaskTreeView()
+
     def packageTaskData(self):
         """
             Package reconstruction data for replicating the current state of the task manager
@@ -101,12 +111,18 @@ class taskManager:
         logging.info("Received request to package 'taskManager' data.")
         dataPackage = {}
         for task in self.taskList:
-            # pp.pprint(self.taskList[task])
+            # Pull agent info for reconstruction
+            if self.taskList[task].assignee:
+                assignee = self.taskList[task].assignee.numID
+            else:
+                assignee = None
+
             taskData = {
                 "name": self.taskList[task].name,
                 "pickupPosition": self.taskList[task].pickupPosition,
                 "dropoffPosition": self.taskList[task].dropoffPosition,
-                "timeLimit": self.taskList[task].timeLimit
+                "timeLimit": self.taskList[task].timeLimit,
+                "assignee": assignee
             }
             dataPackage[self.taskList[task].numID] = taskData
             logging.debug(f"Packaged taskData: {taskData}")
@@ -170,7 +186,7 @@ class taskClass:
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
-        self.assignee = None
+        self.assignee = kwargs.pop("assignee")
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:

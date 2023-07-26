@@ -89,6 +89,15 @@ class agentManager:
         # Update the agent treeView to reflect the changes
         self.parent.contextView.updateAgentTreeView()
 
+    def fixAssignments(self):
+        # Iterate through the list of all agents, fixing currentTask to refer to objects instead of IDs
+        for agent in self.agentList:
+            if self.agentList[agent].currentTask:
+                self.agentList[agent].currentTask = self.parent.taskManager.taskList[self.agentList[agent].currentTask]
+
+        # Update the agent treeView to reflect the changes
+        self.parent.contextView.updateAgentTreeView()
+
     def packageAgentData(self):
         """
             Package reconstruction data for replicating the current state of the agent manager
@@ -100,12 +109,20 @@ class agentManager:
         """
         logging.info("Received request to package 'agentManager' data.")
         dataPackage = {}
+        # Pull assigned object data
         for agent in self.agentList:
+            # Pull task info for reconstruction
+            if self.agentList[agent].currentTask:
+                currentTask = self.agentList[agent].currentTask.numID
+            else:
+                currentTask = None
+
             agentData = {
                 "ID": self.agentList[agent].ID,
                 "position": self.agentList[agent].position,
                 "orientation": self.agentList[agent].orientation,
-                "className": self.agentList[agent].className 
+                "className": self.agentList[agent].className,
+                "currentTask": currentTask
             }
             dataPackage[self.agentList[agent].numID] = agentData
             logging.debug(f"Packaged agentData: {agentData}")
@@ -125,7 +142,7 @@ class agentClass:
         self.position = kwargs.pop("position")
         self.orientation = kwargs.pop("orientation")
         self.className = kwargs.pop("className")
-        self.currentTask = None
+        self.currentTask = kwargs.pop("currentTask")
 
         # Add the agent to the position list for reference in tileHover
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]
