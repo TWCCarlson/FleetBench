@@ -21,12 +21,10 @@
 - clearAgentCreationUI() probably shouldn't also reset flow control booleans
 - validateAgentPlacement has unnecessary guard clauses in numeric checks. Not possible to reach this code with non-numeric position values
 - logging for earlier modules in the load order should get redone some day
-- fix the way marked empty tiles are loaded in from new mapfiles
 - make code more portable by moving references to other classes to functions and passing references to functions
 - Make ui clearing functions accept the target frame to make code more DRY
 - There are two ways selecting an agent is being handled, unify it into one method
-- Prevent creation of tasks with names already in use
-- Autogenerate task name
+    One for treeView clicks and one for mainCanvas clicks, make it a method in the agent itself
 - Agent managed assignment should enforce 1 agent per task and warn the user if task is already assigned to an agent
 - Might want to change the currenTask/assignee values to be IDs instead of object references
     However this is mightily convenient for not having to search dicts for values->keys later

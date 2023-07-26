@@ -869,6 +869,16 @@ class toolBar(tk.Frame):
 
             # Allow the box to be empty
             return True
+        elif any(self.parent.taskManager.taskList[i].name == taskName for i in self.parent.taskManager.taskList):
+            # If the taskName is the same as a task that already exists, disallow creating it
+            self.taskNameValid = False
+            logging.debug(f"User-input task name '{taskName}' already exists in the task list.")
+
+            # Check that all other enabling conditions are met
+            self.updateTaskCreationButton()
+
+            # Allow the box to be empty
+            return True
         else:
             # Enable the ability to create the task
             self.taskNameValid = True
@@ -984,7 +994,7 @@ class toolBar(tk.Frame):
             taskName = len(self.parent.taskManager.taskList)
         else:
             taskName = self.taskNameValue.get()
-            
+
         logging.debug(f"New task settings: '(Name: {taskName}, Pickup: {str(pickupNode)}, Dropoff: {str(dropoffNode)}, TimeLimit: {timeLimit})'")
 
         # Verify that nodes belong to proper type
