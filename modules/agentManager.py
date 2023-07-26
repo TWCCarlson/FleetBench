@@ -137,12 +137,12 @@ class agentClass:
         self.parent = parent
         logging.info(f"New 'agentClass' instantiated.")
         logging.debug(f"Agent settings: {kwargs}")
-        self.numID = kwargs.pop("numID")# numeric ID, computer use only
-        self.ID = kwargs.pop("ID")      # "human-readable" ID, name
-        self.position = kwargs.pop("position")
-        self.orientation = kwargs.pop("orientation")
-        self.className = kwargs.pop("className")
-        self.currentTask = kwargs.pop("currentTask")
+        self.numID = kwargs.get("numID")# numeric ID, computer use only
+        self.ID = kwargs.get("ID")      # "human-readable" ID, name
+        self.position = kwargs.get("position")
+        self.orientation = kwargs.get("orientation")
+        self.className = kwargs.get("className")
+        self.currentTask = kwargs.get("currentTask")
 
         # Add the agent to the position list for reference in tileHover
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]

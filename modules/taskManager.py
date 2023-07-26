@@ -92,7 +92,6 @@ class taskManager:
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
         for task in self.taskList:
-            print(self.taskList[task].assignee)
             if self.taskList[task].assignee:
                 self.taskList[task].assignee = self.parent.agentManager.agentList[self.taskList[task].assignee]
 
@@ -178,15 +177,15 @@ class taskClass:
         self.parent = parent
         logging.info("New 'taskClass' instantiated.")
         logging.debug(f"Task settings: {kwargs}")
-        self.numID = kwargs.pop("numID")    # Numeric ID, internal use only
-        self.name = kwargs.pop("taskName")  # Human-readable ID, name
-        self.pickupPosition = kwargs.pop("pickupPosition")      # Expects Tuple
-        self.dropoffPosition = kwargs.pop("dropoffPosition")    # Expects Tuple
-        self.timeLimit = kwargs.pop("timeLimit")
+        self.numID = kwargs.get("numID")    # Numeric ID, internal use only
+        self.name = kwargs.get("taskName")  # Human-readable ID, name
+        self.pickupPosition = kwargs.get("pickupPosition")      # Expects Tuple
+        self.dropoffPosition = kwargs.get("dropoffPosition")    # Expects Tuple
+        self.timeLimit = kwargs.get("timeLimit")
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
-        self.assignee = kwargs.pop("assignee")
+        self.assignee = kwargs.get("assignee")
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:

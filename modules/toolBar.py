@@ -183,7 +183,8 @@ class toolBar(tk.Frame):
 
         # Autogenerate name tickbox
         self.autogenerateNameValue = tk.IntVar()
-        self.autogenerateNameTickbox = tk.Checkbutton(self.agentDataFrame, text="Autogenerate Name", variable=self.autogenerateNameValue, command=self.updateAgentCreationButton)
+        self.autogenerateNameTickbox = tk.Checkbutton(self.agentDataFrame, text="Autogenerate Name",
+            variable=self.autogenerateNameValue, command=self.updateAgentCreationButton)
         logging.debug("Agent automatic name generation tickbox built.")
 
         # Render
@@ -777,9 +778,16 @@ class toolBar(tk.Frame):
         self.taskSpecsFrame.columnconfigure(2, weight=1)
         self.taskSpecsFrame.columnconfigure(3, weight=1)
 
+        # Autogenerate name tickbox
+        self.autogenerateTaskNameValue = tk.IntVar()
+        self.autogenerateTaskNameTickbox = tk.Checkbutton(self.taskSpecsFrame, text="Autogen. Name",
+            variable=self.autogenerateTaskNameValue, command=self.updateTaskCreationButton)
+        logging.debug("Task automatic name generation tickbox built.")
+
         # Render widgets
         self.taskNameLabel.grid(row=0, column=0)
         self.taskNameEntry.grid(row=0, column=1, sticky=tk.W)
+        self.autogenerateTaskNameTickbox.grid(row=0, column=2, columnspan=2)
         self.coordinateLabelX.grid(row=2, column=2)
         self.coordinateLabelY.grid(row=2, column=3)
         self.pickupPositionLabel.grid(row=3, column=1)
@@ -952,7 +960,7 @@ class toolBar(tk.Frame):
         # Change the status of the create task button based on entry validity
         # Input validation is already handled at this point
         logging.debug(f"Name: {self.taskNameValid}, Locations: {self.validTaskLocations}, Time limit: {self.validTaskTimeLimit}")
-        if self.taskNameValid and self.validTaskLocations and self.validTaskTimeLimit:
+        if self.validTaskTimeLimit and self.validTaskLocations and (self.taskNameValid or self.autogenerateTaskNameValue.get()):
             self.createTaskButton.config(state=tk.NORMAL)
             logging.debug("All task settings are valid. Allowing creation.")
         else:
@@ -972,7 +980,11 @@ class toolBar(tk.Frame):
         dropoffYPos = eval(self.dropoffYPosValue.get())
         dropoffNode = (dropoffXPos, dropoffYPos)
         timeLimit = eval(self.timeLimitValue.get())
-        taskName = self.taskNameValue.get()
+        if len(self.taskNameValue.get()) == 0 and self.autogenerateTaskNameValue:
+            taskName = len(self.parent.taskManager.taskList)
+        else:
+            taskName = self.taskNameValue.get()
+            
         logging.debug(f"New task settings: '(Name: {taskName}, Pickup: {str(pickupNode)}, Dropoff: {str(dropoffNode)}, TimeLimit: {timeLimit})'")
 
         # Verify that nodes belong to proper type
