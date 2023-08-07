@@ -159,8 +159,8 @@ def initLogging():
         40:"ERROR",
         50:"CRITICAL"
     }
-    logLevel = logging.DEBUG
-    # logLevel = logging.INFO
+    # logLevel = logging.DEBUG
+    logLevel = logging.INFO
     # logLevel = logging.WARNING
     # logLevel = logging.ERROR
     # logLevel = logging.CRITICAL

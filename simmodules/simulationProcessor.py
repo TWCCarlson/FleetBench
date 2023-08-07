@@ -24,10 +24,7 @@ class simProcessor:
             Render the new state
             - Update statistics
         """
-        logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
-        # Check what the currently in use algorithm is
-        algorithmSelection = self.simulationSettings["algorithmSelection"].get()
-        logging.debug(f"Next step started with algorithm: {algorithmSelection}")
+        algorithmSelection = self.getSelectedSimulationAlgorithm()
 
         # Acquire state information references
         simGraphData = self.parent.simGraphData
@@ -55,3 +52,10 @@ class simProcessor:
                 logging.error(f"'{agentTargetNode}' is not a valid node for movement.")
 
         self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
+
+    def getSelectedSimulationAlgorithm(self):
+        logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
+        # Check what the currently in use algorithm is
+        algorithmSelection = self.simulationSettings["algorithmSelection"].get()
+        logging.debug(f"Next step started with algorithm: {algorithmSelection}")
+        return algorithmSelection

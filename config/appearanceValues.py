@@ -62,7 +62,7 @@ class appearanceValues():
 
         # Simulation control panel style
         self.simulationControlBoxWidth = 0.2 * screen_width
-        self.simulationControlBoxHeight = 0.2 * (screen_height - window_unusable)
+        self.simulationControlBoxHeight = 0.032 * screen_height
 
         # Simulation information panel style
         self.simulationInfoPanelWidth = 0.2 * screen_width
