@@ -11,6 +11,22 @@ class simProcessor:
         self.simulationStepCount = 0
 
         # self.simulateStep()
+        # self.simulationUpdateTimer = self.parent.parent.parent.after(1000, self.simulationUpdateTick)
+        # print(self.simulationUpdateTimer)
+
+    def simulationUpdateTick(self):
+        frameDelay = self.simulationSettings['playbackFrameDelay']
+        if frameDelay == "":
+            # Use the default value
+            frameDelay = 1000
+            
+        logging.debug(f"User triggered simulationUpdateTick with rate: {frameDelay}ms")
+        self.simulateStep()
+        self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, self.simulationUpdateTick)
+        print(self.simulationUpdateTimer)
+
+    def simulationStopTicking(self):
+        self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
 
     def simulateStep(self):
         """

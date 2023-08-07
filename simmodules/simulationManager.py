@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import logging
 
 class simulationConfigManager(tk.Toplevel):
@@ -15,6 +16,7 @@ class simulationConfigManager(tk.Toplevel):
         self.simulationLaunch.grid(row=0, column=0)
 
         self.createAlgorithmChoices()
+        self.createSimulationUpdateRate()
 
     def launchSimulation(self):
         simulationSettings = self.packageSimulationConfiguration()
@@ -26,6 +28,7 @@ class simulationConfigManager(tk.Toplevel):
         """
         dataPackage = {}
         dataPackage["algorithmSelection"] = self.algorithmChoiceState
+        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
 
         return dataPackage
     
@@ -44,6 +47,60 @@ class simulationConfigManager(tk.Toplevel):
 
         # Render the menu
         self.algorithmChoiceMenu.grid(row=1, column=0)
+
+    def createSimulationUpdateRate(self):
+        self.frameDelayLabel = tk.Label(self, text="frameDelay:")
+        self.frameDelayValue = tk.StringVar()
+        self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
+        # self.validateTaskTimeLimit = self.register(self.taskTimeLimitValidation)
+        # self.commandTaskTimeLimit = partial(self.taskTimeLimitValidation, 'T')
+        self.frameDelayValue.trace_add("write", lambda *args, b=self.frameDelayValue : self.frameDelayValidation(b, *args))
+        # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
+        self.frameDelayEntry = ttk.Spinbox(self,
+            width=6,
+            from_=0,
+            to=100000,
+            increment=50,
+            textvariable=self.frameDelayValue,
+            # command=self.commandTaskTimeLimit,
+            validate='key',
+            validatecommand=(self.validateFrameDelayEntry, '%P')
+        )
+        logging.debug("Simulation playback frame delay spinbox built.")
+
+        # Set a default value
+        self.frameDelayValue.set(1000)
+
+        # Render components
+        self.frameDelayLabel.grid(row=1, column=1)
+        self.frameDelayEntry.grid(row=1, column=2)
+
+
+    def validateNumericSpinbox(self, inputString):
+        logging.debug(f"Validating numeric spinbox entry: {inputString}")
+        if inputString.isnumeric():
+            # Only allow numeric characters
+            logging.debug("Numeric spinbox entry is numeric. Allowed.")
+            return True
+        elif len(inputString) == 0:
+            logging.debug("Numeric spinbox entry is empty. Allowed.")
+            # Or an empty box
+            return True
+        else:
+            logging.debug("Numeric spinbox entry is invalid.")
+            return False
+        
+    def frameDelayValidation(self, frameDelay, *args):
+        logging.debug(f"Validating custom playback frame delay entry '{frameDelay}'.")
+        # Spinbox should only accept numeric entries
+        if frameDelay.get().isnumeric():
+            # self.validFrameDelayEntry = True
+            logging.debug("Playback frame delay entry is numeric. Allowed.")
+            return True
+        else:
+            # self.validFrameDelayEntry = False
+            logging.debug("Playback frame delay entry is non-numeric and invalid.")
+            return False
 
 class simulationConfigurationState:
     # Holds the current state of the simulation config

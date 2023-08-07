@@ -52,10 +52,10 @@ class simControlPanel(tk.Frame):
         self.revertOneStepButton = tk.Button(self, text="⭰")
 
         # Declare slow continuous playback/pause button
-        self.toggleSimulationRunButton = tk.Button(self, text="⏯")
+        self.toggleSimulationRunButton = tk.Button(self, text="⏯", background="yellow", command=self.simulationPlayPauseToggle)
 
         # Declare step forward once button
-        self.simOneStepButton = tk.Button(self, text="⭲", command=self.parent.parent.simulationProcess.simProcessor.simulateStep)
+        self.simOneStepButton = tk.Button(self, text="⭲", command=self.simulationProcess.simProcessor.simulateStep)
 
         # Declare playback until event occurs button
         self.simUntilEventButton = tk.Button(self, text="⏭")
@@ -92,3 +92,15 @@ class simControlPanel(tk.Frame):
         self.simRapidlyButton.grid(row=0, column=6, sticky=tk.N+tk.S+tk.E+tk.W)
         self.editSimulationStateButton.grid(row=0, column=8, sticky=tk.N+tk.S+tk.E+tk.W)
         self.stopSimulationButton.grid(row=0, column=10, sticky=tk.N+tk.S+tk.E+tk.W)
+
+    def simulationPlayPauseToggle(self):
+        if self.toggleSimulationRunButton['relief'] == tk.RAISED:
+            # Set the button to have the appearance of having been pressed
+            self.toggleSimulationRunButton.config(relief=tk.SUNKEN, background="lawn green")
+            # Start the updating ticking process
+            self.simulationProcess.simProcessor.simulationUpdateTick()
+        elif self.toggleSimulationRunButton['relief'] == tk.SUNKEN:
+            # Set the button to have the appearance of being released
+            self.toggleSimulationRunButton.config(relief=tk.RAISED, background="yellow")
+            # Stop the update ticking process
+            self.simulationProcess.simProcessor.simulationStopTicking()
