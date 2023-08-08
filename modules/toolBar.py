@@ -70,9 +70,15 @@ class toolBar(tk.Frame):
         self.taskCreationPrompt()
         logging.info("Task generator UI created successfully.")
 
+        # Create a labeled container for the task manager
+        self.taskManageFrame = tk.LabelFrame(self, text="Task Manager")
+        self.taskManageFrame.grid(row=3, column=0, sticky="new", padx=4, columnspan=2)
+        self.taskManagePrompt()
+        logging.info("Task manager UI created successfully.")
+
         # Create a labeled container for the rng system
         self.randomSeedFrame = tk.LabelFrame(self, text="RNG System Seed")
-        self.randomSeedFrame.grid(row=3, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.randomSeedFrame.grid(row=4, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.createRandomSeedPane()
         logging.info("Random generator engine configuration UI created successfully.")
 
@@ -425,82 +431,6 @@ class toolBar(tk.Frame):
         # Close agent generator
         self.agentCreationPrompt()
 
-    def createRandomSeedPane(self):
-        logging.debug("Creating random generator engine UI panel elements . . .")
-        self.randomSeedFrame.columnconfigure(0, weight=1)
-        self.randomSeedFrame.columnconfigure(1, weight=1)
-        self.randomSeedFrame.columnconfigure(2, weight=1)
-
-        # Label for RNG seed entrybox
-        self.randomSeedLabel = tk.Label(self.randomSeedFrame, text="RNG Seed Value:")
-        self.randomSeedLabel.grid(row=0, column=0, pady=4, padx=4, sticky=tk.W)
-
-        # Entry box for setting the seed value
-        self.randomSeedValue = tk.StringVar()
-        self.validateRandomSeed = self.register(self.randomSeedValidation)
-        self.randomSeedEntry = tk.Entry(self.randomSeedFrame, 
-            textvariable=self.randomSeedValue, 
-            width=30,
-            validate='key',
-            validatecommand=(self.validateRandomSeed, '%P')
-            )
-        self.randomSeedEntry.grid(row=0, column=1, pady=4, padx=4, sticky=tk.W)
-        logging.debug("Random generator seed entry box built.")
-
-        # Button for confirming choice of seed value
-        self.randomSeedSetButton = tk.Button(self.randomSeedFrame,
-            command = self.copyRandomSeed,
-            text="Set",
-            width=6,
-            state=tk.DISABLED
-        )
-        self.randomSeedSetButton.grid(row=0, column=2, pady=4, padx=4)
-        logging.debug("Random generator seed set action button built.")
-
-        # Text displaying the current seed value
-        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
-        self.currentSeedLabel = tk.Label(self.randomSeedFrame, text=f"Current RNG Seed Value: {currentSeed}")
-        self.currentSeedLabel.grid(row=1, column=0, columnspan=2)
-        logging.debug("Random generator current seed display built.")
-
-    def randomSeedValidation(self, seedString):
-        logging.debug(f"Validating new seed input: '{seedString}'")
-        # Only accept alphanumeric characters
-        if any(not char.isalnum() for char in seedString):
-            self.randomSeedSetButton.config(state=tk.DISABLED)
-            logging.debug("New seed is not alphanumeric.")
-            return False
-        # Ensure the new seed differs from the old seed
-        if seedString == self.parent.randomGenerator.randomGeneratorState.currentSeed:
-            self.randomSeedSetButton.config(state=tk.DISABLED)
-            logging.debug("New seed is identical to the current seed.")
-            return False
-        # Ensure a minimum seed string length
-        if len(seedString) < 2:
-            self.randomSeedSetButton.config(state=tk.DISABLED)
-            logging.debug("New seed is too short.")
-            return True
-        else:
-            logging.debug("Seed is valid, allowing engine to be set.")
-            self.randomSeedSetButton.config(state=tk.NORMAL)
-        return True
-
-    def copyRandomSeed(self):
-        # Pull the RNG seed from the text entry box
-        seed = self.randomSeedEntry.get()
-        # Update the generator's seed
-        self.parent.randomGenerator.updateCurrentSeed(seed)
-        logging.debug("Random Generator engine seed updated.")
-        # Update the display
-        self.updateCurrentSeedDisplay()
-        # Disable the set button
-        self.randomSeedSetButton.config(state=tk.DISABLED)
-
-    def updateCurrentSeedDisplay(self):
-        logging.debug("Updating the current random generator engine seed display value . . .")
-        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
-        self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")
-
     def agentManagePrompt(self):
         logging.debug("Creating agent management prompt UI elements.")
         self.clearAgentManagementUI()
@@ -536,7 +466,7 @@ class toolBar(tk.Frame):
         # Display the currently managed agent
         agentRef = self.parent.agentManager.currentAgent
         self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentRef.numID}:{agentRef.ID} at {agentRef.position}")
-        self.managedAgentLabel.grid(row=0, column=0, columnspan=2, stick=tk.W)
+        self.managedAgentLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         # Create a label for the task assignment drop down
         self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
@@ -576,7 +506,7 @@ class toolBar(tk.Frame):
         self.taskManager.taskList[selectedTaskID].highlightTask(multi=False)
         
         # Save the task into an attribute for external access
-        self.manageAgentTargetTask = selectedTaskID
+        self.parent.taskManager.currentTask = self.parent.taskManager.taskList[selectedTaskID]
 
         # Enable the assignment action button
         self.agentTaskAssignmentButton.configure(state=tk.ACTIVE)
@@ -1031,3 +961,173 @@ class toolBar(tk.Frame):
         except RWSE.RWSTaskTimeLimitImpossible as exc:
             logging.warning("Task is not completable because the time limit is too low for the best path to attain.")
             tk.messagebox.showerror(title="Task time limit too low", message=f"Optimal pathing cannot complete the task in time. \nMinimum complete time: {exc.minTimeToComplete} \nTime limit: {exc.timeLimit}")
+
+    def taskManagePrompt(self):
+        logging.debug("Creating task management prompt UI eleemnts . . .")
+        self.clearTaskManagementUI()
+        # Create a button that starts prompting the user
+        self.manageTaskButton = tk.Button(self.taskManageFrame,
+            command=self.taskManagementUI, text="Manage Task . . .", width=15,
+            state=tk.DISABLED)
+        
+        # Render the button, centered in the frame
+        self.taskManageFrame.columnconfigure(0, weight=1)
+        self.manageTaskButton.grid(row=0, column=0, pady=4, padx=4, columnspan=2)
+        logging.debug("Task management UI reset to initial state.")
+
+    def enableTaskManagement(self):
+        # Enable the management interface
+        self.manageTaskButton.config(state=tk.NORMAL)
+
+    def clearTaskManagementUI(self):
+        # Destroys all the task creation ui elements
+        for widget in self.taskManageFrame.winfo_children():
+            widget.destroy()
+        # Reset column/row weights
+        for row in range(self.taskManageFrame.grid_size()[0]):
+            self.taskManageFrame.rowconfigure(row, weight=0)
+        for col in range(self.taskManageFrame.grid_size()[1]):
+            self.taskManageFrame.columnconfigure(col, weight=0)
+        logging.debug("Removed all UI elements from the task creation frame.")
+
+    def taskManagementUI(self):
+        logging.debug("Creating task management UI elements.")
+        self.clearTaskManagementUI()
+
+        # Display the currently managed task
+        taskRef = self.parent.taskManager.currentTask
+        self.managedTaskLabel = tk.Label(self.taskManageFrame, text=f"Managing Task {taskRef.numID}:{taskRef.name}. Pickup node is: {taskRef.pickupPosition} Dropoff node is: {taskRef.dropoffPosition}")
+        self.managedTaskLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+
+        # Create a label for the agent assignment drop down
+        self.taskAgentAssignmentLabel = tk.Label(self.taskManageFrame, text="Assign agent: ")
+        self.taskAgentAssignmentLabel.grid(row=1, column=0)
+
+        # Create the drop down menu
+        agentList = self.agentManager.agentList
+        self.taskManageFrame.columnconfigure(1, weight=1)
+        if agentList:
+            # There are agents to choose from
+            agentOptions = ()
+            for agent in agentList:
+                agentOptions = (*agentOptions, agentList[agent].ID)
+            self.taskAgentStringVar = tk.StringVar()
+            self.taskAgentAssignmentOptionMenu = ttk.Combobox(self.taskManageFrame, width=20, textvariable=self.taskAgentStringVar)
+            self.taskAgentAssignmentOptionMenu['values'] = agentOptions
+
+            # Render the menu
+            self.taskAgentAssignmentOptionMenu.grid(row=1, column=1)
+            self.taskAgentAssignmentOptionMenu.bind("<<ComboboxSelected>>", self.prepSelectedAgentForAssignment)
+        else:
+            # There are no tasks to choose from
+            self.taskNoAgentsAvailableLabel = tk.Label(self.taskManageFrame, text="No agents available to assign!")
+            self.taskNoAgentsAvailableLabel.grid(row=1, column=1)
+        
+        # Create an action button to assign the task
+        self.taskAgentAssignmentButton = tk.Button(self.taskManageFrame,
+            command=self.assignSelectedAgent, text="Assign Agent", width=10,
+            state=tk.DISABLED
+            )
+        self.taskAgentAssignmentButton.grid(row=1, column=2, padx=4, pady=4)
+
+    def prepSelectedAgentForAssignment(self, event):
+        # Find the agent object ID
+        selectedAgentOption = self.taskAgentStringVar.get()
+        selectedAgentID = next((agentID for agentID, agent in self.agentManager.agentList.items() if agent.ID == selectedAgentOption))
+        self.agentManager.agentList[selectedAgentID].highlightAgent(multi=False)
+
+        # Save the task into an attribute for external access
+        self.parent.agentManager.currentAgent = self.parent.agentManager.agentList[selectedAgentID]
+
+        # Enable the assignment action button
+        self.taskAgentAssignmentButton.configure(state=tk.ACTIVE)
+
+    def assignSelectedAgent(self):
+        # Execute the task assignment
+        self.parent.taskManager.assignAgentToTask()
+        self.parent.agentManager.assignTaskToAgent()
+
+        # Reset the UI
+        self.taskManagePrompt()
+
+        # Clear the highlights on the mainView
+        self.parent.mainView.mainCanvas.clearHighlight()
+
+        # Re-render the app state
+        self.parent.mainView.mainCanvas.renderGraphState()
+
+    def createRandomSeedPane(self):
+        logging.debug("Creating random generator engine UI panel elements . . .")
+        self.randomSeedFrame.columnconfigure(0, weight=1)
+        self.randomSeedFrame.columnconfigure(1, weight=1)
+        self.randomSeedFrame.columnconfigure(2, weight=1)
+
+        # Label for RNG seed entrybox
+        self.randomSeedLabel = tk.Label(self.randomSeedFrame, text="RNG Seed Value:")
+        self.randomSeedLabel.grid(row=0, column=0, pady=4, padx=4, sticky=tk.W)
+
+        # Entry box for setting the seed value
+        self.randomSeedValue = tk.StringVar()
+        self.validateRandomSeed = self.register(self.randomSeedValidation)
+        self.randomSeedEntry = tk.Entry(self.randomSeedFrame, 
+            textvariable=self.randomSeedValue, 
+            width=30,
+            validate='key',
+            validatecommand=(self.validateRandomSeed, '%P')
+            )
+        self.randomSeedEntry.grid(row=0, column=1, pady=4, padx=4, sticky=tk.W)
+        logging.debug("Random generator seed entry box built.")
+
+        # Button for confirming choice of seed value
+        self.randomSeedSetButton = tk.Button(self.randomSeedFrame,
+            command = self.copyRandomSeed,
+            text="Set",
+            width=6,
+            state=tk.DISABLED
+        )
+        self.randomSeedSetButton.grid(row=0, column=2, pady=4, padx=4)
+        logging.debug("Random generator seed set action button built.")
+
+        # Text displaying the current seed value
+        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
+        self.currentSeedLabel = tk.Label(self.randomSeedFrame, text=f"Current RNG Seed Value: {currentSeed}")
+        self.currentSeedLabel.grid(row=1, column=0, columnspan=2)
+        logging.debug("Random generator current seed display built.")
+
+    def randomSeedValidation(self, seedString):
+        logging.debug(f"Validating new seed input: '{seedString}'")
+        # Only accept alphanumeric characters
+        if any(not char.isalnum() for char in seedString):
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            logging.debug("New seed is not alphanumeric.")
+            return False
+        # Ensure the new seed differs from the old seed
+        if seedString == self.parent.randomGenerator.randomGeneratorState.currentSeed:
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            logging.debug("New seed is identical to the current seed.")
+            return False
+        # Ensure a minimum seed string length
+        if len(seedString) < 2:
+            self.randomSeedSetButton.config(state=tk.DISABLED)
+            logging.debug("New seed is too short.")
+            return True
+        else:
+            logging.debug("Seed is valid, allowing engine to be set.")
+            self.randomSeedSetButton.config(state=tk.NORMAL)
+        return True
+
+    def copyRandomSeed(self):
+        # Pull the RNG seed from the text entry box
+        seed = self.randomSeedEntry.get()
+        # Update the generator's seed
+        self.parent.randomGenerator.updateCurrentSeed(seed)
+        logging.debug("Random Generator engine seed updated.")
+        # Update the display
+        self.updateCurrentSeedDisplay()
+        # Disable the set button
+        self.randomSeedSetButton.config(state=tk.DISABLED)
+
+    def updateCurrentSeedDisplay(self):
+        logging.debug("Updating the current random generator engine seed display value . . .")
+        currentSeed = self.parent.randomGenerator.randomGeneratorState.currentSeed
+        self.currentSeedLabel.config(text=f"Current RNG Seed Value: {currentSeed}")

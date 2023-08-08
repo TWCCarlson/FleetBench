@@ -19,6 +19,7 @@ class taskManager:
         # Each task should be an instance of a task class
         self.taskList = {}
         self.taskPositionList = {}
+        self.currentTask = []
         logging.info("Task manager initialized.")
         
     def createNewTask(self, **kwargs):
@@ -77,8 +78,7 @@ class taskManager:
     def assignAgentToTask(self):
         # Retrieve the managed agent and target task IDs
         agentRef = self.parent.agentManager.currentAgent
-        taskID = self.parent.toolBar.manageAgentTargetTask
-        taskRef = self.taskList[taskID]
+        taskRef = self.currentTask
 
         # Assign the agent to the task
         taskRef.assignee = agentRef

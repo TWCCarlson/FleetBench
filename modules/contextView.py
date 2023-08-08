@@ -337,7 +337,8 @@ class contextView(tk.Frame):
             if taskRef.assignee:
                 taskRef.assignee.highlightAgent(multi=False)
             # Update taskManager's currentTask prop
-            self.parent.taskManager.currentTask = taskID
+            self.parent.taskManager.currentTask = taskRef
+            self.parent.toolBar.enableTaskManagement()
             logging.debug(f"User clicked on task '{taskID}' in taskTreeView.")
 
     def handleTaskRClick(self, event):

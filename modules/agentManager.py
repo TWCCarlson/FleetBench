@@ -80,10 +80,10 @@ class agentManager:
 
     def assignTaskToAgent(self):
         agentRef = self.currentAgent
-        taskID = self.parent.toolBar.manageAgentTargetTask
-        taskRef = self.parent.taskManager.taskList[taskID]
+        taskRef = self.parent.taskManager.currentTask
 
         # Assign the task to the agent
+        print(agentRef)
         agentRef.currentTask = taskRef
 
         # Update the agent treeView to reflect the changes

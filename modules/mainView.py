@@ -453,6 +453,7 @@ class mainCanvas(tk.Canvas):
 
         # Update the selection tracker
         self.parent.parent.agentManager.currentAgent = agentRef
+        print(agentRef)
         
         # Update movement choices for the selected agent
         self.parent.parent.contextView.validateMovementButtonStates()
