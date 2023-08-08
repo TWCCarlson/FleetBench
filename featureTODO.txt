@@ -26,6 +26,7 @@
 - There are two ways selecting an agent is being handled, unify it into one method
     One for treeView clicks and one for mainCanvas clicks, make it a method in the agent itself
 - Agent managed assignment should enforce 1 agent per task and warn the user if task is already assigned to an agent
+    Same for task management
 - Might want to change the currenTask/assignee values to be IDs instead of object references
     However this is mightily convenient for not having to search dicts for values->keys later
 - Font styling pass in the future (AFTER IT WORKS)

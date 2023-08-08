@@ -83,7 +83,6 @@ class agentManager:
         taskRef = self.parent.taskManager.currentTask
 
         # Assign the task to the agent
-        print(agentRef)
         agentRef.currentTask = taskRef
 
         # Update the agent treeView to reflect the changes

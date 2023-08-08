@@ -463,6 +463,9 @@ class toolBar(tk.Frame):
         logging.debug("Creating agent management UI elements.")
         self.clearAgentManagementUI()
 
+        # Prevent simultaneous management of tasks and agents
+        self.taskManagePrompt()
+
         # Display the currently managed agent
         agentRef = self.parent.agentManager.currentAgent
         self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentRef.numID}:{agentRef.ID} at {agentRef.position}")
@@ -994,10 +997,13 @@ class toolBar(tk.Frame):
         logging.debug("Creating task management UI elements.")
         self.clearTaskManagementUI()
 
+        # Prevent simultaneous management of tasks and agents
+        self.agentManagePrompt()
+
         # Display the currently managed task
         taskRef = self.parent.taskManager.currentTask
         self.managedTaskLabel = tk.Label(self.taskManageFrame, text=f"Managing Task {taskRef.numID}:{taskRef.name}. Pickup node is: {taskRef.pickupPosition} Dropoff node is: {taskRef.dropoffPosition}")
-        self.managedTaskLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        self.managedTaskLabel.grid(row=0, column=0, columnspan=3, sticky=tk.W)
 
         # Create a label for the agent assignment drop down
         self.taskAgentAssignmentLabel = tk.Label(self.taskManageFrame, text="Assign agent: ")
