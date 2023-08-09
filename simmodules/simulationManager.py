@@ -34,9 +34,15 @@ class simulationConfigManager(tk.Toplevel):
     
     def createAlgorithmChoices(self):
         # Creates a drop down menu for the user to select the driving algorithm for the simulation
-        options = [
-            "Dummy"
-        ]
+
+        # Optiontype dict
+        optionTypeDict = {
+            "Dummy": "mapf",
+            "Single-agent A*": "sapf"
+        }
+
+        # Keys of the dict are the displayed options
+        options = list(optionTypeDict.keys())
 
         # Set a default selection - maybe skip this to force a choice
         self.algorithmChoiceState = self.simulationConfigurationState.algorithmSelectionStringVar
@@ -44,6 +50,11 @@ class simulationConfigManager(tk.Toplevel):
 
         # Declare the drop down menu
         self.algorithmChoiceMenu = tk.OptionMenu(self, self.algorithmChoiceState, *options)
+
+        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
+        for algorithm, type in optionTypeDict.items():
+            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
+                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
 
         # Render the menu
         self.algorithmChoiceMenu.grid(row=1, column=0)
@@ -74,7 +85,6 @@ class simulationConfigManager(tk.Toplevel):
         # Render components
         self.frameDelayLabel.grid(row=1, column=1)
         self.frameDelayEntry.grid(row=1, column=2)
-
 
     def validateNumericSpinbox(self, inputString):
         logging.debug(f"Validating numeric spinbox entry: {inputString}")

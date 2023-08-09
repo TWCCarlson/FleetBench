@@ -92,11 +92,8 @@ class taskManager:
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
         for task in self.taskList:
-            print(self.taskList[task].__dict__)
             if not self.taskList[task].assignee == None:
-                print(self.taskList[task].assignee)
                 self.taskList[task].assignee = self.parent.agentManager.agentList[self.taskList[task].assignee]
-                print(self.taskList[task].assignee)
 
         # Update the treeView to reflect the change
         self.parent.contextView.updateTaskTreeView()
