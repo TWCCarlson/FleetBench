@@ -38,12 +38,31 @@ class simProcessor:
         """
         algorithmSelection = self.getSelectedSimulationAlgorithm()
 
+        algorithmDict = {
+            "Dummy": self.algorithmDummy,
+            "Single-agent A*": self.algorithmSingleAgentAStar
+        }
+        algorithmDict[algorithmSelection]()
+    
+        # pp.pprint(simGraphData.simMapGraph.nodes(data=True))
+
+        self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
+
+    def getSelectedSimulationAlgorithm(self):
+        logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
+        # Check what the currently in use algorithm is
+        algorithmSelection = self.simulationSettings["algorithmSelection"].get()
+        logging.debug(f"Next step started with algorithm: {algorithmSelection}")
+        return algorithmSelection
+    
+    def algorithmDummy(self):
+        """
+            Temporary algorithm that just moves agents directly upward
+        """
         # Acquire state information references
         simGraphData = self.parent.simGraphData
         simAgentManager = self.parent.simAgentManager
         simTaskManager = self.parent.simTaskManager
-
-        # pp.pprint(simGraphData.simMapGraph.nodes(data=True))
 
         # Execute algorithm for every agent currently in the simulation
         # Alternative ways of iterating through the agent list may be of interest later
@@ -63,11 +82,19 @@ class simProcessor:
             else:
                 logging.error(f"'{agentTargetNode}' is not a valid node for movement.")
 
-        self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
+    def algorithmSingleAgentAStar(self):
+        """
+            A* implementation for a single agent, does not work with multi-agent
+            Set up to use the first agent in the agent list, so that other agents can act as blockers
+            Useful as a way to find the shortest current path
+        """
+        # Acquire state information references
+        simGraphData = self.parent.simGraphData
+        simAgentManager = self.parent.simAgentManager
+        simTaskManager = self.parent.simTaskManager
 
-    def getSelectedSimulationAlgorithm(self):
-        logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
-        # Check what the currently in use algorithm is
-        algorithmSelection = self.simulationSettings["algorithmSelection"].get()
-        logging.debug(f"Next step started with algorithm: {algorithmSelection}")
-        return algorithmSelection
+        # Grab the first agent in the agent list
+        agent = simAgentManager.agentList[0]
+        
+        # For now, assume the agent already has a task
+        # agentTask = agent.currentTask

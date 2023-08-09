@@ -9,9 +9,13 @@ class simTaskManager:
         # Data structures
         self.taskList = {}
 
-        # Retrieve initial simulation state from the main window task manager
-        self.retrieveInitialSimState()
         logging.debug("Class 'simTaskManager' initialized.")
+
+    def buildReferences(self):
+        # Build references to objects declared after this one
+        self.simAgentManager = self.parent.simAgentManager
+        self.simTaskManager = self.parent.simTaskManager
+        self.simProcessor = self.parent.simProcessor
 
     def createNewTask(self, **kwargs):
         """
@@ -34,6 +38,13 @@ class simTaskManager:
         self.taskList[self.dictLength] = self.latestTask
         logging.info("Task added to 'simTaskManager' task list.")
 
+    def fixAssignments(self):
+        # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
+        # Needed to overcome pickling of data when retrieving the state
+        for task in self.taskList:
+            if not self.taskList[task].assignee == None:
+                self.taskList[task].assignee = self.parent.simAgentManager.agentList[self.taskList[task].assignee]
+
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
         dataPackage = self.parent.parent.parent.taskManager.packageTaskData()
@@ -43,11 +54,16 @@ class simTaskManager:
             pickupPosition = dataPackage[task]["pickupPosition"]
             dropoffPosition = dataPackage[task]["dropoffPosition"]
             timeLimit = dataPackage[task]["timeLimit"]
+            if "assignee" in dataPackage[task]:
+                assignee = dataPackage[task]["assignee"]
+            else:
+                assignee = None
             self.createNewTask(
                 taskName=taskName,
                 pickupPosition=pickupPosition,
                 dropoffPosition=dropoffPosition,
-                timeLimit=timeLimit
+                timeLimit=timeLimit,
+                assignee=assignee
                 )
         logging.info("All task data ported to simulation state.")
 
@@ -59,10 +75,11 @@ class simTaskClass:
         self.parent = parent
         logging.info("New 'simTaskClass' instantiated.")
         logging.debug(f"Task settings: {kwargs}")
-        self.numID = kwargs.pop("numID")        # Numeric ID, internal use only
-        self.name = kwargs.pop("taskName")      # Human-readable ID, name
-        self.pickupPosition = kwargs.pop("pickupPosition")      # Expects Tuple
-        self.dropoffPosition = kwargs.pop("dropoffPosition")    # Expects Tuple
-        self.timeLimit = kwargs.pop("timeLimit")
+        self.numID = kwargs.get("numID")        # Numeric ID, internal use only
+        self.name = kwargs.get("taskName")      # Human-readable ID, name
+        self.pickupPosition = kwargs.get("pickupPosition")      # Expects Tuple
+        self.dropoffPosition = kwargs.get("dropoffPosition")    # Expects Tuple
+        self.timeLimit = kwargs.get("timeLimit")
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
+        self.assignee = kwargs.get("assignee")

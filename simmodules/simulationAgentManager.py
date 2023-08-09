@@ -10,9 +10,13 @@ class simAgentManager:
         # Data structures
         self.agentList = {}
 
-        # Scrape the configured data
-        self.retrieveInitialSimState()
         logging.debug("Class 'simAgentManager' initialized.")
+
+    def buildReferences(self):
+        # Build references to objects declared after this one
+        self.simAgentManager = self.parent.simAgentManager
+        self.simTaskManager = self.parent.simTaskManager
+        self.simProcessor = self.parent.simProcessor
 
     def createNewAgent(self, **kwargs):
         """
@@ -42,6 +46,15 @@ class simAgentManager:
         self.parent.simGraphData.updateAgentLocations(self.agentList)
         logging.info(f"Agent added to the dict of agents")
 
+    def fixAssignments(self):
+        # Iterate through the list of all agents, fixing currenTask to refer to objects instead of IDs
+        # Needed to overcome pickling of data when retrieving the state
+        for agent in self.agentList:
+            if not self.agentList[agent].currentTask == None:
+                # print(self.agentList)
+                # print(self.simTaskManager.taskList)
+                self.agentList[agent].currentTask = self.simTaskManager.taskList[self.agentList[agent].currentTask]
+
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
         dataPackage = self.parent.parent.parent.agentManager.packageAgentData()
@@ -51,11 +64,16 @@ class simAgentManager:
             position = dataPackage[agent]["position"]
             orientation = dataPackage[agent]["orientation"]
             className = dataPackage[agent]["className"]
+            if "currentTask" in dataPackage[agent]:
+                currentTask = dataPackage[agent]["currentTask"]
+            else:
+                currentTask = None
             self.createNewAgent(
                 ID=ID, 
                 position=position, 
                 orientation=orientation, 
-                className=className
+                className=className,
+                currentTask=currentTask
                 )
         logging.info("All agents ported from main session state into simulation state.")
 
@@ -67,11 +85,12 @@ class simAgentClass:
         self.parent = parent
         logging.info(f"New 'simAgentClass' instantiated.")
         logging.debug(f"Agent settings: {kwargs}")
-        self.numID = kwargs.pop("numID")    # Numeric ID, internal use
-        self.ID = kwargs.pop("ID")          # Human-readable ID, name
-        self.position = kwargs.pop("position")
-        self.orientation = kwargs.pop("orientation")
-        self.className = kwargs.pop("className")
+        self.numID = kwargs.get("numID")    # Numeric ID, internal use
+        self.ID = kwargs.get("ID")          # Human-readable ID, name
+        self.position = kwargs.get("position")
+        self.orientation = kwargs.get("orientation")
+        self.className = kwargs.get("className")
+        self.currentTask = kwargs.get("currentTask")
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph

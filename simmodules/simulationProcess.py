@@ -24,3 +24,17 @@ class simulationProcess():
         # Build simulation executor
         self.simProcessor = simProcessor(self, simulationSettings)
         logging.info("Simulation Execution Class 'simProcessor' instantiated successfully.")
+
+        # Build backreferences
+        self.simGraphData.buildReferences()
+        self.simAgentManager.buildReferences()
+        self.simTaskManager.buildReferences()
+
+        # Load in the initial states of the simulation
+        self.simGraphData.retrieveInitialSimState()
+        self.simAgentManager.retrieveInitialSimState()
+        self.simTaskManager.retrieveInitialSimState()
+
+        # Fix any non-object references
+        self.simAgentManager.fixAssignments()
+        self.simTaskManager.fixAssignments()

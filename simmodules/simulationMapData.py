@@ -13,10 +13,14 @@ class simGraphManager:
         ### Quick references
         # Reference to the canvas used to draw the map in the simulation window:
         self.simMapCanvas = self.parent.parent.simulationWindow.simMainView.simCanvas
-        
-        # Retrieve initial graph state from the session edit window
-        self.retrieveInitialSimState()
+
         logging.debug("Class 'simGraphManager' initialized.")
+
+    def buildReferences(self):
+        # Build references to objects declared after this one
+        self.simAgentManager = self.parent.simAgentManager
+        self.simTaskManager = self.parent.simTaskManager
+        self.simProcessor = self.parent.simProcessor
 
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window
