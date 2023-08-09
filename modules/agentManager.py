@@ -91,7 +91,7 @@ class agentManager:
     def fixAssignments(self):
         # Iterate through the list of all agents, fixing currentTask to refer to objects instead of IDs
         for agent in self.agentList:
-            if self.agentList[agent].currentTask:
+            if not self.agentList[agent].currentTask == None:
                 self.agentList[agent].currentTask = self.parent.taskManager.taskList[self.agentList[agent].currentTask]
 
         # Update the agent treeView to reflect the changes

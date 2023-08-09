@@ -119,7 +119,6 @@ class simControlPanel(tk.Frame):
             if widget.winfo_class() == "Button" and not widget == buttonInUse:
                 widget.config(state=tk.DISABLED)
             
-
     def enableOtherPlaybackControls(self, buttonReleased):
         # Iterate over all buttons in the frame, enabling those that are not the one being used
         for widget in self.winfo_children():
