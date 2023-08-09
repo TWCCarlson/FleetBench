@@ -93,10 +93,20 @@ class simAgentClass:
         """
         currentNode = f"({self.position[0]}, {self.position[1]})"
         targetNode = f"({targetNode[0]}, {targetNode[1]})"
-        logging.debug(f"Checking if currentNode '{currentNode}' and '{targetNode}' share an edge . . .")
-        edgeExists = self.mapGraphRef.has_edge(currentNode, targetNode)
-        logging.debug(f"Edge existence: {edgeExists}")
-        return edgeExists
+        logging.debug(f"Checking if currentNode '{currentNode}' and targetNode '{targetNode}' share an edge . . .")
+        if not self.mapGraphRef.has_edge(currentNode, targetNode):
+            logging.debug("Edge does not exist.")
+            return False
+        logging.debug("Edge exists.")
+
+        logging.debug(f"Checking if targetNode '{targetNode}' is occupied by an agent . . .")
+        if 'agent' in self.mapGraphRef.nodes(data=True)[targetNode]:
+            print("teehee")
+            logging.debug(f"TargetNode '{targetNode}' contains an agent. Cannot move here.")
+            return False
+        logging.debug("Node has space to be moved into.")
+        
+        return True
     
     def executeMove(self, targetNode):
         """
@@ -104,3 +114,6 @@ class simAgentClass:
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
         self.position = targetNode # Set it as a tuple
+
+        # Update the mapgraph with the new location
+        self.parent.parent.simGraphData.updateAgentLocations(self.parent.agentList)

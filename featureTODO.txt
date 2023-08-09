@@ -31,6 +31,7 @@
     However this is mightily convenient for not having to search dicts for values->keys later
 - Font styling pass in the future (AFTER IT WORKS)
 - add task icon to tiles in the mapgraph?
+- movement validity checks need to consider that all agents move 'at once' even though the list may be iterated over
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
