@@ -2,6 +2,7 @@ import logging
 import copy
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
+import networkx as nx
 
 class simAgentManager:
     def __init__(self, parent):
@@ -88,6 +89,7 @@ class simAgentClass:
         self.numID = kwargs.get("numID")    # Numeric ID, internal use
         self.ID = kwargs.get("ID")          # Human-readable ID, name
         self.position = kwargs.get("position")
+        self.currentNode = f"({self.position[0]}, {self.position[1]})"
         self.orientation = kwargs.get("orientation")
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
@@ -104,14 +106,33 @@ class simAgentClass:
             "E" : 3
         }
 
+    def calculateAStarBestPath(self, targetNode):
+        bestAStarPathLength = nx.astar_path_length(self.mapGraphRef, self.currentNode, targetNode, heuristic=None, weight=None)
+        logging.debug(f"Agent '{self.ID}:{self.numID}' A* Calculates a path of length {bestAStarPathLength} from {self.position} to {targetNode}")
+        return bestAStarPathLength
+    
+    def findAllSimplePathsOfCutoffK(self, targetNode, cutoffLength):
+        logging.debug(f"Agent '{self.ID}:{self.numID}' attempting to find all paths up to length {cutoffLength} . . .")
+        cutoffKPathsGenerator = nx.all_simple_paths(self.mapGraphRef, self.currentNode, targetNode, cutoffLength)
+        logging.debug(f"Found paths:")
+        cutoffKPathsList = list(cutoffKPathsGenerator)
+        for count, path in enumerate(cutoffKPathsList):
+            logging.debug(f"{count}: {path}")
+        
+        return cutoffKPathsList
+        
     def validateCandidateMove(self, targetNode):
         """
             Used to check whether an agent can move to a target node
             - There must be an edge between current node and target node
             - There cannot be an agent in the target node, if the config specifies no agent overlap
         """
-        currentNode = f"({self.position[0]}, {self.position[1]})"
-        targetNode = f"({targetNode[0]}, {targetNode[1]})"
+        currentNode = self.currentNode
+        if isinstance(targetNode, str):
+            targetNode = targetNode
+        elif isinstance(targetNode, tuple):
+            targetNode = f"({targetNode[0]}, {targetNode[1]})"
+        
         logging.debug(f"Checking if currentNode '{currentNode}' and targetNode '{targetNode}' share an edge . . .")
         if not self.mapGraphRef.has_edge(currentNode, targetNode):
             logging.debug("Edge does not exist.")
@@ -120,7 +141,6 @@ class simAgentClass:
 
         logging.debug(f"Checking if targetNode '{targetNode}' is occupied by an agent . . .")
         if 'agent' in self.mapGraphRef.nodes(data=True)[targetNode]:
-            print("teehee")
             logging.debug(f"TargetNode '{targetNode}' contains an agent. Cannot move here.")
             return False
         logging.debug("Node has space to be moved into.")
@@ -132,7 +152,15 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        self.position = targetNode # Set it as a tuple
+        if isinstance(targetNode, str):
+            self.currentNode = targetNode    # String
+            self.position = eval(targetNode) # Tuple
+        elif isinstance(targetNode, tuple):
+            self.position = targetNode
+            self.currentNode = f"({targetNode[0]}, {targetNode[1]})"
+        else:
+            logging.error(f"Received invalid targetNode type: {type(targetNode)}")
+            raise TypeError
 
         # Update the mapgraph with the new location
         self.parent.parent.simGraphData.updateAgentLocations(self.parent.agentList)

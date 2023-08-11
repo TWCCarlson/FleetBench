@@ -96,5 +96,15 @@ class simProcessor:
         # Grab the first agent in the agent list
         agent = simAgentManager.agentList[0]
         
-        # For now, assume the agent already has a task
-        # agentTask = agent.currentTask
+        # Assume it has a task for now
+        agentTask = agent.currentTask
+        agentTargetNode = agentTask.pickupNode
+        
+        # Take a step toward the task if not already there
+        if agent.currentNode != agentTargetNode:
+            bestAStarPathLength = agent.calculateAStarBestPath(agentTargetNode)
+            bestPathsList = agent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
+            currentNodeListIndex = bestPathsList[0].index(agent.currentNode)
+            nextNodeInList = bestPathsList[0][currentNodeListIndex+1]
+            if agent.validateCandidateMove(nextNodeInList):
+                agent.executeMove(nextNodeInList)
