@@ -20,7 +20,7 @@ class commandBar(tk.Menu):
         tk.Menu.__init__(self, parent)
 
         self.parent.config(menu=self)
-        self.fileCommand = FileCommands(self)
+        self.fileCommand = fileCommands(self)
         logging.info("Command Bar sub-element 'File Menu' built.")
         self.commandBarState = commandBarState(self)
         logging.info("Command Bar UI built successfully.")
@@ -32,7 +32,7 @@ class commandBarState:
     def __init__(self, parent):
         pass
 
-class FileCommands(tk.Menu):
+class fileCommands(tk.Menu):
     """
         The cascade menu containing commands for new, load, save, and quitting of the simulation sessions
     """

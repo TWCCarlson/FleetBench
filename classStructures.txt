@@ -1,0 +1,41 @@
+main (App tk.Tk)
+=======EDIT MODE CLASSES=======
+---randomGenerator
+------randomGeneratorState
+---mapDataClass
+------mapGraph (nx.Graph)
+---agentManager
+------agentClass
+---taskManager
+------taskClass
+---appearanceValues
+---commandBar
+------fileCommands
+------commandBarState
+---toolBar
+---mainView
+------mainCanvas
+---infoBox
+------infoBoxState
+------infoBoxFrame
+---contextView
+------contextViewState
+===============================
+====SIMULATION MODE CLASSES====
+---simulationConfigManager
+------simulationConfigurationState
+---simulationManager
+------simulationWindow
+---------simInfoBox
+------------infoboxFrame
+---------simMainview
+------------simCanvas
+---------simControlPanel
+------simulationProcess
+---------simGraphManager
+------------simMapGraph (nx.Graph)
+---------simAgentManager
+------------simAgentclass
+---------simTaskManager
+------------simTaskClass
+---------simProcessor

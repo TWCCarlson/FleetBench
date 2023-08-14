@@ -44,8 +44,11 @@ class simulationConfigManager(tk.Toplevel):
         # Keys of the dict are the displayed options
         options = list(optionTypeDict.keys())
 
+        # Stringvar to hold the algorithm selection
+        self.algorithmSelectionStringVar = tk.StringVar()
+
         # Set a default selection - maybe skip this to force a choice
-        self.algorithmChoiceState = self.simulationConfigurationState.algorithmSelectionStringVar
+        self.algorithmChoiceState = self.algorithmSelectionStringVar
         self.algorithmChoiceState.set(options[0])
 
         # Declare the drop down menu
@@ -117,6 +120,3 @@ class simulationConfigurationState:
     def __init__(self, parent):
         self.parent = parent
         logging.info("Simulation State Default Init")
-
-        # Stringvar to hold the algorithm selection
-        self.algorithmSelectionStringVar = tk.StringVar()

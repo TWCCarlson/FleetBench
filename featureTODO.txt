@@ -34,6 +34,7 @@
 - movement validity checks need to consider that all agents move 'at once' even though the list may be iterated over
 - selecting agent on the map does not highlight assigned task locations—feature or bug?
 - simulation needs rng machine
+- loading a save with identical data conflicts with what exists, write clear all data when loading
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
