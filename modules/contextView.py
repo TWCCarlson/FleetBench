@@ -78,7 +78,7 @@ class contextView(tk.Frame):
         self.createTaskTreeView()
 
         self.statsListFrame = tk.Frame(self.objectListNotebook)
-        self.objectListNotebook.add(self.agentListFrame, text="Agents", sticky=tk.W+tk.E)
+        self.objectListNotebook.add(self.agentListFrame, text="Agents")
         self.objectListNotebook.add(self.taskListFrame, text="Tasks")
         self.objectListNotebook.add(self.statsListFrame, text="Statistics")
 

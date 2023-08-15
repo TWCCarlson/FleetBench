@@ -11,11 +11,47 @@ class simulationConfigManager(tk.Toplevel):
         self.title("Simulation Configuration Window")
         self.focus()     # "Select" the window
         self.grab_set()  # Forcefully keep attention on the window
-        self.simulationConfigurationState = simulationConfigurationState(self)
-        self.simulationLaunch = tk.Button(self, text="Launch Simulation", command=self.launchSimulation)
-        self.simulationLaunch.grid(row=0, column=0)
 
+        # Building a notebook; each page contains a set of options
+        self.configNotebook = ttk.Notebook(self)
+
+        # Each page needs a space to insert widgets
+        self.pathfindingAlgorithmFrame = tk.Frame(self.configNotebook)
+        self.taskGenerationFrame = tk.Frame(self.configNotebook)
+        self.displayOptionsFrame = tk.Frame(self.configNotebook)
+
+        # Tabnames-tabframes,tabbuildfunction dictionary
+        noteBookTabs = {
+            "Pathfinding Algorithm": (self.pathfindingAlgorithmFrame, self.buildPathfindingAlgorithmPage),
+            "Task Generation": (self.taskGenerationFrame, self.buildTaskGenerationPage),
+            "Display Options": (self.displayOptionsFrame, self.buildDisplayOptionsPage)
+        }
+
+        # Add all pages to the notebook and build their content
+        for tabName, (tabFrame, tabBuildFunction) in noteBookTabs.items():
+            self.configNotebook.add(tabFrame, text=tabName)
+            tabBuildFunction()
+
+        # Render the notebook in the window
+        self.configNotebook.grid(row=0, column=0)
+
+        # State holder class
+        self.simulationConfigurationState = simulationConfigurationState(self)
+
+        # Simulation start button
+        self.simulationLaunch = tk.Button(self, text="Launch Simulation", command=self.launchSimulation)
+        self.simulationLaunch.grid(row=1, column=0)
+
+    def buildPathfindingAlgorithmPage(self):
+        # Intermediate function grouping together declarations and renders for the algorithm choices page
         self.createAlgorithmChoices()
+
+    def buildTaskGenerationPage(self):
+        # Intermediate function grouping together declarations and renders for the task generation page
+        pass
+
+    def buildDisplayOptionsPage(self):
+        # Intermediate function grouping together declarations and renders for the display options page
         self.createSimulationUpdateRate()
 
     def launchSimulation(self):
@@ -34,8 +70,7 @@ class simulationConfigManager(tk.Toplevel):
     
     def createAlgorithmChoices(self):
         # Creates a drop down menu for the user to select the driving algorithm for the simulation
-
-        # Optiontype dict
+        # Using types to separate multi-agent and single-agent pathfinding algorithms
         optionTypeDict = {
             "Dummy": "mapf",
             "Single-agent A*": "sapf"
@@ -52,7 +87,7 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmChoiceState.set(options[0])
 
         # Declare the drop down menu
-        self.algorithmChoiceMenu = tk.OptionMenu(self, self.algorithmChoiceState, *options)
+        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmChoiceState, *options)
 
         # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
         for algorithm, type in optionTypeDict.items():
@@ -63,14 +98,14 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmChoiceMenu.grid(row=1, column=0)
 
     def createSimulationUpdateRate(self):
-        self.frameDelayLabel = tk.Label(self, text="frameDelay:")
+        self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
         self.frameDelayValue = tk.StringVar()
         self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
         # self.validateTaskTimeLimit = self.register(self.taskTimeLimitValidation)
         # self.commandTaskTimeLimit = partial(self.taskTimeLimitValidation, 'T')
         self.frameDelayValue.trace_add("write", lambda *args, b=self.frameDelayValue : self.frameDelayValidation(b, *args))
         # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
-        self.frameDelayEntry = ttk.Spinbox(self,
+        self.frameDelayEntry = ttk.Spinbox(self.displayOptionsFrame,
             width=6,
             from_=0,
             to=100000,
