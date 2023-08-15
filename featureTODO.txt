@@ -36,6 +36,7 @@
 - simulation needs rng machine
 - loading a save with identical data conflicts with what exists, write clear all data when loading
 - bug: you can scroll the canvas even when the map is small enoguh to not need scrolling
+- bug: task/agent placement spinboxes allow entries outside the map, which hightlights, but the task cannot be placed so this is safe currently
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

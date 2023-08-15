@@ -51,7 +51,7 @@ class simProcessor:
     def getSelectedSimulationAlgorithm(self):
         logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
         # Check what the currently in use algorithm is
-        algorithmSelection = self.simulationSettings["algorithmSelection"].get()
+        algorithmSelection = self.simulationSettings["algorithmSelection"]
         logging.debug(f"Next step started with algorithm: {algorithmSelection}")
         return algorithmSelection
     

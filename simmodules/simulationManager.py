@@ -158,7 +158,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateSelectionStringvar = tk.StringVar()
 
         # Add a trace to the stringvar to call the associated UI function when the user makes a selection from the menu
-        self.taskFixedRateSelectionStringvar.trace_add("write", lambda *args, selection=self.taskFixedRateSelectionStringvar: taskFixedRateMethodOptionsDict[selection.get()]())
+        self.taskFixedRateSelectionStringvar.trace_add("write", lambda *args, selection=self.taskFixedRateSelectionStringvar, parentFrame=self.taskFixedRateOptionsFrame: taskFixedRateMethodOptionsDict[selection.get()](parentFrame))
 
         # Set a default selection - maybe skip this to force a choice
         self.taskFixedRateSelectionStringvar.set(taskFixedRateMethodOptions[0])
@@ -171,19 +171,90 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateMethodOptionsLabel.grid(row=0, column=0)
         self.taskFixedRateMethodMenu.grid(row=0, column=1)
     
-    def buildFixedRateTaskCustomRate(self):
+    def buildFixedRateTaskCustomRate(self, parentFrame):
+        # Clear the parent frame of any leftovers to make room for this frame and its children
+        self.removeSubframes(parentFrame)
+
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskFixedCustomRateOptionsFrame = tk.Frame(parentFrame)
+
+        # Creates UI elements relevant to setting options for task generation at fixed custom rates
+        # Interval label and value
+        self.taskFixedRateCustomIntervalLabel = tk.Label(self.taskFixedCustomRateOptionsFrame, text="Interval:")
+        self.taskFixedRateCustomIntervalValue = tk.StringVar()
+
+        # Interval validation callback on spinbox entry
+        self.validateCustomIntervalValue = self.register(self.validateNumericSpinbox)
+
+        # Custom entry numeric spinbox declaration
+        self.taskFixedRateCustomIntervalSpinbox = ttk.Spinbox(self.taskFixedCustomRateOptionsFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.taskFixedRateCustomIntervalValue,
+            validate='key',
+            validatecommand=(self.validateCustomIntervalValue, '%P')
+        )
+
+        # Render label and spinbox
+        self.taskFixedCustomRateOptionsFrame.grid(row=0, column=2)
+        self.taskFixedRateCustomIntervalLabel.grid(row=0, column=0)
+        self.taskFixedRateCustomIntervalSpinbox.grid(row=0, column=1)
+
+        # Amount of tasks per interval label and value
+        self.taskFixedRateCustomTasksPerIntervalLabel = tk.Label(self.taskFixedCustomRateOptionsFrame, text="Tasks per Interval:")
+        self.taskFixedRateCustomTasksPerIntervalValue = tk.StringVar()
+
+        # Tasks per interval validation callback on spinbox entry
+        self.validateCustomTasksPerIntervalValue = self.register(self.validateNumericSpinbox)
+
+        # Custom entry numeric spinbox declaration
+        self.taskFixedRateCustomTasksPerIntervalSpinnbox = ttk.Spinbox(self.taskFixedCustomRateOptionsFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.taskFixedRateCustomTasksPerIntervalValue,
+            validate='key',
+            validatecommand=(self.validateCustomTasksPerIntervalValue, '%P')
+        )
+
+        # Render label and spinbox
+        self.taskFixedRateCustomTasksPerIntervalLabel.grid(row=1, column=0)
+        self.taskFixedRateCustomTasksPerIntervalSpinnbox.grid(row=1, column=1)
+
+        # Radiobuttons to select task batching strategy
+        self.taskFixedRateCustomTaskBatchingStrategyFrame = tk.Frame(self.taskFixedCustomRateOptionsFrame)
+        self.taskFixedRateCustomTaskBatchingStrategyValue = tk.StringVar()
+        self.taskFixedRateCustomTaskSingleBatchStrategy = tk.Radiobutton(self.taskFixedRateCustomTaskBatchingStrategyFrame, text="Single Batch", variable=self.taskFixedRateCustomTaskBatchingStrategyValue, value="singlebatch")
+        self.taskFixedRateCustomTaskEvenSpreadStrategy = tk.Radiobutton(self.taskFixedRateCustomTaskBatchingStrategyFrame, text="Even Spread", variable=self.taskFixedRateCustomTaskBatchingStrategyValue, value="evenspread")
+        self.taskFixedRateCustomTaskSingleBatchStrategy.select()
+
+        # Render radiobuttons and frame
+        self.taskFixedRateCustomTaskBatchingStrategyFrame.grid(row=2, column=0, columnspan=3)
+        self.taskFixedRateCustomTaskSingleBatchStrategy.grid(row=0, column=0)
+        self.taskFixedRateCustomTaskEvenSpreadStrategy.grid(row=0, column=1)
+        
+    def buildFixedRateTaskMeanRate(self, parentFrame):
+        # Clear the parent frame of any leftovers to make room for this frame and its children
+        self.removeSubframes(parentFrame)
         pass
 
-    def buildFixedRateTaskMeanRate(self):
+    def buildFixedRateTaskMaxRate(self, parentFrame):
+        # Clear the parent frame of any leftovers to make room for this frame and its children
+        self.removeSubframes(parentFrame)
         pass
 
-    def buildFixedRateTaskMaxRate(self):
+    def buildFixedRateTaskMinRate(self, parentFrame):
+        # Clear the parent frame of any leftovers to make room for this frame and its children
+        self.removeSubframes(parentFrame)
         pass
 
-    def buildFixedRateTaskMinRate(self):
-        pass
-
-    def buildFixedRateTaskMedianRate(self):
+    def buildFixedRateTaskMedianRate(self, parentFrame):
+        # Clear the parent frame of any leftovers to make room for this frame and its children
+        self.removeSubframes(parentFrame)
         pass
 
     def buildAsAvailableTaskGenerationOptions(self, parentFrame):
@@ -194,9 +265,6 @@ class simulationConfigManager(tk.Toplevel):
         self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
         self.frameDelayValue = tk.StringVar()
         self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
-        # self.validateTaskTimeLimit = self.register(self.taskTimeLimitValidation)
-        # self.commandTaskTimeLimit = partial(self.taskTimeLimitValidation, 'T')
-        self.frameDelayValue.trace_add("write", lambda *args, b=self.frameDelayValue : self.frameDelayValidation(b, *args))
         # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
         self.frameDelayEntry = ttk.Spinbox(self.displayOptionsFrame,
             width=6,
@@ -230,18 +298,6 @@ class simulationConfigManager(tk.Toplevel):
         else:
             logging.debug("Numeric spinbox entry is invalid.")
             return False
-        
-    def frameDelayValidation(self, frameDelay, *args):
-        logging.debug(f"Validating custom playback frame delay entry '{frameDelay}'.")
-        # Spinbox should only accept numeric entries
-        if frameDelay.get().isnumeric():
-            # self.validFrameDelayEntry = True
-            logging.debug("Playback frame delay entry is numeric. Allowed.")
-            return True
-        else:
-            # self.validFrameDelayEntry = False
-            logging.debug("Playback frame delay entry is non-numeric and invalid.")
-            return False
 
     def removeSubframes(self, frame):
         # Destroy all widgets inside child frames of the passed frames, and the child frames themselves
@@ -252,7 +308,6 @@ class simulationConfigManager(tk.Toplevel):
                 # Destroy the frame—all children are also automatically destroyed
                 # https://www.tcl.tk/man/tcl8.6/TkCmd/destroy.html
                 # "This command deletes the windows given by the window arguments, plus all of their descendants."
-                print(f"widget {widget} destroyed")
                 widget.destroy()
 
 class simulationConfigurationState:
