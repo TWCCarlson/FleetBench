@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+import numpy as np
 
 class simulationConfigManager(tk.Toplevel):
     # Window for managing the state of the simulation configuration
@@ -11,6 +14,9 @@ class simulationConfigManager(tk.Toplevel):
         self.title("Simulation Configuration Window")
         self.focus()     # "Select" the window
         self.grab_set()  # Forcefully keep attention on the window
+
+        # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
+        self.precalculateTaskGenerationTabInformation()
 
         # Building a notebook; each page contains a set of options
         self.configNotebook = ttk.Notebook(self)
@@ -41,6 +47,34 @@ class simulationConfigManager(tk.Toplevel):
         # Simulation start button
         self.simulationLaunch = tk.Button(self, text="Launch Simulation", command=self.launchSimulation)
         self.simulationLaunch.grid(row=1, column=0)
+
+    def precalculateTaskGenerationTabInformation(self):
+        # Retrieving information useful to the user about the simulation map
+        # First get the list of all optimal paths
+        nodeTypeDict = self.parent.mapData.generateNodeListsByType()
+        dictOfOptimalTaskPaths = self.parent.mapData.generateAllTaskShortestPaths(nodeTypeDict['pickup'], nodeTypeDict['deposit'])
+        optimalTaskPaths = list()
+        for pickupNode, dropoffPaths in dictOfOptimalTaskPaths.items():
+            for dropoffNode, path in dropoffPaths.items():
+                optimalTaskPaths.append(path)
+                # print(f"{pickupNode}->{dropoffNode}: {path}")
+
+        # Calculate the lengths of each path
+        # Note that this is inclusive, so that amount of steps it takes to actually complete these tasks is len-1
+        optimalTaskPathLengths = list()
+        for path in optimalTaskPaths:
+            optimalTaskPathLengths.append(len(path))
+
+        # Calculating relevant statistics about optimal paths for use in the GUI
+        optimalTaskPathLengthsArray = np.asarray(optimalTaskPathLengths)
+        self.meanOptimalTaskPathLength = np.mean(optimalTaskPathLengthsArray)
+        self.standardDeviationOptimalTaskPathLength = np.std(optimalTaskPathLengthsArray)
+        self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)
+        self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)
+        self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)
+
+        # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
+        # Turns out this is NP hard and probably not all that useful anyway
 
     def buildPathfindingAlgorithmPage(self):
         # Intermediate function grouping together declarations and renders for the algorithm choices page

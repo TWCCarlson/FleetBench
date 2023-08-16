@@ -8,6 +8,8 @@ import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
+from timeit import default_timer as timer
+
 class mapDataClass:
     """
         Class storing the graph on which the warehouse is based
@@ -222,3 +224,44 @@ class mapDataClass:
         # pp.pprint(dataPackage)
         logging.info("Packaged all mapData.")
         return dataPackage
+    
+    def generateNodeListsByType(self):
+        # Empty lists to be filled
+        self.listOfEdgeNodes = []
+        self.listOfPickupNodes = []
+        self.listOfDropoffNodes = []
+        self.listOfRestNodes = []
+        self.listOfChargeNodes = []
+
+        # Dict pairing node types with respective node lists
+        dictOfTypesLists = {
+            'edge': self.listOfEdgeNodes,
+            'pickup': self.listOfPickupNodes,
+            'deposit': self.listOfDropoffNodes,
+            'rest': self.listOfRestNodes,
+            'charge': self.listOfChargeNodes
+        }
+
+        # Iterate through the list of nodes, sorting them by type using the dict
+        for node in self.mapGraph.nodes(data=True):
+            dictOfTypesLists[node[1]['type']].append(node[0])
+
+        # Return a dict of the lists
+        return dictOfTypesLists
+
+    def generateAllTaskShortestPaths(self, pickupNodeList, depositNodeList):
+        # start = timer()
+        pathsDict = {}
+        # dictionary = nx.all_pairs_shortest_path(self.mapGraph)
+        for pickupNode in pickupNodeList:
+            depositDict = {}
+            for depositNode in depositNodeList:
+                depositDict[depositNode] = nx.shortest_path(self.mapGraph, pickupNode, depositNode)
+            pathsDict[pickupNode] = depositDict
+        # stop = timer()
+        # stuff = [x for x in dictionary]
+        # timed = stop-start
+        # pp.pprint(stuff)
+        # print(pathsDict)
+        # print(timed)
+        return pathsDict

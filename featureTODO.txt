@@ -37,6 +37,21 @@
 - loading a save with identical data conflicts with what exists, write clear all data when loading
 - bug: you can scroll the canvas even when the map is small enoguh to not need scrolling
 - bug: task/agent placement spinboxes allow entries outside the map, which hightlights, but the task cannot be placed so this is safe currently
+- unify usage of deposit vs dropoff
+- There are two ways to handle the massive number of A* searches involved in a long simulation:
+    Method 1 ===
+    Precalculate all the relevant paths that are possible, returning a generator
+    Maintain a list of paths pulled from the generator
+    Every time a path is needed, check the list
+        Eliminate paths which contain nodes that are blocked
+        The first path found which is not eliminated is the best path
+    
+    Method 2 ===
+    When a path is needed,
+        Remove edges connecting blocked nodes to the graph
+        Search for a path with A*
+
+    Determine which is faster to save on simulation time.
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
