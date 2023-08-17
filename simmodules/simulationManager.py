@@ -385,11 +385,11 @@ class simulationConfigManager(tk.Toplevel):
         self.taskAsAvailableOptionsFrame = tk.Frame(parentFrame)
 
         # Create a delay option, specifying how long after an agent becomes an available a new task will be generated
-        # Interval label and value
+        # Delay label and value
         self.taskAsAvailableDelayLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Post-completion delay:")
         self.taskAsAvailableDelayValue = tk.StringVar()
 
-        # Interval validation callback on spinbox entry
+        # Delay validation callback on spinbox entry
         self.validateCustomDelayValue = self.register(self.validateNumericSpinbox)
 
         # Custom entry numeric spinbox declaration
@@ -405,9 +405,37 @@ class simulationConfigManager(tk.Toplevel):
 
         # Render label and spinbox
         self.taskAsAvailableOptionsFrame.grid(row=0, column=2)
-        self.taskAsAvailableDelayLabel.grid(row=0, column=0)
-        self.taskAsAvailableDelaySpinbox.grid(row=0, column=1)
-        
+        self.taskAsAvailableDelayLabel.grid(row=1, column=0)
+        self.taskAsAvailableDelaySpinbox.grid(row=1, column=1)
+
+        # Task generation trigger label
+        self.taskAsAvailableTriggerLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Determine agent availability: ")
+
+        # When an agent is 'available' to pick up a new task can be configured
+        agentAvailabilityTriggerDict = {
+            "On Dropoff": "ondeposit", 
+            "On Pickup": "onpickup", 
+            "On Assignment": "onassignment", 
+            "On Rest": "onrest",
+            # "On Recharge": "onrecharge"
+        }
+
+        # Menu options are the keys of the dict
+        agentAvailabilityTriggerOptions = list(agentAvailabilityTriggerDict.keys())
+
+        # Stringvar holding menu selection
+        self.taskAsAvailableTriggerStringvar = tk.StringVar()
+
+        # Set a default value - maybe skip this to force a choice
+        self.taskAsAvailableTriggerStringvar.set(agentAvailabilityTriggerOptions[0])
+
+        # Declare the dropdown menu, linking it to the stringvar and using the option list
+        self.taskAsAvailableAvailabilityTriggerMenu = tk.OptionMenu(self.taskAsAvailableOptionsFrame, self.taskAsAvailableTriggerStringvar, *agentAvailabilityTriggerOptions)
+
+        # Render the menu and its label
+        self.taskAsAvailableTriggerLabel.grid(row=0, column=0)
+        self.taskAsAvailableAvailabilityTriggerMenu.grid(row=0, column=1)
+
     def createSimulationUpdateRate(self):
         self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
         self.frameDelayValue = tk.StringVar()

@@ -53,6 +53,7 @@
 
     Determine which is faster to save on simulation time.
 - task generation descriptive text for auto options could be text instead of label, for wrapping dynamically
+- shift all widget renders to be at the end of a function to reduce flickering
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
