@@ -5,6 +5,14 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import numpy as np
 
+from collections import Counter
+
+# For graphs embedded in tkinter
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+
 class simulationConfigManager(tk.Toplevel):
     # Window for managing the state of the simulation configuration
     def __init__(self, parent):
@@ -66,12 +74,13 @@ class simulationConfigManager(tk.Toplevel):
             optimalTaskPathLengths.append(len(path))
 
         # Calculating relevant statistics about optimal paths for use in the GUI
-        optimalTaskPathLengthsArray = np.asarray(optimalTaskPathLengths)
-        self.meanOptimalTaskPathLength = np.mean(optimalTaskPathLengthsArray)
-        self.standardDeviationOptimalTaskPathLength = np.std(optimalTaskPathLengthsArray)
-        self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)
-        self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)
-        self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)
+        self.taskPathLengthCountDict = Counter(optimalTaskPathLengths)          # Count of the number of tasks (value) with a specific length (key)
+        optimalTaskPathLengthsArray = np.asarray(optimalTaskPathLengths)        # Converting to a numpy array to utilise numpy functions
+        self.meanOptimalTaskPathLength = np.mean(optimalTaskPathLengthsArray)   # Unweighted average of optimal path lengths
+        self.standardDeviationOptimalTaskPathLength = np.std(optimalTaskPathLengthsArray)   # Standard deviation of optimal path lengths
+        self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)     # Longest length of an optimal path
+        self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)     # Shortest length of an optimal path
+        self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)   # Median length of optimal paths
 
         # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
         # Turns out this is NP hard and probably not all that useful anyway
@@ -82,6 +91,7 @@ class simulationConfigManager(tk.Toplevel):
 
     def buildTaskGenerationPage(self):
         # Intermediate function grouping together declarations and renders for the task generation page
+        self.createTaskInformationPane()
         self.createTaskFrequencyOptions()
 
     def buildDisplayOptionsPage(self):
@@ -130,6 +140,50 @@ class simulationConfigManager(tk.Toplevel):
 
         # Render the menu
         self.algorithmChoiceMenu.grid(row=1, column=0)
+
+    def createTaskInformationPane(self):
+        # Creates a graph and text field that displays statistical information about the possible tasks in the warehouse to the user
+        # Separate this area from the option gui area
+        ttk.Separator(self.taskGenerationFrame, orient="horizontal").grid(row=1, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
+
+        # Create the figure that will contain the plot
+        self.taskInfoFigure = Figure(figsize=(5,2), dpi=100)
+        self.taskInfoPlot = self.taskInfoFigure.add_subplot(111)
+
+        # Define the plot
+        self.taskInfoPlot.bar(self.taskPathLengthCountDict.keys(), self.taskPathLengthCountDict.values())
+        self.taskInfoPlot.set_xticks(list(range(0, self.maximumOptimalPathLength+1)))
+        self.taskInfoPlot.set_xlabel("Optimal Task Path Lengths (steps)")
+        self.taskInfoPlot.set_ylabel("Count")
+
+        # Create the tkinter object using matplotlib's backend, and render it to the page frame
+        self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskGenerationFrame)
+        self.taskInfoCanvasWidget.draw()
+        self.taskInfoCanvasWidget.get_tk_widget().grid(row=2, column=0)
+
+        # Mark the mean value with a line on the plot
+        self.taskInfoPlot.axvline(self.meanOptimalTaskPathLength, color='r')
+
+        # Create a containing frame for the text widget, to control its size
+        self.taskInfoTextFrame = tk.Frame(self.taskGenerationFrame, width=self.winfo_width(), height=100)
+        self.taskInfoTextFrame.grid(row=3, column=0, sticky="news")
+        self.taskInfoTextFrame.grid_propagate(False)        
+
+        # Create some text providing statistical information about the optimal task paths
+        self.taskInfoText = tk.Text(self.taskInfoTextFrame, fg="black", bg="SystemButtonFace", bd=0, font=("Helvetica", 10, "bold"))
+        self.taskInfoText.tag_configure("red", foreground="red")
+        self.taskInfoText.insert(tk.END, "Statistical Data for all possible optimal task paths: \n")
+        self.taskInfoText.insert(tk.END, f"\tMean optimal path length: {round(self.meanOptimalTaskPathLength, 2)}\n", "red")
+        self.taskInfoText.insert(tk.END, f"\tMax optimal path length: {self.maximumOptimalPathLength}\n")
+        self.taskInfoText.insert(tk.END, f"\tMin optimal path length: {self.minimumOptimalPathLength}\n")
+        self.taskInfoText.insert(tk.END, f"\tMedian optimal path length: {self.medianOptimalTaskPathLength}\n")
+        self.taskInfoText.insert(tk.END, f"\tOptimal path length standard deviation: {round(self.standardDeviationOptimalTaskPathLength, 2)}")
+        self.taskInfoText.configure(state=tk.DISABLED, height=6)
+
+        # Restrain the text widget from taking as much space as it wants
+        # self.winfo_width(), self.winfo_height()
+        # Render the text
+        self.taskInfoText.grid(row=0, column=0)
 
     def createTaskFrequencyOptions(self):
         # Create a containing frame for this section
