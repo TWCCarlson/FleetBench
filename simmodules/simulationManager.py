@@ -145,16 +145,21 @@ class simulationConfigManager(tk.Toplevel):
         # Creates a graph and text field that displays statistical information about the possible tasks in the warehouse to the user
         # Separate this area from the option gui area
         ttk.Separator(self.taskGenerationFrame, orient="horizontal").grid(row=1, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
+        ttk.Separator(self.taskGenerationFrame, orient="horizontal").grid(row=3, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
 
         # Create the figure that will contain the plot
         self.taskInfoFigure = Figure(figsize=(5,2), dpi=100)
         self.taskInfoPlot = self.taskInfoFigure.add_subplot(111)
+        # Set the background color of the figure to match the window; matplotlib wants RGB scaled 0-1, while tkinter provides 16-bit rgb
+        systemButtonFaceRGB = np.array(self.winfo_rgb("SystemButtonFace"))
+        self.taskInfoFigure.set_facecolor(np.divide(systemButtonFaceRGB, 2**16))
 
         # Define the plot
         self.taskInfoPlot.bar(self.taskPathLengthCountDict.keys(), self.taskPathLengthCountDict.values())
         self.taskInfoPlot.set_xticks(list(range(0, self.maximumOptimalPathLength+1)))
         self.taskInfoPlot.set_xlabel("Optimal Task Path Lengths (steps)")
         self.taskInfoPlot.set_ylabel("Count")
+        self.taskInfoPlot.set_title("All Possible Task Optimal Paths")
 
         # Create the tkinter object using matplotlib's backend, and render it to the page frame
         self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskGenerationFrame)
@@ -166,8 +171,8 @@ class simulationConfigManager(tk.Toplevel):
 
         # Create a containing frame for the text widget, to control its size
         self.taskInfoTextFrame = tk.Frame(self.taskGenerationFrame, width=self.winfo_width(), height=100)
-        self.taskInfoTextFrame.grid(row=3, column=0, sticky="news")
-        self.taskInfoTextFrame.grid_propagate(False)        
+        self.taskInfoTextFrame.grid(row=4, column=0, sticky="news")
+        self.taskInfoTextFrame.grid_propagate(False)
 
         # Create some text providing statistical information about the optimal task paths
         self.taskInfoText = tk.Text(self.taskInfoTextFrame, fg="black", bg="SystemButtonFace", bd=0, font=("Helvetica", 10, "bold"))
@@ -180,8 +185,6 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoText.insert(tk.END, f"\tOptimal path length standard deviation: {round(self.standardDeviationOptimalTaskPathLength, 2)}")
         self.taskInfoText.configure(state=tk.DISABLED, height=6)
 
-        # Restrain the text widget from taking as much space as it wants
-        # self.winfo_width(), self.winfo_height()
         # Render the text
         self.taskInfoText.grid(row=0, column=0)
 
