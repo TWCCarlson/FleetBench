@@ -331,22 +331,50 @@ class simulationConfigManager(tk.Toplevel):
     def buildFixedRateTaskMeanRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
         self.removeSubframes(parentFrame)
-        pass
+
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskFixedRateMeanOptionsFrame = tk.Frame(parentFrame)
+        self.taskFixedRateMeanOptionsFrame.grid(row=0, column=2)
+
+        # Create descriptive text
+        tk.Label(self.taskFixedRateMeanOptionsFrame, text=f"One task will be created per active agent e very {round(self.meanOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
 
     def buildFixedRateTaskMaxRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
         self.removeSubframes(parentFrame)
-        pass
+        
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskFixedRateMaximumOptionsFrame = tk.Frame(parentFrame)
+        self.taskFixedRateMaximumOptionsFrame.grid(row=0, column=2)
+
+        # Create descriptive text
+        tk.Label(self.taskFixedRateMaximumOptionsFrame, text=f"One task will be created per active agent every {round(self.maximumOptimalPathLength)} simulation steps.").grid(row=0, column=0)
 
     def buildFixedRateTaskMinRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
         self.removeSubframes(parentFrame)
-        pass
+        
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskFixedRateMinimumOptionsFrame = tk.Frame(parentFrame)
+        self.taskFixedRateMinimumOptionsFrame.grid(row=0, column=2)
+
+        # Create descriptive text
+        tk.Label(self.taskFixedRateMinimumOptionsFrame, text=f"One task will be created per active agent every {round(self.minimumOptimalPathLength)} simulation steps.").grid(row=0, column=0)
 
     def buildFixedRateTaskMedianRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
         self.removeSubframes(parentFrame)
-        pass
+        
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskFixedRateMedianOptionsFrame = tk.Frame(parentFrame)
+        self.taskFixedRateMedianOptionsFrame.grid(row=0, column=2)
+
+        # Create descriptive text
+        tk.Label(self.taskFixedRateMedianOptionsFrame, text=f"One task will be created per active agent every {round(self.medianOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
 
     def buildAsAvailableTaskGenerationOptions(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
