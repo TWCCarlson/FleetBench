@@ -380,6 +380,34 @@ class simulationConfigManager(tk.Toplevel):
         # Clear the parent frame of any leftovers to make room for this frame and its children
         self.removeSubframes(parentFrame)
 
+        # Create a containing frame for this section
+        # Useful for deleting all containing widgets later
+        self.taskAsAvailableOptionsFrame = tk.Frame(parentFrame)
+
+        # Create a delay option, specifying how long after an agent becomes an available a new task will be generated
+        # Interval label and value
+        self.taskAsAvailableDelayLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Post-completion delay:")
+        self.taskAsAvailableDelayValue = tk.StringVar()
+
+        # Interval validation callback on spinbox entry
+        self.validateCustomDelayValue = self.register(self.validateNumericSpinbox)
+
+        # Custom entry numeric spinbox declaration
+        self.taskAsAvailableDelaySpinbox = ttk.Spinbox(self.taskAsAvailableOptionsFrame,
+            width=6,
+            from_=0,
+            to=1000,
+            increment=1,
+            textvariable=self.taskAsAvailableDelayValue,
+            validate='key',
+            validatecommand=(self.validateCustomDelayValue, '%P')
+        )
+
+        # Render label and spinbox
+        self.taskAsAvailableOptionsFrame.grid(row=0, column=2)
+        self.taskAsAvailableDelayLabel.grid(row=0, column=0)
+        self.taskAsAvailableDelaySpinbox.grid(row=0, column=1)
+        
     def createSimulationUpdateRate(self):
         self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
         self.frameDelayValue = tk.StringVar()
