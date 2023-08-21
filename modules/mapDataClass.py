@@ -239,7 +239,8 @@ class mapDataClass:
             'pickup': self.listOfPickupNodes,
             'deposit': self.listOfDropoffNodes,
             'rest': self.listOfRestNodes,
-            'charge': self.listOfChargeNodes
+            'charge': self.listOfChargeNodes,
+            'void': []
         }
 
         # Iterate through the list of nodes, sorting them by type using the dict

@@ -4,6 +4,7 @@ import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import numpy as np
+import itertools
 
 from collections import Counter
 
@@ -91,8 +92,15 @@ class simulationConfigManager(tk.Toplevel):
 
     def buildTaskGenerationPage(self):
         # Intermediate function grouping together declarations and renders for the task generation page
-        self.createTaskInformationPane()
+        self.taskGenerationRateFrame = tk.Frame(self.taskGenerationFrame)
+        self.taskGenerationRateFrame.grid(row=0, column=0)
         self.createTaskFrequencyOptions()
+        self.taskStatisticsFrame = tk.Frame(self.taskGenerationFrame)
+        self.taskStatisticsFrame.grid(row=1, column=0)
+        self.createTaskInformationPane()
+        self.taskLocationFrame = tk.LabelFrame(self.taskGenerationFrame, text="Node Weights")
+        self.taskLocationFrame.grid(row=0, column=1, rowspan=2)
+        self.createTaskLocationOptions()
 
     def buildDisplayOptionsPage(self):
         # Intermediate function grouping together declarations and renders for the display options page
@@ -144,8 +152,8 @@ class simulationConfigManager(tk.Toplevel):
     def createTaskInformationPane(self):
         # Creates a graph and text field that displays statistical information about the possible tasks in the warehouse to the user
         # Separate this area from the option gui area
-        ttk.Separator(self.taskGenerationFrame, orient="horizontal").grid(row=1, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
-        ttk.Separator(self.taskGenerationFrame, orient="horizontal").grid(row=3, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
+        ttk.Separator(self.taskStatisticsFrame, orient="horizontal").grid(row=1, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
+        ttk.Separator(self.taskStatisticsFrame, orient="horizontal").grid(row=3, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
 
         # Create the figure that will contain the plot
         self.taskInfoFigure = Figure(figsize=(5,2), dpi=100)
@@ -162,7 +170,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoPlot.set_title("All Possible Task Optimal Paths")
 
         # Create the tkinter object using matplotlib's backend, and render it to the page frame
-        self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskGenerationFrame)
+        self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskStatisticsFrame)
         self.taskInfoCanvasWidget.draw()
         self.taskInfoCanvasWidget.get_tk_widget().grid(row=2, column=0)
 
@@ -170,7 +178,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoPlot.axvline(self.meanOptimalTaskPathLength, color='r')
 
         # Create a containing frame for the text widget, to control its size
-        self.taskInfoTextFrame = tk.Frame(self.taskGenerationFrame, width=self.winfo_width(), height=100)
+        self.taskInfoTextFrame = tk.Frame(self.taskStatisticsFrame, width=self.winfo_width(), height=100)
         self.taskInfoTextFrame.grid(row=4, column=0, sticky="news")
         self.taskInfoTextFrame.grid_propagate(False)
 
@@ -191,7 +199,7 @@ class simulationConfigManager(tk.Toplevel):
     def createTaskFrequencyOptions(self):
         # Create a containing frame for this section
         # Useful for deleting all containing widgets later
-        self.taskFrequencyChoicesFrame = tk.Frame(self.taskGenerationFrame)
+        self.taskFrequencyChoicesFrame = tk.Frame(self.taskGenerationRateFrame)
 
         # Creates a drop-down for task frequency type
         # Based on selection, creates options specific to the frequency type
@@ -436,6 +444,65 @@ class simulationConfigManager(tk.Toplevel):
         self.taskAsAvailableTriggerLabel.grid(row=0, column=0)
         self.taskAsAvailableAvailabilityTriggerMenu.grid(row=0, column=1)
 
+    def createTaskLocationOptions(self):
+        # Allow the user to assign weights or entirely disable certain pickup and dropoff nodes
+        # Containing frames
+        self.taskLocationPickupFrame = tk.LabelFrame(self.taskLocationFrame, text="Pickup Nodes:")
+        self.taskLocationPickupFrame.grid(row=0, column=0)
+        self.taskLocationDropoffFrame = tk.LabelFrame(self.taskLocationFrame, text="Dropoff Nodes:")
+        self.taskLocationDropoffFrame.grid(row=0, column=1)
+
+        # Spinboxes should only be numeric, so use the validating function
+        self.validateTaskWeightValues = self.register(self.validateNumericSpinbox)
+
+        # Get all pickup and dropoff nodes
+        nodeTypeDict = self.parent.mapData.generateNodeListsByType()
+        listOfPickupNodes = nodeTypeDict['pickup']
+        listOfDropoffNodes = nodeTypeDict['deposit']
+
+        # Build the GUI for setting weights of nodes, by type
+        self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame)
+        self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame)
+
+        print(self.taskLocationPickupFrame.grid_slaves(row=2, column=2))
+
+    def buildNodeWeightingOptions(self, nodeList, targetFrame):
+        # Iterate over all pickup nodes
+        for index, node in enumerate(nodeList):
+            # Each node needs a label, tickbox, and numeric spinbox for weight
+            # Create the label, displaying the nodes ID/coordinates
+            nodeLabel = tk.Label(targetFrame, text=str(node))
+            nodeLabel.grid(row=index, column=0)
+
+            # Create the spinbox, to hold the relative numeric weight entry
+            nodeWeightBox = ttk.Spinbox(targetFrame,
+                width=6,
+                from_=0,
+                to=1000,
+                increment=1,
+                validate='key',
+                validatecommand=(self.validateTaskWeightValues, '%P')
+            )
+            nodeWeightBox.insert(0, 100)
+            nodeWeightBox.grid(row=index, column=2)
+
+            # Create a toggle button that disables the use of the tile
+            stateCycler = itertools.cycle([tk.DISABLED, tk.NORMAL]) # Use this to track the state of the widgets tied to the checkbutton, cycling the value on each callback
+            nodeTick = tk.Checkbutton(targetFrame, 
+                command = lambda stateCycler=stateCycler, index=index, controlWidgetColumn=1: self.toggleWidgetsInRow(index, stateCycler, controlWidgetColumn))
+            nodeTick.grid(row=index, column=1)
+            nodeTick.select()   # Default toggled on
+            
+    def toggleWidgetsInRow(self, index, stateCycler, controlWidgetColumn):
+        # Using the index of the grid row the widget callback exists in, toggle every other widget
+        # State cycler is an `itertools.cycle` object, and the controlWidgetColumn is skipped in iteration
+        widgetlist = self.taskLocationPickupFrame.grid_slaves(row=index)
+        nextState = next(stateCycler)   # Get the next state
+        for widget in widgetlist:
+            # Iterate over every widget, skipping the control column (this should stay tk.normal so that it can be clicked again)
+            if not widget.grid_info()["column"]==controlWidgetColumn:
+                widget.configure(state=nextState)
+        
     def createSimulationUpdateRate(self):
         self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
         self.frameDelayValue = tk.StringVar()
