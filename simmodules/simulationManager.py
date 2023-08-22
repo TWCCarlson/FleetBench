@@ -5,6 +5,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import numpy as np
 import itertools
+import modules.tk_extensions as tk_e
 
 from collections import Counter
 
@@ -447,9 +448,18 @@ class simulationConfigManager(tk.Toplevel):
     def createTaskLocationOptions(self):
         # Allow the user to assign weights or entirely disable certain pickup and dropoff nodes
         # Containing frames
-        self.taskLocationPickupFrame = tk.LabelFrame(self.taskLocationFrame, text="Pickup Nodes:")
-        self.taskLocationPickupFrame.grid(row=0, column=0)
-        self.taskLocationDropoffFrame = tk.LabelFrame(self.taskLocationFrame, text="Dropoff Nodes:")
+        self.taskLocationPickupLabelFrame = tk.LabelFrame(self.taskLocationFrame, text="Pickup Nodes")
+        self.taskLocationPickupLabelFrame.grid(row=0, column=0)
+        # Use custom scrolled frame for long lists
+        self.taskLocationPickupScrollFrame = tk_e.VerticalScrolledFrame(self.taskLocationPickupLabelFrame)
+        self.taskLocationPickupFrame = self.taskLocationPickupScrollFrame.interior
+        self.taskLocationPickupScrollFrame.grid(row=0, column=0)
+
+        self.taskLocationDropoffLabelFrame = tk.LabelFrame(self.taskLocationFrame, text="Dropoff Nodes")
+        self.taskLocationDropoffLabelFrame.grid(row=0, column=1)
+        # Use custom scrolled frame for long lists
+        self.taskLocationDropoffScrollFrame = tk_e.VerticalScrolledFrame(self.taskLocationDropoffLabelFrame)
+        self.taskLocationDropoffFrame = self.taskLocationDropoffScrollFrame.interior
         self.taskLocationDropoffFrame.grid(row=0, column=1)
 
         # Spinboxes should only be numeric, so use the validating function
@@ -464,7 +474,15 @@ class simulationConfigManager(tk.Toplevel):
         self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame)
         self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame)
 
-        print(self.taskLocationPickupFrame.grid_slaves(row=2, column=2))
+    def enterVScrollFrameSpinbox(self, event, bindTarget):
+        # Release the mouse from managing the containing canvas before binding it to the spinbox it just entered
+        bindTarget.unbind_mwheel()
+        event.widget.bind('<MouseWheel>', lambda event: event.widget.invoke('buttonup') if event.delta>0 else event.widget.invoke('buttondown'))
+
+    def leaveVScrollFrameSpinbox(self, event, bindTarget):
+        # Release the mouse from managing the spinbox before reattaching it to the canvas containing the spinbox
+        event.widget.unbind('<MouseWheel>')
+        bindTarget.bind_mwheel()
 
     def buildNodeWeightingOptions(self, nodeList, targetFrame):
         # Iterate over all pickup nodes
@@ -475,7 +493,7 @@ class simulationConfigManager(tk.Toplevel):
             nodeLabel.grid(row=index, column=0)
 
             # Create the spinbox, to hold the relative numeric weight entry
-            nodeWeightBox = ttk.Spinbox(targetFrame,
+            nodeWeightBox = tk.Spinbox(targetFrame,
                 width=6,
                 from_=0,
                 to=1000,
@@ -485,6 +503,9 @@ class simulationConfigManager(tk.Toplevel):
             )
             nodeWeightBox.insert(0, 100)
             nodeWeightBox.grid(row=index, column=2)
+            # Bind controls to the spinbox
+            nodeWeightBox.bind('<Enter>', lambda event, bindTarget=targetFrame.master.master: self.enterVScrollFrameSpinbox(event, bindTarget))
+            nodeWeightBox.bind('<Leave>', lambda event, bindTarget=targetFrame.master.master: self.leaveVScrollFrameSpinbox(event, bindTarget))
 
             # Create a toggle button that disables the use of the tile
             stateCycler = itertools.cycle([tk.DISABLED, tk.NORMAL]) # Use this to track the state of the widgets tied to the checkbutton, cycling the value on each callback
