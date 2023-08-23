@@ -460,7 +460,7 @@ class simulationConfigManager(tk.Toplevel):
         # Use custom scrolled frame for long lists
         self.taskLocationDropoffScrollFrame = tk_e.VerticalScrolledFrame(self.taskLocationDropoffLabelFrame)
         self.taskLocationDropoffFrame = self.taskLocationDropoffScrollFrame.interior
-        self.taskLocationDropoffFrame.grid(row=0, column=1)
+        self.taskLocationDropoffScrollFrame.grid(row=0, column=0)
 
         # Spinboxes should only be numeric, so use the validating function
         self.validateTaskWeightValues = self.register(self.validateNumericSpinbox)
@@ -501,7 +501,7 @@ class simulationConfigManager(tk.Toplevel):
                 validate='key',
                 validatecommand=(self.validateTaskWeightValues, '%P')
             )
-            nodeWeightBox.insert(0, 100)
+            nodeWeightBox.insert(0, 10)
             nodeWeightBox.grid(row=index, column=2)
             # Bind controls to the spinbox
             nodeWeightBox.bind('<Enter>', lambda event, bindTarget=targetFrame.master.master: self.enterVScrollFrameSpinbox(event, bindTarget))
