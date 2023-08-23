@@ -475,8 +475,12 @@ class simulationConfigManager(tk.Toplevel):
             "pickup": [],
             "dropoff": []
         }
-        self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame, self.nodeWeightVarDict["pickup"])
-        self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame, self.nodeWeightVarDict["dropoff"])
+        self.nodeAvailableVarDict = {
+            "pickup": [],
+            "dropoff": []
+        }
+        self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame, self.nodeWeightVarDict["pickup"], self.nodeAvailableVarDict["pickup"])
+        self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame, self.nodeWeightVarDict["dropoff"], self.nodeAvailableVarDict["dropoff"])
 
         # Descriptive text
         tk.Label(self.taskLocationFrame, text="Set the relative weight of each node being selected when a task is generated.").grid(row=0, column=0, columnspan=2)
@@ -493,7 +497,7 @@ class simulationConfigManager(tk.Toplevel):
         event.widget.unbind('<MouseWheel>')
         bindTarget.bind_mwheel()
 
-    def buildNodeWeightingOptions(self, nodeList, targetFrame, targetList):
+    def buildNodeWeightingOptions(self, nodeList, targetFrame, targetWeightList, targetAvailableList):
         # Iterate over all nodes in the given list
         for index, node in enumerate(nodeList):
             # Each node needs a label, tickbox, and numeric spinbox for weight
@@ -504,7 +508,7 @@ class simulationConfigManager(tk.Toplevel):
             # Create the spinbox, to hold the relative numeric weight entry
             # Use the textvariable option to enable trace callbacks on changed values
             nodeWeightValue = tk.StringVar()
-            targetList.append(nodeWeightValue) # Tkinter garbage collects local variables, including their traces, so save them to a list
+            targetWeightList.append(nodeWeightValue) # Tkinter garbage collects local variables, including their traces, so save them to a list
             nodeWeightBox = tk.Spinbox(targetFrame,
                 width=6,
                 from_=0,
@@ -517,7 +521,7 @@ class simulationConfigManager(tk.Toplevel):
             nodeWeightBox.insert(0, 1)
             nodeWeightBox.grid(row=index, column=2)
             # .trace_add() supplies lambda the variable ID (PY_VARXX) and the event ("write")
-            nodeWeightValue.trace_add("write", lambda *args, targetList=targetList, targetFrame=targetFrame, targetColumn=3 : self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn))
+            nodeWeightValue.trace_add("write", lambda *args, targetList=targetWeightList, targetFrame=targetFrame, targetColumn=3 : self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn))
             # Bind controls to the spinbox
             nodeWeightBox.bind('<Enter>', lambda event, bindTarget=targetFrame.master.master: self.enterVScrollFrameSpinbox(event, bindTarget))
             nodeWeightBox.bind('<Leave>', lambda event, bindTarget=targetFrame.master.master: self.leaveVScrollFrameSpinbox(event, bindTarget))
@@ -525,19 +529,22 @@ class simulationConfigManager(tk.Toplevel):
             # Create a label display the calculated % chance this node gets used per task generation
             nodeChanceLabel = tk.Label(targetFrame, text="0%")
             nodeChanceLabel.grid(row=index, column=3)
-            self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn=3) # Trigger initial calulcation
+            self.calculateLocationSelectionOdds(targetWeightList, targetFrame, targetColumn=3) # Trigger initial calulcation
 
             # Create a toggle button that disables the use of the tile
             stateCycler = itertools.cycle([tk.DISABLED, tk.NORMAL]) # Use this to track the state of the widgets tied to the checkbutton, cycling the value on each callback
-            nodeTick = tk.Checkbutton(targetFrame, 
-                command = lambda stateCycler=stateCycler, index=index, controlWidgetColumn=1: self.toggleWidgetsInRow(index, stateCycler, controlWidgetColumn))
+            nodeTickVar = tk.IntVar()
+            targetAvailableList.append(nodeTickVar) # Tkinter garbage collects local variables, including their traces, so save them to a list
+            nodeTickVar.set(1)
+            nodeTick = tk.Checkbutton(targetFrame, variable=nodeTickVar,
+                command = lambda stateCycler=stateCycler, index=index, targetFrame=targetFrame, controlWidgetColumn=1: self.toggleWidgetsInRow(index, stateCycler, targetFrame, controlWidgetColumn))
             nodeTick.grid(row=index, column=1)
             nodeTick.select()   # Default toggled on
             
-    def toggleWidgetsInRow(self, index, stateCycler, controlWidgetColumn):
+    def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
         # State cycler is an `itertools.cycle` object, and the controlWidgetColumn is skipped in iteration
-        widgetlist = self.taskLocationPickupFrame.grid_slaves(row=index)
+        widgetlist = targetFrame.grid_slaves(row=index)
         nextState = next(stateCycler)   # Get the next state
         for widget in widgetlist:
             # Iterate over every widget, skipping the control column (this should stay tk.normal so that it can be clicked again)
