@@ -449,14 +449,14 @@ class simulationConfigManager(tk.Toplevel):
         # Allow the user to assign weights or entirely disable certain pickup and dropoff nodes
         # Containing frames
         self.taskLocationPickupLabelFrame = tk.LabelFrame(self.taskLocationFrame, text="Pickup Nodes")
-        self.taskLocationPickupLabelFrame.grid(row=0, column=0)
+        self.taskLocationPickupLabelFrame.grid(row=3, column=0)
         # Use custom scrolled frame for long lists
         self.taskLocationPickupScrollFrame = tk_e.VerticalScrolledFrame(self.taskLocationPickupLabelFrame)
         self.taskLocationPickupFrame = self.taskLocationPickupScrollFrame.interior
         self.taskLocationPickupScrollFrame.grid(row=0, column=0)
 
         self.taskLocationDropoffLabelFrame = tk.LabelFrame(self.taskLocationFrame, text="Dropoff Nodes")
-        self.taskLocationDropoffLabelFrame.grid(row=0, column=1)
+        self.taskLocationDropoffLabelFrame.grid(row=3, column=1)
         # Use custom scrolled frame for long lists
         self.taskLocationDropoffScrollFrame = tk_e.VerticalScrolledFrame(self.taskLocationDropoffLabelFrame)
         self.taskLocationDropoffFrame = self.taskLocationDropoffScrollFrame.interior
@@ -473,6 +473,11 @@ class simulationConfigManager(tk.Toplevel):
         # Build the GUI for setting weights of nodes, by type
         self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame)
         self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame)
+
+        # Descriptive text
+        tk.Label(self.taskLocationFrame, text="Set the relative weight of each node being selected when a task is generated.").grid(row=0, column=0, columnspan=2)
+        tk.Label(self.taskLocationFrame, text="Each task generated randomly selects a pickup node and a dropoff node.").grid(row=1, column=0, columnspan=2)
+        tk.Label(self.taskLocationFrame, text="Untick a node to ban it from being selected.").grid(row=2, column=0, columnspan=2)
 
     def enterVScrollFrameSpinbox(self, event, bindTarget):
         # Release the mouse from managing the containing canvas before binding it to the spinbox it just entered
