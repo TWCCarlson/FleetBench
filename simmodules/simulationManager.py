@@ -471,8 +471,12 @@ class simulationConfigManager(tk.Toplevel):
         listOfDropoffNodes = nodeTypeDict['deposit']
 
         # Build the GUI for setting weights of nodes, by type
-        self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame)
-        self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame)
+        self.nodeWeightVarDict = {
+            "pickup": [],
+            "dropoff": []
+        }
+        self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame, self.nodeWeightVarDict["pickup"])
+        self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame, self.nodeWeightVarDict["dropoff"])
 
         # Descriptive text
         tk.Label(self.taskLocationFrame, text="Set the relative weight of each node being selected when a task is generated.").grid(row=0, column=0, columnspan=2)
@@ -489,8 +493,8 @@ class simulationConfigManager(tk.Toplevel):
         event.widget.unbind('<MouseWheel>')
         bindTarget.bind_mwheel()
 
-    def buildNodeWeightingOptions(self, nodeList, targetFrame):
-        # Iterate over all pickup nodes
+    def buildNodeWeightingOptions(self, nodeList, targetFrame, targetList):
+        # Iterate over all nodes in the given list
         for index, node in enumerate(nodeList):
             # Each node needs a label, tickbox, and numeric spinbox for weight
             # Create the label, displaying the nodes ID/coordinates
@@ -498,19 +502,30 @@ class simulationConfigManager(tk.Toplevel):
             nodeLabel.grid(row=index, column=0)
 
             # Create the spinbox, to hold the relative numeric weight entry
+            # Use the textvariable option to enable trace callbacks on changed values
+            nodeWeightValue = tk.StringVar()
+            targetList.append(nodeWeightValue) # Tkinter garbage collects local variables, including their traces, so save them to a list
             nodeWeightBox = tk.Spinbox(targetFrame,
                 width=6,
                 from_=0,
                 to=1000,
                 increment=1,
                 validate='key',
-                validatecommand=(self.validateTaskWeightValues, '%P')
+                validatecommand=(self.validateTaskWeightValues, '%P'),
+                textvariable=nodeWeightValue
             )
-            nodeWeightBox.insert(0, 10)
+            nodeWeightBox.insert(0, 1)
             nodeWeightBox.grid(row=index, column=2)
+            # .trace_add() supplies lambda the variable ID (PY_VARXX) and the event ("write")
+            nodeWeightValue.trace_add("write", lambda *args, targetList=targetList, targetFrame=targetFrame, targetColumn=3 : self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn))
             # Bind controls to the spinbox
             nodeWeightBox.bind('<Enter>', lambda event, bindTarget=targetFrame.master.master: self.enterVScrollFrameSpinbox(event, bindTarget))
             nodeWeightBox.bind('<Leave>', lambda event, bindTarget=targetFrame.master.master: self.leaveVScrollFrameSpinbox(event, bindTarget))
+
+            # Create a label display the calculated % chance this node gets used per task generation
+            nodeChanceLabel = tk.Label(targetFrame, text="0%")
+            nodeChanceLabel.grid(row=index, column=3)
+            self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn=3) # Trigger initial calulcation
 
             # Create a toggle button that disables the use of the tile
             stateCycler = itertools.cycle([tk.DISABLED, tk.NORMAL]) # Use this to track the state of the widgets tied to the checkbutton, cycling the value on each callback
@@ -528,6 +543,22 @@ class simulationConfigManager(tk.Toplevel):
             # Iterate over every widget, skipping the control column (this should stay tk.normal so that it can be clicked again)
             if not widget.grid_info()["column"]==controlWidgetColumn:
                 widget.configure(state=nextState)
+
+    def calculateLocationSelectionOdds(self, targetList, targetFrame, targetColumn):
+        # Calculates the % chance that a node is selected when a random selection is made for task gen
+        # (nodeweight) / (total weight of all nodes) * 100
+        # Calculate the total weight
+        totalWeight = 0
+        for nodevar in targetList:
+            nodeWeight = float(nodevar.get())
+            totalWeight = totalWeight + nodeWeight
+        
+        # Calculate each node's share of the total weight
+        for index, nodevar in enumerate(targetList):
+            nodeWeight = float(nodevar.get())
+            nodeChance = nodeWeight / totalWeight
+            # Update the label in the same row with the value, converted to % for readability
+            targetFrame.grid_slaves(row=index, column=targetColumn)[0].configure(text=f"{nodeChance*100:2.2f}%")
         
     def createSimulationUpdateRate(self):
         self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
