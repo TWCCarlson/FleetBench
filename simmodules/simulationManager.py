@@ -70,7 +70,6 @@ class simulationConfigManager(tk.Toplevel):
 
         if len(nodeTypeDict['pickup'])>0 and len(nodeTypeDict['deposit'])>0:
             dictOfOptimalTaskPaths = self.parent.mapData.generateAllTaskShortestPaths(nodeTypeDict['pickup'], nodeTypeDict['deposit'])
-            pp.pprint(dictOfOptimalTaskPaths)
             optimalTaskPaths = list()
             for pickupNode, dropoffPaths in dictOfOptimalTaskPaths.items():
                 for dropoffNode, path in dropoffPaths.items():
@@ -94,6 +93,9 @@ class simulationConfigManager(tk.Toplevel):
 
             # Update relevant text
             self.updateTaskStatsText()
+
+            # Update relevant graph
+            self.updateTaskInfoPlot()
 
             # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
             # Turns out this is NP hard and probably not all that useful anyway
@@ -185,9 +187,7 @@ class simulationConfigManager(tk.Toplevel):
         systemButtonFaceRGB = np.array(self.winfo_rgb("SystemButtonFace"))
         self.taskInfoFigure.set_facecolor(np.divide(systemButtonFaceRGB, 2**16))
 
-        # Define the plot
-        self.taskInfoPlot.bar(self.taskPathLengthCountDict.keys(), self.taskPathLengthCountDict.values())
-        self.taskInfoPlot.set_xticks(list(range(0, self.maximumOptimalPathLength+1)))
+        # Configure aspects of the graph that don't change when the data does
         self.taskInfoPlot.set_xlabel("Optimal Task Path Lengths (steps)")
         self.taskInfoPlot.set_ylabel("Count")
         self.taskInfoPlot.set_title("All Possible Task Optimal Paths")
@@ -197,8 +197,8 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoCanvasWidget.draw()
         self.taskInfoCanvasWidget.get_tk_widget().grid(row=2, column=0)
 
-        # Mark the mean value with a line on the plot
-        self.taskInfoPlot.axvline(self.meanOptimalTaskPathLength, color='r')
+        # Draw the plot
+        self.updateTaskInfoPlot()
 
         # Create a containing frame for the text widget, to control its size
         self.taskInfoTextFrame = tk.Frame(self.taskStatisticsFrame, width=self.winfo_width(), height=100)
@@ -210,8 +210,22 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoText.tag_configure("red", foreground="red")
         self.updateTaskStatsText()
 
+    def updateTaskInfoPlot(self):
+        if hasattr(self, "taskInfoPlot") and hasattr(self, "taskInfoCanvasWidget"):
+            # Clear the plot
+            self.taskInfoPlot.cla()
+
+            # Re-draw the data
+            self.taskInfoPlot.bar(self.taskPathLengthCountDict.keys(), self.taskPathLengthCountDict.values())
+            self.taskInfoPlot.set_xticks(list(range(0, self.maximumOptimalPathLength+1)))
+
+            # Mark the mean value with a line on the plot
+            self.taskInfoPlot.axvline(self.meanOptimalTaskPathLength, color='r')
+
+            # Re-render the graph
+            self.taskInfoCanvasWidget.draw()
+
     def updateTaskStatsText(self):
-        # Remove any currently existing text
         if hasattr(self, "taskInfoText"):
             # Enable changes
             self.taskInfoText.configure(state=tk.NORMAL)
