@@ -25,9 +25,6 @@ class simulationConfigManager(tk.Toplevel):
         self.focus()     # "Select" the window
         self.grab_set()  # Forcefully keep attention on the window
 
-        # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
-        self.precalculateTaskGenerationTabInformation()
-
         # Building a notebook; each page contains a set of options
         self.configNotebook = ttk.Notebook(self)
 
@@ -62,30 +59,44 @@ class simulationConfigManager(tk.Toplevel):
         # Retrieving information useful to the user about the simulation map
         # First get the list of all optimal paths
         nodeTypeDict = self.parent.mapData.generateNodeListsByType()
-        dictOfOptimalTaskPaths = self.parent.mapData.generateAllTaskShortestPaths(nodeTypeDict['pickup'], nodeTypeDict['deposit'])
-        optimalTaskPaths = list()
-        for pickupNode, dropoffPaths in dictOfOptimalTaskPaths.items():
-            for dropoffNode, path in dropoffPaths.items():
-                optimalTaskPaths.append(path)
-                # print(f"{pickupNode}->{dropoffNode}: {path}")
 
-        # Calculate the lengths of each path
-        # Note that this is inclusive, so that amount of steps it takes to actually complete these tasks is len-1
-        optimalTaskPathLengths = list()
-        for path in optimalTaskPaths:
-            optimalTaskPathLengths.append(len(path))
+        # Trim the dict of possible nodes according to use selection
+        for pickupNode in self.nodeAvailableVarDict['pickup']:
+            if not self.nodeAvailableVarDict["pickup"][pickupNode].get():
+                nodeTypeDict['pickup'].remove(pickupNode)
+        for dropoffNode in self.nodeAvailableVarDict['dropoff']:
+            if not self.nodeAvailableVarDict["dropoff"][dropoffNode].get():
+                nodeTypeDict['deposit'].remove(dropoffNode)
 
-        # Calculating relevant statistics about optimal paths for use in the GUI
-        self.taskPathLengthCountDict = Counter(optimalTaskPathLengths)          # Count of the number of tasks (value) with a specific length (key)
-        optimalTaskPathLengthsArray = np.asarray(optimalTaskPathLengths)        # Converting to a numpy array to utilise numpy functions
-        self.meanOptimalTaskPathLength = np.mean(optimalTaskPathLengthsArray)   # Unweighted average of optimal path lengths
-        self.standardDeviationOptimalTaskPathLength = np.std(optimalTaskPathLengthsArray)   # Standard deviation of optimal path lengths
-        self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)     # Longest length of an optimal path
-        self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)     # Shortest length of an optimal path
-        self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)   # Median length of optimal paths
+        if len(nodeTypeDict['pickup'])>0 and len(nodeTypeDict['deposit'])>0:
+            dictOfOptimalTaskPaths = self.parent.mapData.generateAllTaskShortestPaths(nodeTypeDict['pickup'], nodeTypeDict['deposit'])
+            pp.pprint(dictOfOptimalTaskPaths)
+            optimalTaskPaths = list()
+            for pickupNode, dropoffPaths in dictOfOptimalTaskPaths.items():
+                for dropoffNode, path in dropoffPaths.items():
+                    optimalTaskPaths.append(path)
+                    # print(f"{pickupNode}->{dropoffNode}: {path}")
 
-        # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
-        # Turns out this is NP hard and probably not all that useful anyway
+            # Calculate the lengths of each path
+            # Note that this is inclusive, so that amount of steps it takes to actually complete these tasks is len-1
+            optimalTaskPathLengths = list()
+            for path in optimalTaskPaths:
+                optimalTaskPathLengths.append(len(path))
+
+            # Calculating relevant statistics about optimal paths for use in the GUI
+            self.taskPathLengthCountDict = Counter(optimalTaskPathLengths)          # Count of the number of tasks (value) with a specific length (key)
+            optimalTaskPathLengthsArray = np.asarray(optimalTaskPathLengths)        # Converting to a numpy array to utilise numpy functions
+            self.meanOptimalTaskPathLength = np.mean(optimalTaskPathLengthsArray)   # Unweighted average of optimal path lengths
+            self.standardDeviationOptimalTaskPathLength = np.std(optimalTaskPathLengthsArray)   # Standard deviation of optimal path lengths
+            self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)     # Longest length of an optimal path
+            self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)     # Shortest length of an optimal path
+            self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)   # Median length of optimal paths
+
+            # Update relevant text
+            self.updateTaskStatsText()
+
+            # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
+            # Turns out this is NP hard and probably not all that useful anyway
 
     def buildPathfindingAlgorithmPage(self):
         # Intermediate function grouping together declarations and renders for the algorithm choices page
@@ -96,12 +107,20 @@ class simulationConfigManager(tk.Toplevel):
         self.taskGenerationRateFrame = tk.Frame(self.taskGenerationFrame)
         self.taskGenerationRateFrame.grid(row=0, column=0)
         self.createTaskFrequencyOptions()
+        self.taskLocationFrame = tk.LabelFrame(self.taskGenerationFrame, text="Node Weights")
+        self.taskLocationFrame.grid(row=0, column=1, rowspan=2)
+        self.nodeWeightVarDict = {
+            "pickup": {},
+            "dropoff": {}
+        }
+        self.nodeAvailableVarDict = {
+            "pickup": {},
+            "dropoff": {}
+        }
+        self.createTaskLocationOptions()
         self.taskStatisticsFrame = tk.Frame(self.taskGenerationFrame)
         self.taskStatisticsFrame.grid(row=1, column=0)
         self.createTaskInformationPane()
-        self.taskLocationFrame = tk.LabelFrame(self.taskGenerationFrame, text="Node Weights")
-        self.taskLocationFrame.grid(row=0, column=1, rowspan=2)
-        self.createTaskLocationOptions()
 
     def buildDisplayOptionsPage(self):
         # Intermediate function grouping together declarations and renders for the display options page
@@ -151,6 +170,9 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmChoiceMenu.grid(row=1, column=0)
 
     def createTaskInformationPane(self):
+        # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
+        self.precalculateTaskGenerationTabInformation()
+
         # Creates a graph and text field that displays statistical information about the possible tasks in the warehouse to the user
         # Separate this area from the option gui area
         ttk.Separator(self.taskStatisticsFrame, orient="horizontal").grid(row=1, column=0, sticky=tk.E+tk.W, pady=4, padx=4)
@@ -183,19 +205,33 @@ class simulationConfigManager(tk.Toplevel):
         self.taskInfoTextFrame.grid(row=4, column=0, sticky="news")
         self.taskInfoTextFrame.grid_propagate(False)
 
-        # Create some text providing statistical information about the optimal task paths
+        # Generate statistical text
         self.taskInfoText = tk.Text(self.taskInfoTextFrame, fg="black", bg="SystemButtonFace", bd=0, font=("Helvetica", 10, "bold"))
         self.taskInfoText.tag_configure("red", foreground="red")
-        self.taskInfoText.insert(tk.END, "Statistical Data for all possible optimal task paths: \n")
-        self.taskInfoText.insert(tk.END, f"\tMean optimal path length: {round(self.meanOptimalTaskPathLength, 2)}\n", "red")
-        self.taskInfoText.insert(tk.END, f"\tMax optimal path length: {self.maximumOptimalPathLength}\n")
-        self.taskInfoText.insert(tk.END, f"\tMin optimal path length: {self.minimumOptimalPathLength}\n")
-        self.taskInfoText.insert(tk.END, f"\tMedian optimal path length: {self.medianOptimalTaskPathLength}\n")
-        self.taskInfoText.insert(tk.END, f"\tOptimal path length standard deviation: {round(self.standardDeviationOptimalTaskPathLength, 2)}")
-        self.taskInfoText.configure(state=tk.DISABLED, height=6)
+        self.updateTaskStatsText()
 
-        # Render the text
-        self.taskInfoText.grid(row=0, column=0)
+    def updateTaskStatsText(self):
+        # Remove any currently existing text
+        if hasattr(self, "taskInfoText"):
+            # Enable changes
+            self.taskInfoText.configure(state=tk.NORMAL)
+
+            # Clear existing text
+            self.taskInfoText.delete('1.0', tk.END)
+
+            # Create some text providing statistical information about the optimal task paths
+            self.taskInfoText.insert(tk.END, "Statistical Data for all possible optimal task paths: \n")
+            self.taskInfoText.insert(tk.END, f"\tMean optimal path length: {round(self.meanOptimalTaskPathLength, 2)}\n", "red")
+            self.taskInfoText.insert(tk.END, f"\tMax optimal path length: {self.maximumOptimalPathLength}\n")
+            self.taskInfoText.insert(tk.END, f"\tMin optimal path length: {self.minimumOptimalPathLength}\n")
+            self.taskInfoText.insert(tk.END, f"\tMedian optimal path length: {self.medianOptimalTaskPathLength}\n")
+            self.taskInfoText.insert(tk.END, f"\tOptimal path length standard deviation: {round(self.standardDeviationOptimalTaskPathLength, 2)}")
+
+            # Prevent interaction
+            self.taskInfoText.configure(state=tk.DISABLED, height=6)
+            
+            # Render the text
+            self.taskInfoText.grid(row=0, column=0)
 
     def createTaskFrequencyOptions(self):
         # Create a containing frame for this section
@@ -471,14 +507,6 @@ class simulationConfigManager(tk.Toplevel):
         listOfDropoffNodes = nodeTypeDict['deposit']
 
         # Build the GUI for setting weights of nodes, by type
-        self.nodeWeightVarDict = {
-            "pickup": [],
-            "dropoff": []
-        }
-        self.nodeAvailableVarDict = {
-            "pickup": [],
-            "dropoff": []
-        }
         self.buildNodeWeightingOptions(listOfPickupNodes, self.taskLocationPickupFrame, self.nodeWeightVarDict["pickup"], self.nodeAvailableVarDict["pickup"])
         self.buildNodeWeightingOptions(listOfDropoffNodes, self.taskLocationDropoffFrame, self.nodeWeightVarDict["dropoff"], self.nodeAvailableVarDict["dropoff"])
 
@@ -497,7 +525,7 @@ class simulationConfigManager(tk.Toplevel):
         event.widget.unbind('<MouseWheel>')
         bindTarget.bind_mwheel()
 
-    def buildNodeWeightingOptions(self, nodeList, targetFrame, targetWeightList, targetAvailableList):
+    def buildNodeWeightingOptions(self, nodeList, targetFrame, targetWeightDict, targetAvailableDict):
         # Iterate over all nodes in the given list
         for index, node in enumerate(nodeList):
             # Each node needs a label, tickbox, and numeric spinbox for weight
@@ -508,7 +536,7 @@ class simulationConfigManager(tk.Toplevel):
             # Create the spinbox, to hold the relative numeric weight entry
             # Use the textvariable option to enable trace callbacks on changed values
             nodeWeightValue = tk.StringVar()
-            targetWeightList.append(nodeWeightValue) # Tkinter garbage collects local variables, including their traces, so save them to a list
+            targetWeightDict[str(node)] = nodeWeightValue # Tkinter garbage collects local variables, including their traces, so save them to a dict
             nodeWeightBox = tk.Spinbox(targetFrame,
                 width=6,
                 from_=0,
@@ -521,7 +549,7 @@ class simulationConfigManager(tk.Toplevel):
             nodeWeightBox.insert(0, 1)
             nodeWeightBox.grid(row=index, column=2)
             # .trace_add() supplies lambda the variable ID (PY_VARXX) and the event ("write")
-            nodeWeightValue.trace_add("write", lambda *args, targetList=targetWeightList, targetFrame=targetFrame, targetColumn=3 : self.calculateLocationSelectionOdds(targetList, targetFrame, targetColumn))
+            nodeWeightValue.trace_add("write", lambda *args, targetDict=targetWeightDict, targetFrame=targetFrame, targetColumn=3, targetNode=node : self.calculateLocationSelectionOdds(targetDict, targetFrame, targetColumn, targetNode))
             # Bind controls to the spinbox
             nodeWeightBox.bind('<Enter>', lambda event, bindTarget=targetFrame.master.master: self.enterVScrollFrameSpinbox(event, bindTarget))
             nodeWeightBox.bind('<Leave>', lambda event, bindTarget=targetFrame.master.master: self.leaveVScrollFrameSpinbox(event, bindTarget))
@@ -529,18 +557,18 @@ class simulationConfigManager(tk.Toplevel):
             # Create a label display the calculated % chance this node gets used per task generation
             nodeChanceLabel = tk.Label(targetFrame, text="0%")
             nodeChanceLabel.grid(row=index, column=3)
-            self.calculateLocationSelectionOdds(targetWeightList, targetFrame, targetColumn=3) # Trigger initial calulcation
+            self.calculateLocationSelectionOdds(targetWeightDict, targetFrame, targetColumn=3, targetNode=node) # Trigger initial calulcation
 
             # Create a toggle button that disables the use of the tile
             stateCycler = itertools.cycle([tk.DISABLED, tk.NORMAL]) # Use this to track the state of the widgets tied to the checkbutton, cycling the value on each callback
             nodeTickVar = tk.IntVar()
-            targetAvailableList.append(nodeTickVar) # Tkinter garbage collects local variables, including their traces, so save them to a list
+            targetAvailableDict[str(node)] = nodeTickVar # Tkinter garbage collects local variables, including their traces, so save them to a dict
             nodeTickVar.set(1)
             nodeTick = tk.Checkbutton(targetFrame, variable=nodeTickVar,
-                command = lambda stateCycler=stateCycler, index=index, targetFrame=targetFrame, controlWidgetColumn=1: self.toggleWidgetsInRow(index, stateCycler, targetFrame, controlWidgetColumn))
+                command = lambda stateCycler=stateCycler, index=index, targetFrame=targetFrame, controlWidgetColumn=1, rowName=str(node): 
+                                self.toggleWidgetsInRow(index, stateCycler, targetFrame, controlWidgetColumn))
             nodeTick.grid(row=index, column=1)
-            nodeTick.select()   # Default toggled on
-            
+
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
         # State cycler is an `itertools.cycle` object, and the controlWidgetColumn is skipped in iteration
@@ -551,18 +579,21 @@ class simulationConfigManager(tk.Toplevel):
             if not widget.grid_info()["column"]==controlWidgetColumn:
                 widget.configure(state=nextState)
 
-    def calculateLocationSelectionOdds(self, targetList, targetFrame, targetColumn):
+        # Piggyback to recalculate and re-render the graph
+        self.precalculateTaskGenerationTabInformation()
+
+    def calculateLocationSelectionOdds(self, targetDict, targetFrame, targetColumn, targetNode):
         # Calculates the % chance that a node is selected when a random selection is made for task gen
         # (nodeweight) / (total weight of all nodes) * 100
         # Calculate the total weight
         totalWeight = 0
-        for nodevar in targetList:
-            nodeWeight = float(nodevar.get())
+        for nodeName in targetDict:
+            nodeWeight = float(targetDict[nodeName].get())
             totalWeight = totalWeight + nodeWeight
         
         # Calculate each node's share of the total weight
-        for index, nodevar in enumerate(targetList):
-            nodeWeight = float(nodevar.get())
+        for index, nodeName in enumerate(targetDict):
+            nodeWeight = float(targetDict[nodeName].get())
             nodeChance = nodeWeight / totalWeight
             # Update the label in the same row with the value, converted to % for readability
             targetFrame.grid_slaves(row=index, column=targetColumn)[0].configure(text=f"{nodeChance*100:2.2f}%")
