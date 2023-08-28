@@ -30,12 +30,14 @@ class simulationConfigManager(tk.Toplevel):
 
         # Each page needs a space to insert widgets
         self.pathfindingAlgorithmFrame = tk.Frame(self.configNotebook)
+        self.agentConfigurationFrame = tk.Frame(self.configNotebook)
         self.taskGenerationFrame = tk.Frame(self.configNotebook)
         self.displayOptionsFrame = tk.Frame(self.configNotebook)
 
         # Tabnames-tabframes,tabbuildfunction dictionary
         noteBookTabs = {
             "Pathfinding Algorithm": (self.pathfindingAlgorithmFrame, self.buildPathfindingAlgorithmPage),
+            "Agent Configuration": (self.agentConfigurationFrame, self.buildAgentConfigurationPage),
             "Task Generation": (self.taskGenerationFrame, self.buildTaskGenerationPage),
             "Display Options": (self.displayOptionsFrame, self.buildDisplayOptionsPage)
         }
@@ -103,6 +105,326 @@ class simulationConfigManager(tk.Toplevel):
     def buildPathfindingAlgorithmPage(self):
         # Intermediate function grouping together declarations and renders for the algorithm choices page
         self.createAlgorithmOptions()
+
+    def buildAgentConfigurationPage(self):
+        # Intermediate function goruping together declarations and renders for the agent configuration page
+        self.agentChargeOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentChargeOptionFrame.grid(row=0, column=0)
+        self.buildAgentChargeOptions()
+        self.populateAgentChargeOptions()
+        self.renderAgentChargeOptions()
+        self.agentTypeOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentTypeOptionFrame.grid(row=0, column=0)
+        self.buildAgentTypeOptions()
+        self.agentBreakdownOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentBreakdownOptionFrame.grid(row=0, column=0)
+        self.buildAgentBreakdownOptions()
+        self.agentStartPosOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentStartPosOptionFrame.grid(row=0, column=0)
+        self.buildAgentStartPosOptions()
+        self.agentMiscOptionsFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentMiscOptionsFrame.grid(row=0, column=0)
+        self.buildAgentMiscOptions()
+
+    def buildAgentChargeOptions(self):
+        # Creates widgets for options related to how the charge level on agents is managed
+        # Create a label
+        self.agentChargeOptionLabel = tk.Label(self.agentChargeOptionFrame)
+
+        # Create an optionmenu and the variable holding the selection
+        self.agentChargeOptionValue = tk.StringVar()
+        self.agentChargeOptionMenu = tk.OptionMenu(self.agentChargeOptionFrame, self.agentChargeOptionValue, "temp")
+
+    def populateAgentChargeOptions(self):
+        # Inserts data into the agent charge level management options widgets
+
+        # Set label text
+        self.agentChargeOptionLabel.configure(text="Agent Charge Limitation:")
+
+        # Build the dict of options and their relevant frames
+        agentChargeStyleOptionsDict = {
+            "Ignored / Unlimited": self.buildAgentUnlimitedChargeOptions,
+            "Limited": self.buildAgentLimitedChargeOptionSet
+        }
+
+        # Menu options are the text in the dict keys
+        agentChargeStyleMenuOptions = list(agentChargeStyleOptionsDict.keys())
+
+        # Regenerate the menu with options
+        self.updateTargetOptionMenuChoices(self.agentChargeOptionMenu, self.agentChargeOptionValue, agentChargeStyleMenuOptions)
+
+        # Add a trace to the menu stringvar to call up the relevant UI when a choice is made
+        self.agentChargeOptionValue.trace_add("write", lambda *args, selection=self.agentChargeOptionValue, parentFrame=self.agentChargeOptionFrame: agentChargeStyleOptionsDict[selection.get()](parentFrame))
+
+        # Set a default selection - maybe skip this to force a choice
+        self.agentChargeOptionValue.set(agentChargeStyleMenuOptions[0])
+
+    def renderAgentChargeOptions(self):
+        # Renders the agent charge level management widgets
+        self.agentChargeOptionLabel.grid(row=0, column=0)
+        self.agentChargeOptionMenu.grid(row=0, column=1)
+
+    def buildAgentUnlimitedChargeOptions(self, parentFrame):
+        # There are no options if the charge is unlimited
+        # Therefore just remove any suboption frames
+        self.removeSubframes(parentFrame)
+
+    def buildAgentLimitedChargeOptionSet(self, parentFrame):
+        # When agent energy is a limited and managed resource, user needs to set agent:
+        # Capacity, costs, charge rate, and charge station strategy
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Build a new subframe for containing everything
+        self.agentLimitedChargeOptionsFrame = tk.Frame(parentFrame)
+        self.agentLimitedChargeOptionsFrame.grid(row=0, column=2)
+
+        # Build, then populate, then render the widgets
+        self.buildAgentLimitedChargeOptions(self.agentLimitedChargeOptionsFrame)
+        self.populateAgentLimitedChargeOptions(self.agentLimitedChargeOptionsFrame)
+        self.renderAgentLimitedChargeOptions()
+
+    def buildAgentLimitedChargeOptions(self, parentFrame):
+        # Creates widgets relating to the option set when agent charge is limited
+        
+        ### Capacity widgets
+        # Label
+        self.agentLimitedChargeCapacityLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox
+        self.agentLimitedChargeCapacityValue = tk.StringVar()
+        self.validateAgentChargeCapacityValue = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargeCapacitySpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargeCapacityValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargeCapacityValue, '%P')
+        )
+
+        ### Costs widgets
+        # Label
+        self.agentLimitedChargeCostStyleLabel = tk.Label(parentFrame)
+
+        # Optionmenu for cost payment style
+        self.agentLimitedChargeCostStyleValue = tk.StringVar()
+        self.agentLimitedChargeCostStyleMenu = tk.OptionMenu(parentFrame, self.agentLimitedChargeCostStyleValue, "temp")
+
+    def populateAgentLimitedChargeOptions(self, parentFrame):
+        # Attaches information to the widgets for limited agent charge options
+
+        # Set agent capacity label text
+        self.agentLimitedChargeCapacityLabel.configure(text="Agent Charge Capacity:")
+
+        # Set agent cost payment style text
+        self.agentLimitedChargeCostStyleLabel.configure(text="Cost Determ. Method:")
+
+        # Build the dict of options and their relevant frames
+        agentLimitedChargeCostStyleDict = {
+            "Fixed per sim. step": self.buildAgentLimitedChargeStepCostSet,
+            "Fixed per action taken": self.buildAgentLimitedChargeActionCostSet,
+            "Custom": self.buildAgentLimitedChargeCustomCostSet,
+        }
+
+        # Menu options are the text in the dict keys
+        agentLimitedChargeCostStyleMenuOptions = list(agentLimitedChargeCostStyleDict.keys())
+
+        # Regenerate the menu with options
+        self.updateTargetOptionMenuChoices(self.agentLimitedChargeCostStyleMenu, self.agentLimitedChargeCostStyleValue, agentLimitedChargeCostStyleMenuOptions)
+
+        # Add a trace to the menu stringvar to call up the relevant UI when a choice is made
+        self.agentLimitedChargeCostStyleValue.trace_add("write", lambda *args, selection=self.agentLimitedChargeCostStyleValue,
+            parentFrame=parentFrame : agentLimitedChargeCostStyleDict[selection.get()](parentFrame))
+        
+        # Set a default selection - maybe skip this to force a choice
+        self.agentLimitedChargeCostStyleValue.set(agentLimitedChargeCostStyleMenuOptions[0])
+
+    def renderAgentLimitedChargeOptions(self):
+        # Renders widgets relating to limited agent charge options
+        self.agentLimitedChargeCapacityLabel.grid(row=0, column=0)
+        self.agentLimitedChargeCapacitySpinbox.grid(row=0, column=1)
+
+        self.agentLimitedChargeCostStyleLabel.grid(row=1, column=0)
+        self.agentLimitedChargeCostStyleMenu.grid(row=1, column=1)
+        
+    def buildAgentLimitedChargeStepCostSet(self, parentFrame):
+        # Intermediate function for options about energy cost in simulation
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Create new subframe for easier management
+        self.agentLimitedChargeStepCostOptionFrame = tk.Frame(parentFrame)
+        self.agentLimitedChargeStepCostOptionFrame.grid(row=0, column=2)
+
+        self.buildAgentLimitedChargeStepCostOptions(self.agentLimitedChargeStepCostOptionFrame)
+        self.populateAgentLimitedChargeStepCostOptions()
+        self.renderAgentLimitedChargeStepCostOptions()
+
+    def buildAgentLimitedChargeStepCostOptions(self, parentFrame):
+        # Builds widgets related to setting the cost per step when agent charge is limited
+        # Spinbox label
+        self.agentLimitedChargeStepCostLabel = tk.Label(parentFrame)
+        
+        # Numeric Spinbox for entering the cost per simulation step
+        self.agentLimitedChargeStepCostValue = tk.StringVar()
+        self.validateAgentChargeStepCost = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargeStepCostSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargeStepCostValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargeStepCost, '%P')
+        )
+
+    def populateAgentLimitedChargeStepCostOptions(self):
+        # Inserts data into the agent charge cost per simulation step options widgets
+        # Set label text
+        self.agentLimitedChargeStepCostLabel.configure(text="Cost Per Sim. Step:")
+
+    def renderAgentLimitedChargeStepCostOptions(self):
+        # Renders agent charge cost per simulation step options widgets
+        self.agentLimitedChargeStepCostLabel.grid(row=0, column=0)
+        self.agentLimitedChargeStepCostSpinbox.grid(row=0, column=1)
+
+    def buildAgentLimitedChargeActionCostSet(self,parentFrame):
+        # Intermediate function for options about energy cost per action
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Create new subframe for easier management
+        self.agentLimitedChargeActionCostFrame = tk.Frame(parentFrame)
+        self.agentLimitedChargeActionCostFrame.grid(row=0, column=2)
+
+        self.buildAgentLimitedChargeActionCostOptions(self.agentLimitedChargeActionCostFrame)
+        self.populateAgentLimitedChargeActionCostOptions()
+        self.renderAgentLimitedChargeActionCostOptions()
+
+    def buildAgentLimitedChargeActionCostOptions(self, parentFrame):
+        # Builds widgets related to setting the cost per action when the agent charge is limited
+        # Spinbox label
+        self.agentLimitedChargeActionCostLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for entering the cost per agent action
+        self.agentLimitedChargeActionCostValue = tk.StringVar()
+        self.validateAgentChargeActionCost = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargeActionCostSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargeActionCostValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargeActionCost, '%P')
+        )
+
+    def populateAgentLimitedChargeActionCostOptions(self):
+        # Inserts data into the agent charge cost per simulation step options widgets
+        # Set label text
+        self.agentLimitedChargeActionCostLabel.configure(text="Cost Per Action:")
+
+    def renderAgentLimitedChargeActionCostOptions(self):
+        # Renders agent charge cost per action options widgets
+        self.agentLimitedChargeActionCostLabel.grid(row=0, column=0)
+        self.agentLimitedChargeActionCostSpinbox.grid(row=0, column=1)
+
+    def buildAgentLimitedChargeCustomCostSet(self, parentFrame):
+        # Intermediate function grouping functions related to setting custom costs
+        # X per move, Y per pickup, Z per step
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Create new subframe for easier management
+        self.agentLimitedChargeCustomCostFrame = tk.Frame(parentFrame)
+        self.agentLimitedChargeCustomCostFrame.grid(row=0, column=2, rowspan=2)
+
+        self.buildAgentLimitedChargeCustomCostOptions(self.agentLimitedChargeCustomCostFrame)
+        self.populateAgentLimitedChargeCustomCostOptions()
+        self.renderAgentLimitedChargeCustomCostOptions()
+
+    def buildAgentLimitedChargeCustomCostOptions(self, parentFrame):
+        # Builds widgets related to setting a custom cost value for each type of action an agent can take
+        ### Movement cost
+        # Spinbox label
+        self.agentLimitedChargeMovementCostLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for entering the cost per agent move
+        self.agentLimitedChargeMovementCostValue = tk.StringVar()
+        self.validateAgentChargeMovementCost = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargeMovementCostSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargeMovementCostValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargeMovementCost, '%P')
+        )
+        
+        ### Pickup cost
+        # Spinbox label
+        self.agentLimitedChargePickupCostLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for entering the cost per agent pickup action
+        self.agentLimitedChargePickupCostValue = tk.StringVar()
+        self.validateAgentChargePickupCost = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargePickupCostSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargePickupCostValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargePickupCost, '%P')
+        )
+
+        ### Dropoff cost
+        # Spinbox label
+        self.agentLimitedChargeDropoffCostLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for entering the cost per agent action
+        self.agentLimitedChargeDropoffCostValue = tk.StringVar()
+        self.validateAgentChargeDropoffCost = self.register(self.validateNumericSpinbox)
+        self.agentLimitedChargeDropoffCostSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentLimitedChargeDropoffCostValue,
+            validate='key',
+            validatecommand=(self.validateAgentChargeDropoffCost, '%P')
+        )
+
+    def populateAgentLimitedChargeCustomCostOptions(self):
+        # Inserts data into the agent charge cost per simulation step options widgets
+        # Set label text
+        self.agentLimitedChargeMovementCostLabel.configure(text="Cost Per Move:")
+        self.agentLimitedChargePickupCostLabel.configure(text="Cost Per Pickup:")
+        self.agentLimitedChargeDropoffCostLabel.configure(text="Cost Per Dropoff:")
+
+    def renderAgentLimitedChargeCustomCostOptions(self):
+        # Renders agent charge custom cost by action type options widgets
+        self.agentLimitedChargeMovementCostLabel.grid(row=0, column=0)
+        self.agentLimitedChargeMovementCostSpinbox.grid(row=0, column=1)
+        self.agentLimitedChargePickupCostLabel.grid(row=1, column=0)
+        self.agentLimitedChargePickupCostSpinbox.grid(row=1, column=1)
+        self.agentLimitedChargeDropoffCostLabel.grid(row=2, column=0)
+        self.agentLimitedChargeDropoffCostSpinbox.grid(row=2, column=1)
+
+    def buildAgentTypeOptions(self):
+        pass
+
+    def buildAgentBreakdownOptions(self):
+        pass
+
+    def buildAgentStartPosOptions(self):
+        pass
+
+    def buildAgentMiscOptions(self):
+        pass
 
     def buildTaskGenerationPage(self):
         # Intermediate function grouping together declarations and renders for the task generation page
@@ -269,7 +591,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFrequencySelectionStringvar = tk.StringVar()
 
         # Add a trace to the stringvar to call the associated UI function when the user makes a selection from the menu
-        self.taskFrequencySelectionStringvar.trace_add("write", lambda *args, selection=self.taskFrequencySelectionStringvar, parentFrame=self.taskFrequencyChoicesFrame: taskFrequencyMethodOptionsDict[selection.get()](self.taskFrequencyChoicesFrame))
+        self.taskFrequencySelectionStringvar.trace_add("write", lambda *args, selection=self.taskFrequencySelectionStringvar, parentFrame=self.taskFrequencyChoicesFrame: taskFrequencyMethodOptionsDict[selection.get()](parentFrame))
 
         # Declare the dropdown menu, linking it to the stringvar
         self.taskFrequencyMethodMenu = tk.OptionMenu(self.taskFrequencyChoicesFrame, self.taskFrequencySelectionStringvar, *taskFrequencyMethodMenuOptions)
@@ -397,7 +719,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateMeanOptionsFrame.grid(row=0, column=2)
 
         # Create descriptive text
-        tk.Label(self.taskFixedRateMeanOptionsFrame, text=f"One task will be created per active agent e very {round(self.meanOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
+        tk.Label(self.taskFixedRateMeanOptionsFrame, text=f"One task will be created per active agent every {round(self.meanOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
 
     def buildFixedRateTaskMaxRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
@@ -660,6 +982,13 @@ class simulationConfigManager(tk.Toplevel):
                 # https://www.tcl.tk/man/tcl8.6/TkCmd/destroy.html
                 # "This command deletes the windows given by the window arguments, plus all of their descendants."
                 widget.destroy()
+
+    def updateTargetOptionMenuChoices(self, targetMenu, menuStringvar, newOptionsList):
+        menu = targetMenu["menu"]
+        menu.delete(0, tk.END)
+        for option in newOptionsList:
+            menu.add_command(label=option,
+                command=lambda value=option: menuStringvar.set(value))
 
 class simulationConfigurationState:
     # Holds the current state of the simulation config

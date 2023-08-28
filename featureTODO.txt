@@ -55,6 +55,8 @@
 - task generation descriptive text for auto options could be text instead of label, for wrapping dynamically
 - shift all widget renders to be at the end of a function to reduce flickering
 - task generation pane should have object instantiation decouple from attribute population to decrease hacky interreliance solutions like hasttr() and try:
+- ui can be made more adaptive with .grid_info(), so that new widgets are always placed at edges of the frame
+- may need an integer spinbox for extra restriction on numeric spinbox (agent charge costs)
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
