@@ -597,11 +597,6 @@ class simulationConfigManager(tk.Toplevel):
         systemButtonFaceRGB = np.array(self.winfo_rgb("SystemButtonFace"))
         self.taskInfoFigure.set_facecolor(np.divide(systemButtonFaceRGB, 2**16))
 
-        # Configure aspects of the graph that don't change when the data does
-        self.taskInfoPlot.set_xlabel("Optimal Task Path Lengths (steps)")
-        self.taskInfoPlot.set_ylabel("Count")
-        self.taskInfoPlot.set_title("All Possible Task Optimal Paths")
-
         # Create the tkinter object using matplotlib's backend, and render it to the page frame
         self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskStatisticsFrame)
         self.taskInfoCanvasWidget.draw()
@@ -628,6 +623,9 @@ class simulationConfigManager(tk.Toplevel):
             # Re-draw the data
             self.taskInfoPlot.bar(self.taskPathLengthCountDict.keys(), self.taskPathLengthCountDict.values())
             self.taskInfoPlot.set_xticks(list(range(0, self.maximumOptimalPathLength+1)))
+            self.taskInfoPlot.set_xlabel("Optimal Task Path Lengths (steps)")
+            self.taskInfoPlot.set_ylabel("Count")
+            self.taskInfoPlot.set_title("All Possible Task Optimal Paths")
 
             # Mark the mean value with a line on the plot
             self.taskInfoPlot.axvline(self.meanOptimalTaskPathLength, color='r')
