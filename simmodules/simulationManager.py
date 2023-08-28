@@ -113,12 +113,14 @@ class simulationConfigManager(tk.Toplevel):
         self.buildAgentChargeOptions()
         self.populateAgentChargeOptions()
         self.renderAgentChargeOptions()
-        self.agentTypeOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentTypeOptionFrame.grid(row=0, column=0)
-        self.buildAgentTypeOptions()
+        # self.agentTypeOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        # self.agentTypeOptionFrame.grid(row=0, column=0)
+        # self.buildAgentTypeOptions(self.agentTypeOptionFrame)
         self.agentBreakdownOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentBreakdownOptionFrame.grid(row=0, column=0)
-        self.buildAgentBreakdownOptions()
+        self.agentBreakdownOptionFrame.grid(row=1, column=0)
+        self.buildAgentBreakdownOptions(self.agentBreakdownOptionFrame)
+        self.populateAgentBreakdownOptions(self.agentBreakdownOptionFrame)
+        self.renderAgentBreakdownOptions()
         self.agentStartPosOptionFrame = tk.Frame(self.agentConfigurationFrame)
         self.agentStartPosOptionFrame.grid(row=0, column=0)
         self.buildAgentStartPosOptions()
@@ -414,11 +416,97 @@ class simulationConfigManager(tk.Toplevel):
         self.agentLimitedChargeDropoffCostLabel.grid(row=2, column=0)
         self.agentLimitedChargeDropoffCostSpinbox.grid(row=2, column=1)
 
-    def buildAgentTypeOptions(self):
+    def buildAgentTypeOptions(self, parentFrame):
+        # Not implemented
         pass
 
-    def buildAgentBreakdownOptions(self):
-        pass
+    def buildAgentBreakdownOptions(self, parentFrame):
+        # Intermediate function grouping together declarations and renders for the agent breakdown options page
+        # Breakdown style label
+        self.agentBreakdownOptionLabel = tk.Label(parentFrame)
+
+        # Option menu for breakdown handling style selection
+        self.agentBreakdownOptionValue = tk.StringVar()
+        self.agentBreakdownOptionMenu = tk.OptionMenu(parentFrame, self.agentBreakdownOptionValue, "temp")
+
+    def populateAgentBreakdownOptions(self, parentFrame):
+        # Inserts data in to the agent breakdown handling style widgets
+        # Set the label text
+        self.agentBreakdownOptionLabel.configure(text="Breakdown Style:")
+
+        # Build the dict of options and relevant UI functions
+        agentBreakdownOptionsDict = {
+            "Problem-free operation": self.buildAgentNoBreakdownOptionSet,
+            "Fixed-rate maintenance schedule": self.buildAgentFixedRateBreakdownOptionSet,
+            # "Fixed chance of failure per sim. step": ""
+        }
+
+        # Menu options consist of a list of the dict keys
+        agentBreakdownMenuOptions = list(agentBreakdownOptionsDict.keys())
+
+        # Regenerate the menu with the options
+        self.updateTargetOptionMenuChoices(self.agentBreakdownOptionMenu, self.agentBreakdownOptionValue, agentBreakdownMenuOptions)
+
+        # Trace changes to the option menu's stringvar to call the relevant UI functions
+        self.agentBreakdownOptionValue.trace_add("write", lambda *args, selection=self.agentBreakdownOptionValue, parentFrame=parentFrame:
+            agentBreakdownOptionsDict[selection.get()](parentFrame))
+        
+        # Set a default selection - maybe skip this to force a choice
+        self.agentBreakdownOptionValue.set(agentBreakdownMenuOptions[0])
+        
+    def renderAgentBreakdownOptions(self):
+        # Renders the agent breakdown handling option ui widgets
+        self.agentBreakdownOptionLabel.grid(row=0, column=0)
+        self.agentBreakdownOptionMenu.grid(row=0, column=1)
+
+    def buildAgentNoBreakdownOptionSet(self, parentFrame):
+        # Builds widgets relating to the case where the are no agent breakdowns
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Currently if breakdowns cannot happen there are no options available
+
+    def buildAgentFixedRateBreakdownOptionSet(self, parentFrame):
+        # Intermediate function grouping declarations and renders relating to agent breakdowns occurring at fixed rates
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Build a new subframe for containing everything
+        self.agentBreakdownFixedRateOptionsFrame = tk.Frame(parentFrame)
+        self.agentBreakdownFixedRateOptionsFrame.grid(row=0, column=2)
+
+        # Generate all widgets, populate them with data, and render them
+        self.buildAgentBreakdownFixedRateOptions(self.agentBreakdownFixedRateOptionsFrame)
+        self.populateAgentBreakdownFixedRateOptions()
+        self.renderAgentBreakdownFixedRateOptions()
+
+    def buildAgentBreakdownFixedRateOptions(self, parentFrame):
+        # Build widgets related to agent breakdowns occurring at a fixed rate
+        # Label
+        self.agentBreakdownFixedRateLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for setting the rate in simulation steps of breakdowns
+        self.agentBreakdownFixedRateValue = tk.StringVar()
+        self.validateBreakdownFixedRateCost = self.register(self.validateNumericSpinbox)
+        self.agentBreakdownFixedRateSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentBreakdownFixedRateValue,
+            validate='key',
+            validatecommand=(self.validateBreakdownFixedRateCost, '%P')
+        )
+
+    def populateAgentBreakdownFixedRateOptions(self):
+        # Populate widgets with data
+        # Set label text
+        self.agentBreakdownFixedRateLabel.configure(text="Sim. steps per incident:")
+
+    def renderAgentBreakdownFixedRateOptions(self):
+        # Render the relevant widgets
+        self.agentBreakdownFixedRateLabel.grid(row=0, column=0)
+        self.agentBreakdownFixedRateSpinbox.grid(row=0, column=1)
 
     def buildAgentStartPosOptions(self):
         pass
