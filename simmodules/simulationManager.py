@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font as tkfont
 import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -236,7 +237,7 @@ class simulationConfigManager(tk.Toplevel):
         # Regenerate the menu with options
         self.updateTargetOptionMenuChoices(self.agentLimitedChargeCostStyleMenu, self.agentLimitedChargeCostStyleValue, agentLimitedChargeCostStyleMenuOptions)
 
-        # Add a trace to the menu stringvar to call up the relevant UI when a choice is made
+        # Add a `z` to the menu stringvar to call up the relevant UI when a choice is made
         self.agentLimitedChargeCostStyleValue.trace_add("write", lambda *args, selection=self.agentLimitedChargeCostStyleValue,
             parentFrame=parentFrame : agentLimitedChargeCostStyleDict[selection.get()](parentFrame))
         
@@ -425,10 +426,10 @@ class simulationConfigManager(tk.Toplevel):
         # Breakdown style label
         self.agentBreakdownOptionLabel = tk.Label(parentFrame)
 
-        # Option menu for breakdown handling style selection
+        # Option menu for breakdown behavior style selection
         self.agentBreakdownOptionValue = tk.StringVar()
         self.agentBreakdownOptionMenu = tk.OptionMenu(parentFrame, self.agentBreakdownOptionValue, "temp")
-
+        
     def populateAgentBreakdownOptions(self, parentFrame):
         # Inserts data in to the agent breakdown handling style widgets
         # Set the label text
@@ -438,7 +439,7 @@ class simulationConfigManager(tk.Toplevel):
         agentBreakdownOptionsDict = {
             "Problem-free operation": self.buildAgentNoBreakdownOptionSet,
             "Fixed-rate maintenance schedule": self.buildAgentFixedRateBreakdownOptionSet,
-            # "Fixed chance of failure per sim. step": ""
+            "Fixed chance of failure per sim. step": self.buildAgentChancePerStepOptionSet
         }
 
         # Menu options consist of a list of the dict keys
@@ -507,6 +508,79 @@ class simulationConfigManager(tk.Toplevel):
         # Render the relevant widgets
         self.agentBreakdownFixedRateLabel.grid(row=0, column=0)
         self.agentBreakdownFixedRateSpinbox.grid(row=0, column=1)
+
+    def buildAgentChancePerStepOptionSet(self, parentFrame):
+        # Clear out any subframes
+        self.removeSubframes(parentFrame)
+
+        # Build a new subframe for containing everything
+        self.agentBreakdownChancePerStepOptionsFrame = tk.Frame(parentFrame)
+        self.agentBreakdownChancePerStepOptionsFrame.grid(row=0, column=2)
+
+        # Generate all widgets, populate them with data, and render them
+        self.buildAgentChancePerStepOptions(self.agentBreakdownChancePerStepOptionsFrame)
+        self.populateAgentChancePerStepOptions()
+        self.renderAgentChancePerStepOptions()
+
+    def buildAgentChancePerStepOptions(self, parentFrame):
+        # Build widgets relating to breakdowns having a fixed chance to occur
+        # Label
+        self.agentBreakdownChancePerStepLabel = tk.Label(parentFrame)
+
+        # Numeric spinbox for setting the rate in simulation steps of breakdowns
+        self.agentBreakdownChancePerStepValue = tk.StringVar()
+        self.validateBreakdownChancePerStepCost = self.register(self.validateNumericSpinbox)
+        self.agentBreakdownChancePerStepSpinbox = ttk.Spinbox(parentFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.agentBreakdownChancePerStepValue,
+            validate='key',
+            validatecommand=(self.validateBreakdownChancePerStepCost, '%P')
+        )
+
+        # Label to be used as descriptive text
+        self.agentBreakdownChanceOverTimeLabel = tk.Text(parentFrame, fg="black", bg="SystemButtonFace", bd=0, font=(tkfont.nametofont("TkDefaultFont")))
+        self.agentBreakdownChanceOverTimeLabel.configure(state=tk.DISABLED, height=3)
+
+    def populateAgentChancePerStepOptions(self):
+        # Populate widgets with data
+        # Set label text
+        self.agentBreakdownChancePerStepLabel.configure(text="Chance of incident per sim. step:")
+
+        # Add a trace to the spinbox var to re-render the text
+        self.agentBreakdownChancePerStepValue.trace_add("write", lambda *args, selection=self.agentBreakdownChancePerStepValue,
+            targetLabel=self.agentBreakdownChanceOverTimeLabel : self.updateBreakdownChancePerStepText(selection.get(), targetLabel))
+        
+    def updateBreakdownChancePerStepText(self, value, targetLabel):
+        # Calculate the odds of an incident after a few steps
+        chanceInFive = (1-(1-float(value)/100000)**5)*100
+        chanceInTwenty = (1-(1-float(value)/100000)**20)*100
+        chanceInHundred = (1-(1-float(value)/100000)**100)*100
+
+        # Enable editing of the text widget 
+        targetLabel.configure(state=tk.NORMAL)
+
+        # Clear the text
+        targetLabel.delete('1.0', tk.END)
+
+        # Insert new text
+        targetLabel.insert(tk.END, f" The odds of an incident occurring in 5 steps is {chanceInFive:3.5f}%\n")
+        targetLabel.insert(tk.END, f" The odds of an incident occurring in 20 steps is {chanceInTwenty:3.5f}%\n")
+        targetLabel.insert(tk.END, f" The odds of an incident occurring in 100 steps is {chanceInHundred:3.5f}%\n")
+
+        # Disable user interaction with the widget
+        targetLabel.configure(state=tk.DISABLED, height=3)
+
+        # Render the text
+        targetLabel.grid(row=0, column=2)
+
+    def renderAgentChancePerStepOptions(self):
+        # Render relevant widgets to the window
+        self.agentBreakdownChancePerStepLabel.grid(row=0, column=0)
+        self.agentBreakdownChancePerStepSpinbox.grid(row=0, column=1)
+        self.agentBreakdownChanceOverTimeLabel.grid(row=0, column=2)
 
     def buildAgentStartPosOptions(self):
         pass
