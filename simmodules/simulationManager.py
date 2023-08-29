@@ -110,7 +110,7 @@ class simulationConfigManager(tk.Toplevel):
     def buildAgentConfigurationPage(self):
         # Intermediate function goruping together declarations and renders for the agent configuration page
         self.agentChargeOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentChargeOptionFrame.grid(row=0, column=0)
+        self.agentChargeOptionFrame.grid(row=0, column=0, sticky=tk.W)
         self.buildAgentChargeOptions()
         self.populateAgentChargeOptions()
         self.renderAgentChargeOptions()
@@ -118,15 +118,15 @@ class simulationConfigManager(tk.Toplevel):
         # self.agentTypeOptionFrame.grid(row=0, column=0)
         # self.buildAgentTypeOptions(self.agentTypeOptionFrame)
         self.agentBreakdownOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentBreakdownOptionFrame.grid(row=1, column=0)
+        self.agentBreakdownOptionFrame.grid(row=1, column=0, sticky=tk.W)
         self.buildAgentBreakdownOptions(self.agentBreakdownOptionFrame)
         self.populateAgentBreakdownOptions(self.agentBreakdownOptionFrame)
         self.renderAgentBreakdownOptions()
         self.agentStartPosOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentStartPosOptionFrame.grid(row=0, column=0)
+        self.agentStartPosOptionFrame.grid(row=0, column=0, sticky=tk.W)
         self.buildAgentStartPosOptions()
         self.agentMiscOptionsFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentMiscOptionsFrame.grid(row=0, column=0)
+        self.agentMiscOptionsFrame.grid(row=0, column=0, sticky=tk.W)
         self.buildAgentMiscOptions()
 
     def buildAgentChargeOptions(self):
@@ -164,8 +164,8 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentChargeOptions(self):
         # Renders the agent charge level management widgets
-        self.agentChargeOptionLabel.grid(row=0, column=0)
-        self.agentChargeOptionMenu.grid(row=0, column=1)
+        self.agentChargeOptionLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentChargeOptionMenu.grid(row=0, column=1, sticky=tk.W)
 
     def buildAgentUnlimitedChargeOptions(self, parentFrame):
         # There are no options if the charge is unlimited
@@ -180,7 +180,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # Build a new subframe for containing everything
         self.agentLimitedChargeOptionsFrame = tk.Frame(parentFrame)
-        self.agentLimitedChargeOptionsFrame.grid(row=0, column=2)
+        self.agentLimitedChargeOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Build, then populate, then render the widgets
         self.buildAgentLimitedChargeOptions(self.agentLimitedChargeOptionsFrame)
@@ -246,11 +246,11 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentLimitedChargeOptions(self):
         # Renders widgets relating to limited agent charge options
-        self.agentLimitedChargeCapacityLabel.grid(row=0, column=0)
-        self.agentLimitedChargeCapacitySpinbox.grid(row=0, column=1)
+        self.agentLimitedChargeCapacityLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentLimitedChargeCapacitySpinbox.grid(row=0, column=1, sticky=tk.W)
 
-        self.agentLimitedChargeCostStyleLabel.grid(row=1, column=0)
-        self.agentLimitedChargeCostStyleMenu.grid(row=1, column=1)
+        self.agentLimitedChargeCostStyleLabel.grid(row=1, column=0, sticky=tk.W)
+        self.agentLimitedChargeCostStyleMenu.grid(row=1, column=1, sticky=tk.W)
         
     def buildAgentLimitedChargeStepCostSet(self, parentFrame):
         # Intermediate function for options about energy cost in simulation
@@ -259,7 +259,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # Create new subframe for easier management
         self.agentLimitedChargeStepCostOptionFrame = tk.Frame(parentFrame)
-        self.agentLimitedChargeStepCostOptionFrame.grid(row=0, column=2)
+        self.agentLimitedChargeStepCostOptionFrame.grid(row=0, column=2, sticky=tk.W)
 
         self.buildAgentLimitedChargeStepCostOptions(self.agentLimitedChargeStepCostOptionFrame)
         self.populateAgentLimitedChargeStepCostOptions()
@@ -290,8 +290,8 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentLimitedChargeStepCostOptions(self):
         # Renders agent charge cost per simulation step options widgets
-        self.agentLimitedChargeStepCostLabel.grid(row=0, column=0)
-        self.agentLimitedChargeStepCostSpinbox.grid(row=0, column=1)
+        self.agentLimitedChargeStepCostLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentLimitedChargeStepCostSpinbox.grid(row=0, column=1, sticky=tk.W)
 
     def buildAgentLimitedChargeActionCostSet(self,parentFrame):
         # Intermediate function for options about energy cost per action
@@ -300,7 +300,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # Create new subframe for easier management
         self.agentLimitedChargeActionCostFrame = tk.Frame(parentFrame)
-        self.agentLimitedChargeActionCostFrame.grid(row=0, column=2)
+        self.agentLimitedChargeActionCostFrame.grid(row=0, column=2, sticky=tk.W)
 
         self.buildAgentLimitedChargeActionCostOptions(self.agentLimitedChargeActionCostFrame)
         self.populateAgentLimitedChargeActionCostOptions()
@@ -331,8 +331,8 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentLimitedChargeActionCostOptions(self):
         # Renders agent charge cost per action options widgets
-        self.agentLimitedChargeActionCostLabel.grid(row=0, column=0)
-        self.agentLimitedChargeActionCostSpinbox.grid(row=0, column=1)
+        self.agentLimitedChargeActionCostLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentLimitedChargeActionCostSpinbox.grid(row=0, column=1, sticky=tk.W)
 
     def buildAgentLimitedChargeCustomCostSet(self, parentFrame):
         # Intermediate function grouping functions related to setting custom costs
@@ -410,12 +410,12 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentLimitedChargeCustomCostOptions(self):
         # Renders agent charge custom cost by action type options widgets
-        self.agentLimitedChargeMovementCostLabel.grid(row=0, column=0)
-        self.agentLimitedChargeMovementCostSpinbox.grid(row=0, column=1)
-        self.agentLimitedChargePickupCostLabel.grid(row=1, column=0)
-        self.agentLimitedChargePickupCostSpinbox.grid(row=1, column=1)
-        self.agentLimitedChargeDropoffCostLabel.grid(row=2, column=0)
-        self.agentLimitedChargeDropoffCostSpinbox.grid(row=2, column=1)
+        self.agentLimitedChargeMovementCostLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentLimitedChargeMovementCostSpinbox.grid(row=0, column=1, sticky=tk.W)
+        self.agentLimitedChargePickupCostLabel.grid(row=1, column=0, sticky=tk.W)
+        self.agentLimitedChargePickupCostSpinbox.grid(row=1, column=1, sticky=tk.W)
+        self.agentLimitedChargeDropoffCostLabel.grid(row=2, column=0, sticky=tk.W)
+        self.agentLimitedChargeDropoffCostSpinbox.grid(row=2, column=1, sticky=tk.W)
 
     def buildAgentTypeOptions(self, parentFrame):
         # Not implemented
@@ -429,7 +429,14 @@ class simulationConfigManager(tk.Toplevel):
         # Option menu for breakdown behavior style selection
         self.agentBreakdownOptionValue = tk.StringVar()
         self.agentBreakdownOptionMenu = tk.OptionMenu(parentFrame, self.agentBreakdownOptionValue, "temp")
-        
+
+        # Breakdown handling label
+        self.agentBreakdownHandlingOptionLabel = tk.Label(parentFrame)
+
+        # Option menu for breakdown handling style selection
+        self.agentBreakdownHandlingOptionValue = tk.StringVar()
+        self.agentBreakdownhandlingOptionMenu = tk.OptionMenu(parentFrame, self.agentBreakdownHandlingOptionValue, "temp")
+
     def populateAgentBreakdownOptions(self, parentFrame):
         # Inserts data in to the agent breakdown handling style widgets
         # Set the label text
@@ -454,11 +461,25 @@ class simulationConfigManager(tk.Toplevel):
         
         # Set a default selection - maybe skip this to force a choice
         self.agentBreakdownOptionValue.set(agentBreakdownMenuOptions[0])
+
+        # Set label text
+        self.agentBreakdownHandlingOptionLabel.configure(text="Breakdown response:")
+
+        # Build the dict of options
+        agentBreakdownResponseList = ["Return home", "Nearest Repair Station"]
+
+        # Regenerate the menu with the options
+        self.updateTargetOptionMenuChoices(self.agentBreakdownhandlingOptionMenu, self.agentBreakdownHandlingOptionValue, agentBreakdownResponseList)
+
+        # Set a default selection - maybe skip this to force a choice
+        self.agentBreakdownHandlingOptionValue.set(agentBreakdownResponseList[0])
         
     def renderAgentBreakdownOptions(self):
         # Renders the agent breakdown handling option ui widgets
-        self.agentBreakdownOptionLabel.grid(row=0, column=0)
-        self.agentBreakdownOptionMenu.grid(row=0, column=1)
+        self.agentBreakdownOptionLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentBreakdownOptionMenu.grid(row=0, column=1, sticky=tk.W)
+        self.agentBreakdownHandlingOptionLabel.grid(row=1, column=0, sticky=tk.W)
+        self.agentBreakdownhandlingOptionMenu.grid(row=1, column=1, sticky=tk.W)
 
     def buildAgentNoBreakdownOptionSet(self, parentFrame):
         # Builds widgets relating to the case where the are no agent breakdowns
@@ -474,7 +495,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # Build a new subframe for containing everything
         self.agentBreakdownFixedRateOptionsFrame = tk.Frame(parentFrame)
-        self.agentBreakdownFixedRateOptionsFrame.grid(row=0, column=2)
+        self.agentBreakdownFixedRateOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Generate all widgets, populate them with data, and render them
         self.buildAgentBreakdownFixedRateOptions(self.agentBreakdownFixedRateOptionsFrame)
@@ -506,8 +527,8 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentBreakdownFixedRateOptions(self):
         # Render the relevant widgets
-        self.agentBreakdownFixedRateLabel.grid(row=0, column=0)
-        self.agentBreakdownFixedRateSpinbox.grid(row=0, column=1)
+        self.agentBreakdownFixedRateLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentBreakdownFixedRateSpinbox.grid(row=0, column=1, sticky=tk.W)
 
     def buildAgentChancePerStepOptionSet(self, parentFrame):
         # Clear out any subframes
@@ -515,7 +536,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # Build a new subframe for containing everything
         self.agentBreakdownChancePerStepOptionsFrame = tk.Frame(parentFrame)
-        self.agentBreakdownChancePerStepOptionsFrame.grid(row=0, column=2)
+        self.agentBreakdownChancePerStepOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Generate all widgets, populate them with data, and render them
         self.buildAgentChancePerStepOptions(self.agentBreakdownChancePerStepOptionsFrame)
@@ -578,9 +599,9 @@ class simulationConfigManager(tk.Toplevel):
 
     def renderAgentChancePerStepOptions(self):
         # Render relevant widgets to the window
-        self.agentBreakdownChancePerStepLabel.grid(row=0, column=0)
-        self.agentBreakdownChancePerStepSpinbox.grid(row=0, column=1)
-        self.agentBreakdownChanceOverTimeLabel.grid(row=0, column=2)
+        self.agentBreakdownChancePerStepLabel.grid(row=0, column=0, sticky=tk.W)
+        self.agentBreakdownChancePerStepSpinbox.grid(row=0, column=1, sticky=tk.W)
+        self.agentBreakdownChanceOverTimeLabel.grid(row=0, column=2, sticky=tk.W)
 
     def buildAgentStartPosOptions(self):
         pass
@@ -653,7 +674,7 @@ class simulationConfigManager(tk.Toplevel):
                 self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
 
         # Render the menu
-        self.algorithmChoiceMenu.grid(row=1, column=0)
+        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def createTaskInformationPane(self):
         # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
@@ -674,7 +695,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create the tkinter object using matplotlib's backend, and render it to the page frame
         self.taskInfoCanvasWidget = FigureCanvasTkAgg(self.taskInfoFigure, self.taskStatisticsFrame)
         self.taskInfoCanvasWidget.draw()
-        self.taskInfoCanvasWidget.get_tk_widget().grid(row=2, column=0)
+        self.taskInfoCanvasWidget.get_tk_widget().grid(row=2, column=0, sticky=tk.W)
 
         # Draw the plot
         self.updateTaskInfoPlot()
@@ -756,9 +777,9 @@ class simulationConfigManager(tk.Toplevel):
         # Declare the dropdown menu, linking it to the stringvar
         self.taskFrequencyMethodMenu = tk.OptionMenu(self.taskFrequencyChoicesFrame, self.taskFrequencySelectionStringvar, *taskFrequencyMethodMenuOptions)
         # Render the menu and its label
-        self.taskFrequencyChoicesFrame.grid(row=0, column=0)
-        self.taskFrequencyMethodOptionsLabel.grid(row=0, column=0)
-        self.taskFrequencyMethodMenu.grid(row=0, column=1)
+        self.taskFrequencyChoicesFrame.grid(row=0, column=0, sticky=tk.W)
+        self.taskFrequencyMethodOptionsLabel.grid(row=0, column=0, sticky=tk.W)
+        self.taskFrequencyMethodMenu.grid(row=0, column=1, sticky=tk.W)
         
         # Set a default selection - maybe skip this to force a choice
         self.taskFrequencySelectionStringvar.set(taskFrequencyMethodMenuOptions[0])
@@ -799,9 +820,9 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateMethodMenu = tk.OptionMenu(self.taskFixedRateOptionsFrame, self.taskFixedRateSelectionStringvar, *taskFixedRateMethodOptions)
 
         # Render the menu and its label
-        self.taskFixedRateOptionsFrame.grid(row=0, column=2)
-        self.taskFixedRateMethodOptionsLabel.grid(row=0, column=0)
-        self.taskFixedRateMethodMenu.grid(row=0, column=1)
+        self.taskFixedRateOptionsFrame.grid(row=0, column=2, sticky=tk.W)
+        self.taskFixedRateMethodOptionsLabel.grid(row=0, column=0, sticky=tk.W)
+        self.taskFixedRateMethodMenu.grid(row=0, column=1, sticky=tk.W)
     
     def buildFixedRateTaskCustomRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
@@ -831,9 +852,9 @@ class simulationConfigManager(tk.Toplevel):
         )
 
         # Render label and spinbox
-        self.taskFixedCustomRateOptionsFrame.grid(row=0, column=2)
-        self.taskFixedRateCustomIntervalLabel.grid(row=0, column=0)
-        self.taskFixedRateCustomIntervalSpinbox.grid(row=0, column=1)
+        self.taskFixedCustomRateOptionsFrame.grid(row=0, column=2, sticky=tk.W)
+        self.taskFixedRateCustomIntervalLabel.grid(row=0, column=0, sticky=tk.W)
+        self.taskFixedRateCustomIntervalSpinbox.grid(row=0, column=1, sticky=tk.W)
 
         # Amount of tasks per interval label and value
         self.taskFixedRateCustomTasksPerIntervalLabel = tk.Label(self.taskFixedCustomRateOptionsFrame, text="Tasks per Interval:")
@@ -854,8 +875,8 @@ class simulationConfigManager(tk.Toplevel):
         )
 
         # Render label and spinbox
-        self.taskFixedRateCustomTasksPerIntervalLabel.grid(row=1, column=0)
-        self.taskFixedRateCustomTasksPerIntervalSpinnbox.grid(row=1, column=1)
+        self.taskFixedRateCustomTasksPerIntervalLabel.grid(row=1, column=0, sticky=tk.W)
+        self.taskFixedRateCustomTasksPerIntervalSpinnbox.grid(row=1, column=1, sticky=tk.W)
 
         # Radiobuttons to select task batching strategy
         self.taskFixedRateCustomTaskBatchingStrategyFrame = tk.Frame(self.taskFixedCustomRateOptionsFrame)
@@ -865,9 +886,9 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateCustomTaskSingleBatchStrategy.select()
 
         # Render radiobuttons and frame
-        self.taskFixedRateCustomTaskBatchingStrategyFrame.grid(row=2, column=0, columnspan=3)
-        self.taskFixedRateCustomTaskSingleBatchStrategy.grid(row=0, column=0)
-        self.taskFixedRateCustomTaskEvenSpreadStrategy.grid(row=0, column=1)
+        self.taskFixedRateCustomTaskBatchingStrategyFrame.grid(row=2, column=0, columnspan=3, sticky=tk.W)
+        self.taskFixedRateCustomTaskSingleBatchStrategy.grid(row=0, column=0, sticky=tk.W)
+        self.taskFixedRateCustomTaskEvenSpreadStrategy.grid(row=0, column=1, sticky=tk.W)
         
     def buildFixedRateTaskMeanRate(self, parentFrame):
         # Clear the parent frame of any leftovers to make room for this frame and its children
@@ -876,7 +897,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create a containing frame for this section
         # Useful for deleting all containing widgets later
         self.taskFixedRateMeanOptionsFrame = tk.Frame(parentFrame)
-        self.taskFixedRateMeanOptionsFrame.grid(row=0, column=2)
+        self.taskFixedRateMeanOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Create descriptive text
         tk.Label(self.taskFixedRateMeanOptionsFrame, text=f"One task will be created per active agent every {round(self.meanOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
@@ -888,7 +909,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create a containing frame for this section
         # Useful for deleting all containing widgets later
         self.taskFixedRateMaximumOptionsFrame = tk.Frame(parentFrame)
-        self.taskFixedRateMaximumOptionsFrame.grid(row=0, column=2)
+        self.taskFixedRateMaximumOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Create descriptive text
         tk.Label(self.taskFixedRateMaximumOptionsFrame, text=f"One task will be created per active agent every {round(self.maximumOptimalPathLength)} simulation steps.").grid(row=0, column=0)
@@ -900,7 +921,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create a containing frame for this section
         # Useful for deleting all containing widgets later
         self.taskFixedRateMinimumOptionsFrame = tk.Frame(parentFrame)
-        self.taskFixedRateMinimumOptionsFrame.grid(row=0, column=2)
+        self.taskFixedRateMinimumOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Create descriptive text
         tk.Label(self.taskFixedRateMinimumOptionsFrame, text=f"One task will be created per active agent every {round(self.minimumOptimalPathLength)} simulation steps.").grid(row=0, column=0)
@@ -912,7 +933,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create a containing frame for this section
         # Useful for deleting all containing widgets later
         self.taskFixedRateMedianOptionsFrame = tk.Frame(parentFrame)
-        self.taskFixedRateMedianOptionsFrame.grid(row=0, column=2)
+        self.taskFixedRateMedianOptionsFrame.grid(row=0, column=2, sticky=tk.W)
 
         # Create descriptive text
         tk.Label(self.taskFixedRateMedianOptionsFrame, text=f"One task will be created per active agent every {round(self.medianOptimalTaskPathLength)} simulation steps.").grid(row=0, column=0)
@@ -945,9 +966,9 @@ class simulationConfigManager(tk.Toplevel):
         )
 
         # Render label and spinbox
-        self.taskAsAvailableOptionsFrame.grid(row=0, column=2)
-        self.taskAsAvailableDelayLabel.grid(row=1, column=0)
-        self.taskAsAvailableDelaySpinbox.grid(row=1, column=1)
+        self.taskAsAvailableOptionsFrame.grid(row=0, column=2, sticky=tk.W)
+        self.taskAsAvailableDelayLabel.grid(row=1, column=0, sticky=tk.W)
+        self.taskAsAvailableDelaySpinbox.grid(row=1, column=1, sticky=tk.W)
 
         # Task generation trigger label
         self.taskAsAvailableTriggerLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Determine agent availability: ")
@@ -974,8 +995,8 @@ class simulationConfigManager(tk.Toplevel):
         self.taskAsAvailableAvailabilityTriggerMenu = tk.OptionMenu(self.taskAsAvailableOptionsFrame, self.taskAsAvailableTriggerStringvar, *agentAvailabilityTriggerOptions)
 
         # Render the menu and its label
-        self.taskAsAvailableTriggerLabel.grid(row=0, column=0)
-        self.taskAsAvailableAvailabilityTriggerMenu.grid(row=0, column=1)
+        self.taskAsAvailableTriggerLabel.grid(row=0, column=0, sticky=tk.W)
+        self.taskAsAvailableAvailabilityTriggerMenu.grid(row=0, column=1, sticky=tk.W)
 
     def createTaskLocationOptions(self):
         # Allow the user to assign weights or entirely disable certain pickup and dropoff nodes
@@ -1027,7 +1048,7 @@ class simulationConfigManager(tk.Toplevel):
             # Each node needs a label, tickbox, and numeric spinbox for weight
             # Create the label, displaying the nodes ID/coordinates
             nodeLabel = tk.Label(targetFrame, text=str(node))
-            nodeLabel.grid(row=index, column=0)
+            nodeLabel.grid(row=index, column=0, sticky=tk.W)
 
             # Create the spinbox, to hold the relative numeric weight entry
             # Use the textvariable option to enable trace callbacks on changed values
@@ -1043,7 +1064,7 @@ class simulationConfigManager(tk.Toplevel):
                 textvariable=nodeWeightValue
             )
             nodeWeightBox.insert(0, 1)
-            nodeWeightBox.grid(row=index, column=2)
+            nodeWeightBox.grid(row=index, column=2, sticky=tk.W)
             # .trace_add() supplies lambda the variable ID (PY_VARXX) and the event ("write")
             nodeWeightValue.trace_add("write", lambda *args, targetDict=targetWeightDict, targetFrame=targetFrame, targetColumn=3, targetNode=node : self.calculateLocationSelectionOdds(targetDict, targetFrame, targetColumn, targetNode))
             # Bind controls to the spinbox
@@ -1052,7 +1073,7 @@ class simulationConfigManager(tk.Toplevel):
 
             # Create a label display the calculated % chance this node gets used per task generation
             nodeChanceLabel = tk.Label(targetFrame, text="0%")
-            nodeChanceLabel.grid(row=index, column=3)
+            nodeChanceLabel.grid(row=index, column=3, sticky=tk.W)
             self.calculateLocationSelectionOdds(targetWeightDict, targetFrame, targetColumn=3, targetNode=node) # Trigger initial calulcation
 
             # Create a toggle button that disables the use of the tile
@@ -1063,7 +1084,7 @@ class simulationConfigManager(tk.Toplevel):
             nodeTick = tk.Checkbutton(targetFrame, variable=nodeTickVar,
                 command = lambda stateCycler=stateCycler, index=index, targetFrame=targetFrame, controlWidgetColumn=1, rowName=str(node): 
                                 self.toggleWidgetsInRow(index, stateCycler, targetFrame, controlWidgetColumn))
-            nodeTick.grid(row=index, column=1)
+            nodeTick.grid(row=index, column=1, sticky=tk.W)
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
@@ -1115,8 +1136,8 @@ class simulationConfigManager(tk.Toplevel):
         self.frameDelayValue.set(1000)
 
         # Render components
-        self.frameDelayLabel.grid(row=1, column=1)
-        self.frameDelayEntry.grid(row=1, column=2)
+        self.frameDelayLabel.grid(row=1, column=1, sticky=tk.W)
+        self.frameDelayEntry.grid(row=1, column=2, sticky=tk.W)
 
     def validateNumericSpinbox(self, inputString):
         logging.debug(f"Validating numeric spinbox entry: {inputString}")
