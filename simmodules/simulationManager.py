@@ -108,7 +108,7 @@ class simulationConfigManager(tk.Toplevel):
         self.createAlgorithmOptions()
 
     def buildAgentConfigurationPage(self):
-        # Intermediate function goruping together declarations and renders for the agent configuration page
+        # Intermediate function grouping together declarations and renders for the agent configuration page
         self.agentChargeOptionFrame = tk.Frame(self.agentConfigurationFrame)
         self.agentChargeOptionFrame.grid(row=0, column=0, sticky=tk.W)
         self.buildAgentChargeOptions()
@@ -123,11 +123,15 @@ class simulationConfigManager(tk.Toplevel):
         self.populateAgentBreakdownOptions(self.agentBreakdownOptionFrame)
         self.renderAgentBreakdownOptions()
         self.agentStartPosOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentStartPosOptionFrame.grid(row=0, column=0, sticky=tk.W)
-        self.buildAgentStartPosOptions()
+        self.agentStartPosOptionFrame.grid(row=2, column=0, sticky=tk.W)
+        self.buildAgentStartPosOptions(self.agentStartPosOptionFrame)
+        self.populateAgentStartPosOptions(self.agentStartPosOptionFrame)
+        self.renderAgentStartPosOptions()
         self.agentMiscOptionsFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentMiscOptionsFrame.grid(row=0, column=0, sticky=tk.W)
-        self.buildAgentMiscOptions()
+        self.agentMiscOptionsFrame.grid(row=3, column=0, sticky=tk.W)
+        self.buildAgentMiscOptions(self.agentMiscOptionsFrame)
+        self.populateAgentMiscOptions(self.agentMiscOptionsFrame)
+        self.renderAgentMiscOptions()
 
     def buildAgentChargeOptions(self):
         # Creates widgets for options related to how the charge level on agents is managed
@@ -603,11 +607,96 @@ class simulationConfigManager(tk.Toplevel):
         self.agentBreakdownChancePerStepSpinbox.grid(row=0, column=1, sticky=tk.W)
         self.agentBreakdownChanceOverTimeLabel.grid(row=0, column=2, sticky=tk.W)
 
-    def buildAgentStartPosOptions(self):
-        pass
+    def buildAgentStartPosOptions(self, parentFrame):
+        # Build widgets that relate to agent's starting positions
+        # Label
+        self.agentStartPosStyleLabel = tk.Label(parentFrame)
 
-    def buildAgentMiscOptions(self):
-        pass
+        # OptionMenu holding style options
+        self.agentStartPosStyleValue = tk.StringVar()
+        self.agentStartPosStyleMenu = tk.OptionMenu(parentFrame, self.agentStartPosStyleValue, "temp")
+
+    def populateAgentStartPosOptions(self, parentFrame):
+        # Populate relevant widgets with data
+        self.agentStartPosStyleLabel.configure(text="Agent starting position determined by:")
+
+        # Menu options stored as a list
+        agentStartPosStyleOptionsList = [
+            "As given in Simulation Edit Window", "Home tiles (automatic assignment)"
+        ]
+
+        # Regenerate the menu with the option list
+        self.updateTargetOptionMenuChoices(self.agentStartPosStyleMenu, self.agentStartPosStyleValue, agentStartPosStyleOptionsList)
+
+        # No need to trace this menu currently
+        # Set a default selection
+        self.agentStartPosStyleValue.set(agentStartPosStyleOptionsList[0])
+
+    def renderAgentStartPosOptions(self):
+        # Render related widgets
+        self.agentStartPosStyleLabel.grid(row=0, column=0)
+        self.agentStartPosStyleMenu.grid(row=0, column=1)
+
+    def buildAgentMiscOptions(self, parentFrame):
+        # Build widgets relating to miscellaneous agent options
+        # Label for whether an agent rotating takes time during simulation
+        self.agentMiscOptionRotateCostLabel = tk.Label(parentFrame)
+
+        # Optionmenu containing options related to rotation costs
+        self.agentMiscOptionRotateCostValue = tk.StringVar()
+        self.agentMiscOptionRotateCostMenu = tk.OptionMenu(parentFrame, self.agentMiscOptionRotateCostValue, "temp")
+
+        # Label for whether an agent picking up or dropping off a task takes time during simulation
+        self.agentMiscOptionTaskInteractCostLabel = tk.Label(parentFrame)
+    
+        # Optionmenu containing options related to interaction costs
+        self.agentMiscOptionTaskInteractCostValue = tk.StringVar()
+        self.agentMiscOptionTaskInteractCostMenu = tk.OptionMenu(parentFrame, self.agentMiscOptionTaskInteractCostValue, "temp")
+
+    def populateAgentMiscOptions(self, parentFrame):
+        # Populate relevant widgets
+        # Rotation cost label
+        self.agentMiscOptionRotateCostLabel.configure(text="Cost of agent rotations:")
+
+        # Rotation cost optionmenu options list
+        agentMiscOptionRotationCostList = [
+            "No cost for rotation", "Rotation requires step"
+        ]
+
+        # Regenerate the option menu with the new option list
+        self.updateTargetOptionMenuChoices(self.agentMiscOptionRotateCostMenu, self.agentMiscOptionRotateCostValue, agentMiscOptionRotationCostList)
+
+        # Set a default option - maybe skip this to force a choice
+        self.agentMiscOptionRotateCostValue.set(agentMiscOptionRotationCostList[0])
+
+        # Disable unimplemented option
+        self.agentMiscOptionRotateCostMenu['menu'].entryconfigure(agentMiscOptionRotationCostList[1], state=tk.DISABLED)
+
+        # Task interaction cost label
+        self.agentMiscOptionTaskInteractCostLabel.configure(text="Cost of task interactions:")
+
+        # Task interaction cost optionmenu options list
+        agentMiscOptionTaskInteractionCostList = [
+            "No cost for pickup/dropoff", "Pickup/dropoff require step"
+        ]
+        
+        # Regenerate the option menu with the new option list
+        self.updateTargetOptionMenuChoices(self.agentMiscOptionTaskInteractCostMenu, self.agentMiscOptionTaskInteractCostValue, agentMiscOptionTaskInteractionCostList)
+
+        # Disable unimplemented option
+        self.agentMiscOptionTaskInteractCostMenu['menu'].entryconfigure(agentMiscOptionTaskInteractionCostList[1], state=tk.DISABLED)
+
+        # Set a default value - maybe skip this to force a choice
+        self.agentMiscOptionTaskInteractCostValue.set(agentMiscOptionTaskInteractionCostList[0])
+
+    def renderAgentMiscOptions(self):
+        # Render rotation cost option widgets
+        self.agentMiscOptionRotateCostLabel.grid(row=0, column=0)
+        self.agentMiscOptionRotateCostMenu.grid(row=0, column=1)
+
+        # Render task interaction cost option widgets
+        self.agentMiscOptionTaskInteractCostLabel.grid(row=1, column=0)
+        self.agentMiscOptionTaskInteractCostMenu.grid(row=1, column=1)
 
     def buildTaskGenerationPage(self):
         # Intermediate function grouping together declarations and renders for the task generation page
