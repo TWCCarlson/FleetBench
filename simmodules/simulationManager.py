@@ -1194,7 +1194,6 @@ class simulationConfigManager(tk.Toplevel):
         )
         logging.debug("Simulation playback frame delay spinbox built.")
 
-
     def populateDisplayPlaybackOptions(self):
         # Set headless mode label text
         self.displayHeadlessPlaybackLabel.configure(text="Headless Mode")
@@ -1211,21 +1210,6 @@ class simulationConfigManager(tk.Toplevel):
         self.displayHeadlessPlaybackCheckbutton.grid(row=0, column=1, sticky=tk.W)
         self.frameDelayLabel.grid(row=1, column=0, sticky=tk.W)
         self.frameDelayEntry.grid(row=1, column=1, sticky=tk.W)
-
-    def launchSimulation(self):
-        simulationSettings = self.packageSimulationConfiguration()
-        self.parent.launchSimulator(simulationSettings)
-
-    def packageSimulationConfiguration(self):
-        """
-            Packages the current simulation configuration for saving
-        """
-        dataPackage = {}
-        dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
-        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
-        dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
-
-        return dataPackage
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
@@ -1287,6 +1271,38 @@ class simulationConfigManager(tk.Toplevel):
         for option in newOptionsList:
             menu.add_command(label=option,
                 command=lambda value=option: menuStringvar.set(value))
+            
+    def packageSimulationConfiguration(self):
+        """
+            Packages the current simulation configuration for saving
+        """
+        dataPackage = {}
+        # Needs work for handling branched options (nested)
+        ### Algorithm Options
+        dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
+
+        ### Agent Configuration Options
+        dataPackage["agentChargeLimitation"] = self.agentChargeOptionValue.get()
+        dataPackage["agentBreakdownStyle"] = self.agentBreakdownOptionValue.get()
+        dataPackage["agentBreakdownHandlingStyle"] = self.agentBreakdownHandlingOptionValue.get()
+        dataPackage["agentStartPositionStyle"] = self.agentStartPosStyleValue.get()
+        dataPackage["agentRotationCost"] = self.agentMiscOptionRotateCostValue.get()
+        dataPackage["agentTaskActionCost"] = self.agentMiscOptionTaskInteractCostValue.get()
+
+        ### Task Generation Options
+        dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
+        dataPackage["taskNodeWeightDict"] = self.nodeWeightVarDict
+        dataPackage["taskNodeAvailableDict"] = self.nodeAvailableVarDict
+
+        ### Display Options
+        dataPackage["playbackHeadlessMode"] = self.displayHeadlessPlaybackValue.get()
+        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
+
+        return dataPackage
+    
+    def launchSimulation(self):
+        simulationSettings = self.packageSimulationConfiguration()
+        self.parent.launchSimulator(simulationSettings)
 
 class simulationConfigurationState:
     # Holds the current state of the simulation config
