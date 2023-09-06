@@ -107,6 +107,34 @@ class simulationConfigManager(tk.Toplevel):
         # Intermediate function grouping together declarations and renders for the algorithm choices page
         self.createAlgorithmOptions()
 
+    def createAlgorithmOptions(self):
+        # Creates a drop down menu for the user to select the driving algorithm for the simulation
+        # Using types to separate multi-agent and single-agent pathfinding algorithms
+        optionTypeDict = {
+            "Dummy": "mapf",
+            "Single-agent A*": "sapf"
+        }
+
+        # Keys of the dict are the displayed options
+        algorithmOptions = list(optionTypeDict.keys())
+
+        # Stringvar to hold the algorithm selection
+        self.algorithmSelectionStringVar = tk.StringVar()
+
+        # Set a default selection - maybe skip this to force a choice
+        self.algorithmSelectionStringVar.set(algorithmOptions[0])
+
+        # Declare the drop down menu
+        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
+
+        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
+        for algorithm, type in optionTypeDict.items():
+            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
+                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
+
+        # Render the menu
+        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
+
     def buildAgentConfigurationPage(self):
         # Intermediate function grouping together declarations and renders for the agent configuration page
         self.agentChargeOptionFrame = tk.Frame(self.agentConfigurationFrame)
@@ -1130,7 +1158,59 @@ class simulationConfigManager(tk.Toplevel):
 
     def buildDisplayOptionsPage(self):
         # Intermediate function grouping together declarations and renders for the display options page
-        self.createSimulationUpdateRate()
+        self.displayPlaybackOptionsFrame = tk.Frame(self.displayOptionsFrame)
+        self.displayPlaybackOptionsFrame.grid(row=0, column=0, sticky=tk.W)
+        self.buildDisplayPlaybackOptions()
+        self.populateDisplayPlaybackOptions()
+        self.renderDisplayPlaybackOptions()
+
+    def buildDisplayPlaybackOptions(self):
+        # Build widgets relating to displaying the simulation state during playback
+        # Headless mode setting label
+        self.displayHeadlessPlaybackLabel = tk.Label(self.displayPlaybackOptionsFrame)
+
+        # Headless mode setting checkbutton
+        self.displayHeadlessPlaybackValue = tk.IntVar()
+        self.displayHeadlessPlaybackValue.set(1)
+        self.displayHeadlessPlaybackCheckbutton = tk.Checkbutton(self.displayPlaybackOptionsFrame,
+            variable=self.displayHeadlessPlaybackValue)
+
+        # Framerate setting label
+        self.frameDelayLabel = tk.Label(self.displayPlaybackOptionsFrame)
+
+        # Framerate setting numeric spinbox
+        self.frameDelayValue = tk.StringVar()
+        self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
+        # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
+        self.frameDelayEntry = ttk.Spinbox(self.displayPlaybackOptionsFrame,
+            width=6,
+            from_=0,
+            to=100000,
+            increment=50,
+            textvariable=self.frameDelayValue,
+            # command=self.commandTaskTimeLimit,
+            validate='key',
+            validatecommand=(self.validateFrameDelayEntry, '%P')
+        )
+        logging.debug("Simulation playback frame delay spinbox built.")
+
+
+    def populateDisplayPlaybackOptions(self):
+        # Set headless mode label text
+        self.displayHeadlessPlaybackLabel.configure(text="Headless Mode")
+
+        # Set framerate spinbox label
+        self.frameDelayLabel.configure(text="Frame Delay (ms):")
+        
+        # Set the default framerate setting value
+        self.frameDelayValue.set(1000)
+
+    def renderDisplayPlaybackOptions(self):
+        # Render components
+        self.displayHeadlessPlaybackLabel.grid(row=0, column=0, sticky=tk.W)
+        self.displayHeadlessPlaybackCheckbutton.grid(row=0, column=1, sticky=tk.W)
+        self.frameDelayLabel.grid(row=1, column=0, sticky=tk.W)
+        self.frameDelayEntry.grid(row=1, column=1, sticky=tk.W)
 
     def launchSimulation(self):
         simulationSettings = self.packageSimulationConfiguration()
@@ -1146,34 +1226,6 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
 
         return dataPackage
-    
-    def createAlgorithmOptions(self):
-        # Creates a drop down menu for the user to select the driving algorithm for the simulation
-        # Using types to separate multi-agent and single-agent pathfinding algorithms
-        optionTypeDict = {
-            "Dummy": "mapf",
-            "Single-agent A*": "sapf"
-        }
-
-        # Keys of the dict are the displayed options
-        algorithmOptions = list(optionTypeDict.keys())
-
-        # Stringvar to hold the algorithm selection
-        self.algorithmSelectionStringVar = tk.StringVar()
-
-        # Set a default selection - maybe skip this to force a choice
-        self.algorithmSelectionStringVar.set(algorithmOptions[0])
-
-        # Declare the drop down menu
-        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
-
-        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
-        for algorithm, type in optionTypeDict.items():
-            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
-                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
-
-        # Render the menu
-        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
@@ -1203,30 +1255,6 @@ class simulationConfigManager(tk.Toplevel):
             nodeChance = nodeWeight / totalWeight
             # Update the label in the same row with the value, converted to % for readability
             targetFrame.grid_slaves(row=index, column=targetColumn)[0].configure(text=f"{nodeChance*100:2.2f}%")
-        
-    def createSimulationUpdateRate(self):
-        self.frameDelayLabel = tk.Label(self.displayOptionsFrame, text="frameDelay:")
-        self.frameDelayValue = tk.StringVar()
-        self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
-        # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
-        self.frameDelayEntry = ttk.Spinbox(self.displayOptionsFrame,
-            width=6,
-            from_=0,
-            to=100000,
-            increment=50,
-            textvariable=self.frameDelayValue,
-            # command=self.commandTaskTimeLimit,
-            validate='key',
-            validatecommand=(self.validateFrameDelayEntry, '%P')
-        )
-        logging.debug("Simulation playback frame delay spinbox built.")
-
-        # Set a default value
-        self.frameDelayValue.set(1000)
-
-        # Render components
-        self.frameDelayLabel.grid(row=1, column=1, sticky=tk.W)
-        self.frameDelayEntry.grid(row=1, column=2, sticky=tk.W)
 
     def validateNumericSpinbox(self, inputString):
         logging.debug(f"Validating numeric spinbox entry: {inputString}")
