@@ -576,9 +576,9 @@ class simulationConfigManager(tk.Toplevel):
 
         # Add a trace to the spinbox var to re-render the text
         self.agentBreakdownChancePerStepValue.trace_add("write", lambda *args, selection=self.agentBreakdownChancePerStepValue,
-            targetLabel=self.agentBreakdownChanceOverTimeLabel : self.updateBreakdownChancePerStepText(selection.get(), targetLabel))
+            targetLabel=self.agentBreakdownChanceOverTimeLabel : self.updateAgentBreakdownChancePerStepText(selection.get(), targetLabel))
         
-    def updateBreakdownChancePerStepText(self, value, targetLabel):
+    def updateAgentBreakdownChancePerStepText(self, value, targetLabel):
         # Calculate the odds of an incident after a few steps
         chanceInFive = (1-(1-float(value)/100000)**5)*100
         chanceInTwenty = (1-(1-float(value)/100000)**20)*100
@@ -717,53 +717,6 @@ class simulationConfigManager(tk.Toplevel):
         self.taskStatisticsFrame = tk.Frame(self.taskGenerationFrame)
         self.taskStatisticsFrame.grid(row=1, column=0)
         self.createTaskInformationPane()
-
-    def buildDisplayOptionsPage(self):
-        # Intermediate function grouping together declarations and renders for the display options page
-        self.createSimulationUpdateRate()
-
-    def launchSimulation(self):
-        simulationSettings = self.packageSimulationConfiguration()
-        self.parent.launchSimulator(simulationSettings)
-
-    def packageSimulationConfiguration(self):
-        """
-            Packages the current simulation configuration for saving
-        """
-        dataPackage = {}
-        dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
-        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
-        dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
-
-        return dataPackage
-    
-    def createAlgorithmOptions(self):
-        # Creates a drop down menu for the user to select the driving algorithm for the simulation
-        # Using types to separate multi-agent and single-agent pathfinding algorithms
-        optionTypeDict = {
-            "Dummy": "mapf",
-            "Single-agent A*": "sapf"
-        }
-
-        # Keys of the dict are the displayed options
-        algorithmOptions = list(optionTypeDict.keys())
-
-        # Stringvar to hold the algorithm selection
-        self.algorithmSelectionStringVar = tk.StringVar()
-
-        # Set a default selection - maybe skip this to force a choice
-        self.algorithmSelectionStringVar.set(algorithmOptions[0])
-
-        # Declare the drop down menu
-        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
-
-        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
-        for algorithm, type in optionTypeDict.items():
-            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
-                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
-
-        # Render the menu
-        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def createTaskInformationPane(self):
         # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
@@ -1174,6 +1127,53 @@ class simulationConfigManager(tk.Toplevel):
                 command = lambda stateCycler=stateCycler, index=index, targetFrame=targetFrame, controlWidgetColumn=1, rowName=str(node): 
                                 self.toggleWidgetsInRow(index, stateCycler, targetFrame, controlWidgetColumn))
             nodeTick.grid(row=index, column=1, sticky=tk.W)
+
+    def buildDisplayOptionsPage(self):
+        # Intermediate function grouping together declarations and renders for the display options page
+        self.createSimulationUpdateRate()
+
+    def launchSimulation(self):
+        simulationSettings = self.packageSimulationConfiguration()
+        self.parent.launchSimulator(simulationSettings)
+
+    def packageSimulationConfiguration(self):
+        """
+            Packages the current simulation configuration for saving
+        """
+        dataPackage = {}
+        dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
+        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
+        dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
+
+        return dataPackage
+    
+    def createAlgorithmOptions(self):
+        # Creates a drop down menu for the user to select the driving algorithm for the simulation
+        # Using types to separate multi-agent and single-agent pathfinding algorithms
+        optionTypeDict = {
+            "Dummy": "mapf",
+            "Single-agent A*": "sapf"
+        }
+
+        # Keys of the dict are the displayed options
+        algorithmOptions = list(optionTypeDict.keys())
+
+        # Stringvar to hold the algorithm selection
+        self.algorithmSelectionStringVar = tk.StringVar()
+
+        # Set a default selection - maybe skip this to force a choice
+        self.algorithmSelectionStringVar.set(algorithmOptions[0])
+
+        # Declare the drop down menu
+        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
+
+        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
+        for algorithm, type in optionTypeDict.items():
+            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
+                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
+
+        # Render the menu
+        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
