@@ -8,7 +8,7 @@ from modules.infoBox import infoBox
 from modules.agentManager import agentManager
 from modules.taskManager import taskManager
 from modules.randomGenerator import randomGenerator
-from simmodules.simulationManager import simulationConfigManager
+from simmodules.simulationConfigManager import simulationConfigManager
 from simmodules.simulationWindow import simulationWindow
 from simmodules.simulationProcess import simulationProcess
 from config.appearanceValues import appearanceValues
@@ -150,6 +150,8 @@ class simulationManager:
     def buildReferences(self):
         # Build necessary references for inner classes
         self.simulationWindow.simControlPanel.buildReferences()
+        self.simulationWindow.simDataView.buildReferences()
+        self.simulationProcess.buildReferences()
 
 def initLogging():
     loglevelReference = {

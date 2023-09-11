@@ -38,6 +38,9 @@ class simTaskManager:
         self.taskList[self.dictLength] = self.latestTask
         logging.info("Task added to 'simTaskManager' task list.")
 
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
         # Needed to overcome pickling of data when retrieving the state
@@ -83,3 +86,9 @@ class simTaskClass:
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.assignee = kwargs.get("assignee")
+
+    def highlightTask(self, multi):
+        # Hightlight the pickup position
+        logging.debug(f"Task '{self.name}:{self.numID}' requests highlighting from 'mainCanvas'.")
+        self.parent.parent.parent.simulationWindow.simMainView.simCanvas.highlightTile(self.pickupPosition[0], self.pickupPosition[1], 'green', multi=multi, highlightType='pickupHighlight')
+        self.parent.parent.parent.simulationWindow.simMainView.simCanvas.highlightTile(self.dropoffPosition[0], self.dropoffPosition[1], 'blue', multi=multi, highlightType='dropoffHighlight')

@@ -47,6 +47,9 @@ class simAgentManager:
         self.parent.simGraphData.updateAgentLocations(self.agentList)
         logging.info(f"Agent added to the dict of agents")
 
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+
     def fixAssignments(self):
         # Iterate through the list of all agents, fixing currenTask to refer to objects instead of IDs
         # Needed to overcome pickling of data when retrieving the state
@@ -105,6 +108,11 @@ class simAgentClass:
             "S" : 2,
             "E" : 3
         }
+    def highlightAgent(self, multi):
+        # Have the agent request highlighting from the main canvas
+        logging.debug(f"Agent '{self.ID}:{self.numID}' requests highlighting from 'mainCanvas'.")
+        self.parent.parent.parent.simulationWindow.simMainView.simCanvas.highlightTile(
+            self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
 
     def calculateAStarBestPath(self, targetNode):
         bestAStarPathLength = nx.astar_path_length(self.mapGraphRef, self.currentNode, targetNode, heuristic=None, weight=None)

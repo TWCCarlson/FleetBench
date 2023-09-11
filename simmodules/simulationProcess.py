@@ -25,6 +25,7 @@ class simulationProcess():
         self.simProcessor = simProcessor(self, simulationSettings)
         logging.info("Simulation Execution Class 'simProcessor' instantiated successfully.")
 
+    def buildReferences(self):
         # Build backreferences
         self.simGraphData.buildReferences()
         self.simAgentManager.buildReferences()

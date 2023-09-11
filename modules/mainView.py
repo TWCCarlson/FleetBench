@@ -506,6 +506,10 @@ class mainCanvas(tk.Canvas):
         self.infoBoxFrame = self.parent.parent.infoBox.infoBoxFrame
         self.infoBoxFrame.hoverInfoText.set(hoverString)
 
+    def clearMainCanvas(self):
+        self.delete("all")
+        logging.info("Main canvas cleared.")
+
     def sortCanvasLayers(self):
         # Orders the stuff on the canvas to a default order
         # Find all objects with each tag
@@ -558,10 +562,6 @@ class mainCanvas(tk.Canvas):
         for layer in layerStates:
             self.setLayerVisibility(layer, layerStates[layer])
         logging.info("Updated layer visibilities to match user settings.")
-
-    def clearMainCanvas(self):
-        self.delete("all")
-        logging.info("Main canvas cleared.")
 
     def setLayerVisibility(self, layerTag, desiredState):
         objs = self.find_withtag(layerTag)

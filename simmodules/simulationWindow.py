@@ -3,6 +3,7 @@ import logging
 from simmodules.simulationMainView import simMainView
 from simmodules.simulationInfoBox import simInfoBox
 from simmodules.simulationControlPanel import simControlPanel
+from simmodules.simulationTreeView import simDataView
 
 class simulationWindow(tk.Toplevel):
     # Window for displaying the current state of simulation
@@ -26,3 +27,7 @@ class simulationWindow(tk.Toplevel):
         # Simulation control bar
         self.simControlPanel = simControlPanel(self)
         logging.info("Simulation Component class 'simControlPanel' instantiated successfully.")
+
+        # Simulation Agent and Task display
+        self.simDataView = simDataView(self)
+        logging.info("Simulation Component class 'simDataView' instantiated successfully.")

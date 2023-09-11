@@ -66,6 +66,6 @@ class appearanceValues():
 
         # Simulation information panel style
         self.simulationInfoPanelWidth = 0.2 * screen_width
-        self.simulationInfoPanelHeight = 0.8 * (screen_height - window_unusable)
+        self.simulationInfoPanelHeight = screen_height - self.simulationControlBoxHeight - window_unusable
 
         logging.info("Appearance configuration settings loaded.")

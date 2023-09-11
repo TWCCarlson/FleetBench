@@ -199,11 +199,6 @@ class simCanvas(tk.Canvas):
 
         logging.info("Canvas re-render finished.")
 
-    def clearMainCanvas(self):
-        # Destroys all entities on the canvas
-        self.delete("all")
-        logging.info("Main simulation canvas cleared.")
-
     def renderNodes(self, mapGraph, tileSize, nodeSizeRatio):
         # Iterate through the graph and draw nodes onto the simulation main view canvas
         for node in mapGraph.nodes.data():
@@ -386,6 +381,26 @@ class simCanvas(tk.Canvas):
                     logging.debug("Unconnected edge drawn.")
         logging.info("Rendered all unconnected graphData edges.")
 
+    def agentClickHighlighter(self, agentName, agentID, event):
+        # Remove previous highlighting
+        logging.debug("Handling click on agent in main canvas.")
+        self.clearHighlight()
+        logging.debug(f"Clicked agentName: {agentName}, agentID: {agentID}")
+
+        # Find iid for specified agent in the treeview
+        agentIID = self.parent.parent.simDataView.agentTreeView.tag_has(agentName)
+
+        # Set the selection to include the agent
+        self.parent.parent.simDataView.agentTreeView.selection_set(agentIID)
+        logging.debug("Agent treeView updated to reflect user selection.")
+        
+        # Highlight the agent
+        agentRef = self.parent.parent.parent.simulationProcess.simAgentManager.agentList.get(agentID)
+        agentRef.highlightAgent(multi=False)
+        
+        # Update the selection tracker
+        self.parent.parent.parent.simulationProcess.simAgentManager.currentAgent = agentRef
+
     def renderAgents(self, graphData, tileSize):
         # Renders agent positions and orientations
         # Render the agent position direct from the graph object
@@ -477,8 +492,8 @@ class simCanvas(tk.Canvas):
                 logging.debug("Node contains an agent, ID added to hover info.")
 
                 # Further, make clicks on this hovertile select the agent
-                # self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentName, nodeAgentID))
-                # logging.debug("Bound clicks on the capture tile to the agent.")
+                self.tag_bind(tileObject, "<Button-1>", partial(self.agentClickHighlighter, nodeAgentName, nodeAgentID))
+                logging.debug("Bound clicks on the capture tile to the agent.")
             else:
                 hoverString = f"{str(node[0])}: {nodeType.capitalize()}"
 
@@ -492,6 +507,11 @@ class simCanvas(tk.Canvas):
     def infoHoverEnter(self, hoverString, event):
         self.infoBoxFrame = self.parent.parent.simInfoBox.simInfoBoxFrame
         self.infoBoxFrame.hoverInfoText.set(hoverString)
+
+    def clearMainCanvas(self):
+        # Destroys all entities on the canvas
+        self.delete("all")
+        logging.info("Main simulation canvas cleared.")
 
     def sortCanvasLayers(self):
         # Moves all layers to a default order
@@ -586,3 +606,64 @@ class simCanvas(tk.Canvas):
 
     def toggleAgentOrientationVisibility(self):
         self.agentOrientationVisibility = self.toggleLayerVisibility("agentOrientation", self.agentOrientationVisibility)
+
+    def highlightTile(self, tileIDX, tileIDY, color, multi, highlightType):
+        # Clear the old highlights before drawing this singular highlight
+        if multi == False:
+            self.clearHighlight(highlightType)
+            
+        # Draw a translucent highlight over the indicated cell for user guidance
+        # tileSize = self.appearanceValues.canvasTileSize
+        if isinstance(tileIDX, str):
+            tileSize = self.appearanceValues.canvasTileSize
+            self.create_rect(
+                eval(tileIDX) * tileSize,
+                eval(tileIDY) * tileSize,
+                eval(tileIDX) * tileSize + tileSize,
+                eval(tileIDY) * tileSize + tileSize,
+                anchor=tk.NW,
+                fill=color,
+                alpha=0.3,
+                tags=["highlight", highlightType]
+            )
+        else:
+            tileSize = self.appearanceValues.canvasTileSize
+            self.create_rect(
+                tileIDX * tileSize,
+                tileIDY * tileSize,
+                tileIDX * tileSize + tileSize,
+                tileIDY * tileSize + tileSize,
+                anchor=tk.NW,
+                fill=color,
+                alpha=0.3,
+                tags=["highlight", highlightType]
+            )
+        logging.debug(f"Highlighted tile: ({str(tileIDX)}, {str(tileIDY)})")
+        logging.debug(f"With: {color}, multi={multi}, and type {highlightType}")
+
+        # Re-sort the layers so the infolayer is not hidden by the highlight
+        self.sortCanvasLayers()
+
+    def clearHighlight(self, highlightType=None):
+        # Unsafe function, doesn't check that the kind of removal requested actually exists, fails silently too
+        # Remove all objects tagged "highlight" if a type isn't specified
+        if highlightType == None:
+            self.images = {}
+            objs = self.find_withtag("highlight")
+            for obj in objs:
+                self.delete(obj)
+            logging.debug(f"Cleared all highlights.")
+
+    def create_rect(self, x1, y1, x2, y2, **kwargs):
+        # https://stackoverflow.com/questions/54637795/how-to-make-a-tkinter-canvas-rectangle-transparent
+        # Modified for passing 'anchor' and 'tags' as kwargs
+        if 'alpha' in kwargs:
+            alpha = int(kwargs.pop('alpha') * 255)
+            fill = kwargs.pop('fill')
+            anchor = kwargs.pop('anchor')
+            tags = kwargs.pop('tags')
+            fill = self.parent.parent.winfo_rgb(fill) + (alpha,)
+            image = Image.new('RGBA', (x2-x1, y2-y1), fill)
+            tkImage = ImageTk.PhotoImage(image)
+            self.images[tkImage] = tags
+            self.create_image(x1, y1, image=tkImage, anchor=anchor, tags=tags)
