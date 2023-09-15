@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+from pathlib import Path
 
 class simulationConfigManager(tk.Toplevel):
     # Window for managing the state of the simulation configuration
@@ -136,15 +137,213 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def buildAgentConfigurationPage(self):
+        SPINBOX_DEFAULT_RANGE = (1, 100000, 1)
+        # Use a factory to produce ui elements from inputs, maintaining relational lists
+        # In: label text, ui element (numspinbox, entry, optionmenu)
+
+        # Control variables, saved here for custom naming and reference ease
+
+        ### Limited Charge
+        self.agentChargeLimitationValue = tk.StringVar()
+        self.agentLimitedChargeCostStyleValue = tk.StringVar()
+        self.agentLimitedChargeCapacityValue = tk.StringVar()
+        self.agentLimitedChargeStepCostValue = tk.StringVar()
+        self.agentLimitedChargeActionCostValue = tk.StringVar()
+        self.agentLimitedChargeMovementCostValue = tk.StringVar()
+        self.agentLimitedChargePickupCostValue = tk.StringVar()
+        self.agentLimitedChargeDropoffCostValue = tk.StringVar()
+
+        ### Breakdowns
+        self.agentBreakdownOptionValue = tk.StringVar()
+        self.agentBreakdownFixedRateValue = tk.StringVar()
+        self.agentBreakdownChancePerStepValue = tk.StringVar()
+
+        ### Start position
+        self.agentStartPosStyleValue = tk.StringVar()
+
+        ### Movement Costs
+        self.agentMiscOptionRotateCostValue = tk.StringVar()
+
+        ### Interaction Costs
+        self.agentMiscOptionTaskInteractCostValue = tk.StringVar()
+        
+        # UI Definition Dict
+        # {
+        #     "labelText": ,
+        #     "elementType": ,
+        #     "elementDefault": ,
+        #     "optionValue": ,
+        #     "gridLoc": 
+        #     "elementData": ,
+        # },
+        self.agentOptionSet = [
+            {
+                "labelText": "Agent Charge Limitation",
+                "elementType": "optionMenu",
+                "elementDefault": "Ignored / Unlimited",
+                "optionValue": self.agentChargeLimitationValue,
+                "elementData": {
+                    "Ignored / Unlimited": None,
+                    "Limited": [
+                        {
+                            "labelText": "Agent Charge Capacity:",
+                            "elementType": "numericSpinbox",
+                            "elementDefault": None,
+                            "optionValue": self.agentLimitedChargeCapacityValue,
+                            "gridLoc": "auto",
+                            "elementData": SPINBOX_DEFAULT_RANGE
+                        },
+                        {
+                            "labelText": "Cost Determ. Method",
+                            "elementType": "optionMenu",
+                            "elementDefault": "Fixed per sim. step",
+                            "optionValue": self.agentLimitedChargeCostStyleValue,
+                            "gridLoc": "auto",
+                            "elementData":{
+                                "Fixed per sim. step": [
+                                    {
+                                        "labelText": "Cost Per Sim. Step:",
+                                        "elementType": "numericSpinbox",
+                                        "elementDefault": None,
+                                        "optionValue": self.agentLimitedChargeStepCostValue,
+                                        "gridLoc": "auto",
+                                        "elementData": SPINBOX_DEFAULT_RANGE
+                                    }
+                                ],
+                                "Fixed per action taken": [
+                                    {
+                                        "labelText": "Cost Per Action:",
+                                        "elementType": "numericSpinbox",
+                                        "elementDefault": None,
+                                        "optionValue": self.agentLimitedChargeActionCostValue,
+                                        "gridLoc": "auto",
+                                        "elementData": SPINBOX_DEFAULT_RANGE
+                                    }
+                                ],
+                                "Custom": [
+                                    {
+                                        "labelText": "Cost Per Move:",
+                                        "elementType": "numericSpinbox",
+                                        "elementDefault": None,
+                                        "optionValue": self.agentLimitedChargeMovementCostValue,
+                                        "gridLoc": "auto",
+                                        "elementData": SPINBOX_DEFAULT_RANGE
+                                    },
+                                    {
+                                        "labelText": "Cost Per Pickup:",
+                                        "elementType": "numericSpinbox",
+                                        "elementDefault": None,
+                                        "optionValue": self.agentLimitedChargePickupCostValue,
+                                        "gridLoc": "auto",
+                                        "elementData": SPINBOX_DEFAULT_RANGE
+                                    },
+                                    {
+                                        "labelText": "Cost Per Dropoff:",
+                                        "elementType": "numericSpinbox",
+                                        "elementDefault": None,
+                                        "optionValue": self.agentLimitedChargeDropoffCostValue,
+                                        "gridLoc": "auto",
+                                        "elementData": SPINBOX_DEFAULT_RANGE
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "labelText": "Breakdown Style:",
+                "elementType": "optionMenu",
+                "elementDefault": "Problem-free operation",
+                "optionValue": self.agentBreakdownOptionValue,
+                "gridLoc": "auto",
+                "elementData": {
+                    "Problem-free operation": None,
+                    "Fixed-rate maintenance schedule": [
+                        {
+                            "labelText": "Sim. steps per incident",
+                            "elementType": "numericSpinbox",
+                            "elementDefault": None,
+                            "optionValue": self.agentBreakdownFixedRateValue,
+                            "gridLoc": "auto",
+                            "elementData": SPINBOX_DEFAULT_RANGE
+                        }
+                    ],
+                    "Fixed chance of failure per sim. step": [
+                        {
+                            "labelText": "Chance of incident per sim. step\n(Out of 100,000)",
+                            "elementType": "numericSpinbox",
+                            "elementDefault": None,
+                            "optionValue": self.agentBreakdownChancePerStepValue,
+                            "gridLoc": "auto",
+                            "elementData": SPINBOX_DEFAULT_RANGE
+                        },
+                        {
+                            "labelText": "Agent Breakdown Odds Descriptive Text",
+                            "elementType": "descriptiveTracedText",
+                            "elementDefault": None,
+                            "optionValue": self.agentBreakdownChancePerStepValue,
+                            "gridLoc": "auto",
+                            "elementData": [
+                                {"formula": "(1-(1-float(currentValue)/100000)**5)*100",
+                                 "string": ["f\"The odds of an incident occurring in 5 steps is {calcValue:3.5f}%\""]},
+                                {"formula": "(1-(1-float(currentValue)/100000)**20)*100",
+                                 "string": ["f\"The odds of an incident occurring in 20 steps is {calcValue:3.5f}%\""]},
+                                {"formula": "(1-(1-float(currentValue)/100000)**100)*100",
+                                 "string": ["f\"The odds of an incident occurring in 100 steps is {calcValue:3.5f}%\""]}
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "labelText": "Agent starting position determined by:",
+                "elementType": "optionMenu",
+                "elementDefault": "As given in Simulation Edit Window",
+                "optionValue": self.agentStartPosStyleValue,
+                "gridLoc": "auto",
+                "elementData": {
+                    "As given in Simulation Edit Window": None,
+                    "Home Tiles (automatic assignment)": None
+                }
+            },
+            {
+                "labelText": "Cost of agent rotations:",
+                "elementType": "optionMenu",
+                "elementDefault": "No cost for rotation",
+                "optionValue": self.agentMiscOptionRotateCostValue,
+                "gridLoc": "auto",
+                "elementData": {
+                    "No cost for rotation": None,
+                    "Rotation requires step": None
+                }
+            },
+            {
+                "labelText": "Cost of task interactions",
+                "elementType": "optionMenu",
+                "elementDefault": "No cost for pickup/dropoff",
+                "optionValue": self.agentMiscOptionTaskInteractCostValue,
+                "gridLoc": "auto",
+                "elementData": {
+                    "No cost for pickup/dropoff": None,
+                    "Pickup/dropoff require step": None
+                }
+            }
+        ]
+        # cwd = Path(__file__).parent
+        # filePath = (cwd / 'simmenuconfig.txt').resolve()
+        
+        # self.agentChargeOptionSet = eval(open(filePath, "r").read())
+        self.agentChargeOptionSetUI = tk_e.ConfigOptionSet(self.agentConfigurationFrame)
+        self.agentChargeOptionSetUI.buildOutOptionSetUI(self.agentOptionSet)
+        self.agentChargeOptionSetUI.configure(highlightbackground="black", highlightthickness=1)
+        self.buildAgentConfigPage()
+        
+    def buildAgentConfigPage(self):
         # Intermediate function grouping together declarations and renders for the agent configuration page
-        self.agentChargeOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        self.agentChargeOptionFrame.grid(row=0, column=0, sticky=tk.W)
-        self.buildAgentChargeOptions()
-        self.populateAgentChargeOptions()
-        self.renderAgentChargeOptions()
-        # self.agentTypeOptionFrame = tk.Frame(self.agentConfigurationFrame)
-        # self.agentTypeOptionFrame.grid(row=0, column=0)
-        # self.buildAgentTypeOptions(self.agentTypeOptionFrame)
+        self.agentTypeOptionFrame = tk.Frame(self.agentConfigurationFrame)
+        self.agentTypeOptionFrame.grid(row=0, column=0)
+        self.buildAgentTypeOptions(self.agentTypeOptionFrame)
         self.agentBreakdownOptionFrame = tk.Frame(self.agentConfigurationFrame)
         self.agentBreakdownOptionFrame.grid(row=1, column=0, sticky=tk.W)
         self.buildAgentBreakdownOptions(self.agentBreakdownOptionFrame)
@@ -166,7 +365,7 @@ class simulationConfigManager(tk.Toplevel):
         # Create a label
         self.agentChargeOptionLabel = tk.Label(self.agentChargeOptionFrame)
 
-        # Create an optionmenu and the variable holding the selection
+        # Create an optionmenu
         self.agentChargeOptionValue = tk.StringVar()
         self.agentChargeOptionMenu = tk.OptionMenu(self.agentChargeOptionFrame, self.agentChargeOptionValue, "temp")
 

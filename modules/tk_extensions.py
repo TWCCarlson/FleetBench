@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter.constants import *
+from tkinter import font as tkfont
+import pprint
+pp = pprint.PrettyPrinter(indent=1)
 
 class agentTreeViewMenu(tk.Menu):
     """
@@ -101,3 +104,173 @@ class VerticalScrolledFrame(ttk.Frame):
 
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+class ConfigOptionSet(tk.Frame):
+    """
+        UI Element builder
+        Always creates a label - element pair
+        Currently the elements available are:
+            - tk.OptionMenu
+            - ttk.Spinbox (numeric, validated)
+        Unless a specific row-column tuple is given, tacks the entry onto the next row
+    """
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent)
+        self.parent = parent
+        self.childElements = {}
+
+        # Place this containing frame
+        parentGridSize = parent.grid_size()   # (Column, row) tuple
+        if isinstance(parent, ConfigOption):
+            self.grid(row=0, column=parentGridSize[0], sticky=tk.W)
+        else:
+            self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
+
+    def buildOutOptionSetUI(self, uiDefineDict):
+        for element in uiDefineDict:
+            self.childElements[element["labelText"][:-1]] = ConfigOption(self, element)
+        
+class ConfigOption(tk.Frame):
+    """
+        UI Element builder
+        Always creates a label - element pair
+        Currently the elements available are:
+            - tk.OptionMenu
+            - ttk.Spinbox (numeric, validated)
+        Unless a specific row-column tuple is given, tacks the entry onto the next row
+    """
+    def __init__(self, parent, elementData, **kwargs):
+        super().__init__(parent)
+        self.parent = parent
+        self.configure(highlightthickness=1, highlightbackground="red")
+
+        # Place this containing frame
+        parentGridSize = parent.grid_size()   # (Column, row) tuple
+        if isinstance(parent, ConfigOptionSet):
+            self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
+        else:
+            self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
+
+        type = elementData["elementType"]
+        if type == "optionMenu" or type == "numericSpinbox":
+            self._addUIElements(elementData=elementData)
+        elif type == "descriptiveTracedText" or type=="descriptiveText":
+            self._addCustomText(elementData=elementData)
+
+    def _addCustomText(self, elementData):
+        pp.pprint(elementData)
+
+        if elementData["elementType"] == "descriptiveTracedText":
+            # Create the label to contain text
+            self.descriptiveText = tk.Text(self, fg="black", bg="SystemButtonFace", bd=0, font=(tkfont.nametofont("TkDefaultFont")))
+            self.descriptiveText.configure(state=tk.DISABLED, height=0)
+            self.descriptiveText.grid(row=0, column=0)
+
+            # Trace the target variable
+            optionValue = elementData["optionValue"]
+            elementData["optionValue"].trace_add("write", lambda *args, currentValue=optionValue, elementData=elementData: self._updateDescriptiveTracedText(elementData, currentValue.get()))
+
+    def _updateDescriptiveTracedText(self, elementData, currentValue):
+        # Enable editing the text field
+        self.descriptiveText.configure(state=tk.NORMAL)
+
+        # Clear the text
+        self.descriptiveText.delete('1.0', tk.END)
+
+        for lineOfText in elementData["elementData"]:
+            # Fetch formula and calculate
+            calcValue = eval(lineOfText["formula"])
+            
+            # Insert text to descriptiveText
+            self.descriptiveText.insert(tk.END, eval(lineOfText["string"][0]) + "\n")
+
+        self.descriptiveText.configure(state=tk.DISABLED, height=len(elementData["elementData"]))
+
+    def _addUIElements(self, elementData):
+        # Always create a label
+        labelWidget = self._addLabel(elementData=elementData)
+
+        # Identify the target row/column
+        gridLoc = self._findNextWidgetLoc()
+
+        # Render the elements
+        labelWidget.grid(row=gridLoc[1], column=0)
+
+        # Check the requested element type
+        if elementData["elementType"] == "optionMenu":
+            inputWidget = self._addOptionMenu(elementData=elementData)
+            inputWidget.grid(row=gridLoc[0], column=1)
+            self._traceOptionMenu(elementData=elementData)
+            # Set the default value
+            elementData["optionValue"].set(list(elementData["elementData"].keys())[0])
+        elif elementData["elementType"] == "numericSpinbox":
+            inputWidget = self._addNumericSpinbox(elementData=elementData)
+            inputWidget.grid(row=gridLoc[0], column=1)
+
+    def _addLabel(self, elementData):
+        # Build the label
+        self.labelWidget = tk.Label(self, text=elementData["labelText"])
+        return self.labelWidget
+
+    def _addOptionMenu(self, elementData):
+        # Build the menu
+        self.menuWidget = tk.OptionMenu(self, elementData["optionValue"], *list(elementData["elementData"].keys()))
+        return self.menuWidget
+
+    def _traceOptionMenu(self, elementData):
+        # Reference to the optionMenu control variable
+        optionValue = elementData["optionValue"]
+        optionValue.trace_add("write", lambda *args, menuChoice=optionValue, elementData=elementData: self._doUIChange(elementData=elementData, menuChoice=menuChoice.get()))
+
+    def _doUIChange(self, elementData, menuChoice):
+        self._clearSubframes()
+
+        if elementData["elementData"][menuChoice] == None:
+            return
+        # elif 
+        
+        tempRef = ConfigOptionSet(self)
+        tempRef.buildOutOptionSetUI(elementData["elementData"][menuChoice])
+        setattr(self, menuChoice, tempRef)
+        
+    def _clearSubframes(self):
+        # Destroy all widgets inside child frames of the passed frames, and the child frames themselves
+        # Find all child widgets
+        for widget in self.winfo_children():
+            # Identify which ones are frames
+            if isinstance(widget, tk.Frame):
+                # Destroy the frame—all children are also automatically destroyed
+                # https://www.tcl.tk/man/tcl8.6/TkCmd/destroy.html
+                # "This command deletes the windows given by the window arguments, plus all of their descendants."
+                widget.destroy()
+
+    def _addNumericSpinbox(self, elementData):
+        # Get spinbox range, increment
+        spinboxMin = elementData["elementData"][0]
+        spinboxMax = elementData["elementData"][1]
+        spinboxInc = elementData["elementData"][2]
+
+        # Create the validating function registry
+        self.validateNumericSpinboxFunc = self.register(self._validateNumericSpinbox)
+
+        # Build the spinbox
+        self.spinboxWidget = ttk.Spinbox(self,
+            width=6, from_=spinboxMin, to=spinboxMax, increment=spinboxInc,
+            textvariable=elementData["optionValue"], validate='key',
+            validatecommand=(self.validateNumericSpinboxFunc, '%P'))
+        return self.spinboxWidget
+
+    def _validateNumericSpinbox(self, inputString):
+        if inputString.isnumeric():
+            # Only allow numeric characters
+            return True
+        elif len(inputString) == 0:
+            # Or an empty box
+            return True
+        else:
+            return False
+
+    def _findNextWidgetLoc(self):
+        # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found
+        gridLoc = self.grid_size()
+        return gridLoc
