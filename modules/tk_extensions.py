@@ -142,7 +142,6 @@ class ConfigOption(tk.Frame):
     def __init__(self, parent, elementData, **kwargs):
         super().__init__(parent)
         self.parent = parent
-        self.configure(highlightthickness=1, highlightbackground="red")
 
         # Place this containing frame
         parentGridSize = parent.grid_size()   # (Column, row) tuple
