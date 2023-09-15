@@ -1,6 +1,7 @@
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import logging
+import tkinter as tk
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -10,6 +11,14 @@ class simProcessor:
         # Default values
         self.simulationStepCount = 0
 
+        # Acquire state information references
+        self.simGraphDataRef = self.parent.simGraphData
+        self.simAgentManagerRef = self.parent.simAgentManager
+        self.simTaskManagerRef = self.parent.simTaskManager
+        self.simConfigRef = self.parent.parent.parent.simulationConfigWindow
+
+        pp.pprint(self.simConfigRef)
+
     def simulationUpdateTick(self):
         frameDelay = self.simulationSettings['playbackFrameDelay']
         if frameDelay == "":
@@ -17,8 +26,13 @@ class simProcessor:
             frameDelay = 1000
             
         logging.debug(f"User triggered simulationUpdateTick with rate: {frameDelay}ms")
-        self.simulateStep()
-        self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, self.simulationUpdateTick)
+        try:
+            self.simulateStep()
+            self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, self.simulationUpdateTick)
+        except tk.TclError as e:
+            logging.warning(f"Simulation Window was destroyed. Timer cannot execute next simulation step.")
+
+        
         print(self.simulationUpdateTimer)
 
     def simulationStopTicking(self):
@@ -36,6 +50,20 @@ class simProcessor:
             Render the new state
             - Update statistics
         """
+        ### Generate new tasks
+        ### Calculate/execute agent moves
+            # Charge expenditures
+            # Agent states/goals update
+        ### Execute task interactions if applicable
+        ### Verify task states
+
+        
+
+        # Generate new tasks, conditionally
+
+
+
+
         algorithmSelection = self.getSelectedSimulationAlgorithm()
 
         algorithmDict = {

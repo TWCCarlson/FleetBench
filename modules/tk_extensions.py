@@ -151,7 +151,7 @@ class ConfigOption(tk.Frame):
             self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
 
         type = elementData["elementType"]
-        if type == "optionMenu" or type == "numericSpinbox":
+        if type == "optionMenu" or type == "numericSpinbox" or type == "checkButton":
             self._addUIElements(elementData=elementData)
         elif type == "descriptiveTracedText" or type=="descriptiveText":
             self._addCustomText(elementData=elementData)
@@ -205,6 +205,9 @@ class ConfigOption(tk.Frame):
         elif elementData["elementType"] == "numericSpinbox":
             inputWidget = self._addNumericSpinbox(elementData=elementData)
             inputWidget.grid(row=gridLoc[0], column=1)
+        elif elementData["elementType"] == "checkButton":
+            inputWidget = self._addCheckButton(elementData=elementData)
+            inputWidget.grid(row=gridLoc[0], column=1)
 
     def _addLabel(self, elementData):
         # Build the label
@@ -257,6 +260,10 @@ class ConfigOption(tk.Frame):
             width=6, from_=spinboxMin, to=spinboxMax, increment=spinboxInc,
             textvariable=elementData["optionValue"], validate='key',
             validatecommand=(self.validateNumericSpinboxFunc, '%P'))
+        
+        # Set the default value
+        elementData["optionValue"].set("" if elementData["elementDefault"] == None else elementData["elementDefault"])
+
         return self.spinboxWidget
 
     def _validateNumericSpinbox(self, inputString):
@@ -268,6 +275,15 @@ class ConfigOption(tk.Frame):
             return True
         else:
             return False
+
+    def _addCheckButton(self, elementData):
+        # Build the checkbutton widget
+        pp.pprint(elementData)
+        self.checkButtonWidget = tk.Checkbutton(self, variable=elementData["optionValue"])
+
+        # Assign a default value
+        elementData["optionValue"].set(elementData["elementDefault"])
+        return self.checkButtonWidget
 
     def _findNextWidgetLoc(self):
         # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found

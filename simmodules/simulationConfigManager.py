@@ -168,8 +168,9 @@ class simulationConfigManager(tk.Toplevel):
         self.agentMiscOptionTaskInteractCostValue = tk.StringVar()
         
         # UI Definition Dict
+        # Sorcery
         cwd = Path(__file__).parent
-        filePath = (cwd / 'simmenuconfig.txt').resolve()
+        filePath = (cwd / 'simagentmenuconfig.txt').resolve()
         self.agentOptionSet = eval(open(filePath, "r").read())
 
         # Build option menu from config file
@@ -607,59 +608,30 @@ class simulationConfigManager(tk.Toplevel):
             nodeTick.grid(row=index, column=1, sticky=tk.W)
 
     def buildDisplayOptionsPage(self):
-        # Intermediate function grouping together declarations and renders for the display options page
-        self.displayPlaybackOptionsFrame = tk.Frame(self.displayOptionsFrame)
-        self.displayPlaybackOptionsFrame.grid(row=0, column=0, sticky=tk.W)
-        self.buildDisplayPlaybackOptions()
-        self.populateDisplayPlaybackOptions()
-        self.renderDisplayPlaybackOptions()
 
-    def buildDisplayPlaybackOptions(self):
-        # Build widgets relating to displaying the simulation state during playback
-        # Headless mode setting label
-        self.displayHeadlessPlaybackLabel = tk.Label(self.displayPlaybackOptionsFrame)
-
-        # Headless mode setting checkbutton
         self.displayHeadlessPlaybackValue = tk.IntVar()
-        self.displayHeadlessPlaybackValue.set(1)
-        self.displayHeadlessPlaybackCheckbutton = tk.Checkbutton(self.displayPlaybackOptionsFrame,
-            variable=self.displayHeadlessPlaybackValue)
-
-        # Framerate setting label
-        self.frameDelayLabel = tk.Label(self.displayPlaybackOptionsFrame)
-
-        # Framerate setting numeric spinbox
         self.frameDelayValue = tk.StringVar()
-        self.validateFrameDelayEntry = self.register(self.validateNumericSpinbox)
-        # Create a spinbox with entry for millisecond time between frame updates of the canvas while the play button is depressed
-        self.frameDelayEntry = ttk.Spinbox(self.displayPlaybackOptionsFrame,
-            width=6,
-            from_=0,
-            to=100000,
-            increment=50,
-            textvariable=self.frameDelayValue,
-            # command=self.commandTaskTimeLimit,
-            validate='key',
-            validatecommand=(self.validateFrameDelayEntry, '%P')
-        )
-        logging.debug("Simulation playback frame delay spinbox built.")
 
-    def populateDisplayPlaybackOptions(self):
-        # Set headless mode label text
-        self.displayHeadlessPlaybackLabel.configure(text="Headless Mode")
-
-        # Set framerate spinbox label
-        self.frameDelayLabel.configure(text="Frame Delay (ms):")
-        
-        # Set the default framerate setting value
-        self.frameDelayValue.set(1000)
-
-    def renderDisplayPlaybackOptions(self):
-        # Render components
-        self.displayHeadlessPlaybackLabel.grid(row=0, column=0, sticky=tk.W)
-        self.displayHeadlessPlaybackCheckbutton.grid(row=0, column=1, sticky=tk.W)
-        self.frameDelayLabel.grid(row=1, column=0, sticky=tk.W)
-        self.frameDelayEntry.grid(row=1, column=1, sticky=tk.W)
+        self.displayOptionSet = [
+            {
+                "labelText": "Headless Mode:",
+                "elementType": "checkButton",
+                "elementDefault": 0,
+                "optionValue": self.displayHeadlessPlaybackValue,
+                "gridLoc": "auto",
+                "elementData": None
+            },
+            {
+                "labelText": "Sim. Framerate (ms):",
+                "elementType": "numericSpinbox",
+                "elementDefault": 1000,
+                "optionValue": self.frameDelayValue,
+                "gridLoc": "auto",
+                "elementData": (300, 100000, 50)
+            }
+        ]
+        self.displayOptionSetUI = tk_e.ConfigOptionSet(self.displayOptionsFrame)
+        self.displayOptionSetUI.buildOutOptionSetUI(self.displayOptionSet)
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
@@ -732,9 +704,9 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
 
         ### Agent Configuration Options
-        dataPackage["agentChargeLimitation"] = self.agentChargeOptionValue.get()
+        # dataPackage["agentChargeLimitation"] = self.agentChargeOptionValue.get()
         dataPackage["agentBreakdownStyle"] = self.agentBreakdownOptionValue.get()
-        dataPackage["agentBreakdownHandlingStyle"] = self.agentBreakdownHandlingOptionValue.get()
+        # dataPackage["agentBreakdownHandlingStyle"] = self.agentBreakdownHandlingOptionValue.get()
         dataPackage["agentStartPositionStyle"] = self.agentStartPosStyleValue.get()
         dataPackage["agentRotationCost"] = self.agentMiscOptionRotateCostValue.get()
         dataPackage["agentTaskActionCost"] = self.agentMiscOptionTaskInteractCostValue.get()
