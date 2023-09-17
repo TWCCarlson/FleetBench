@@ -151,6 +151,13 @@ class simProcessor:
 
                     # Highlight the task during the wait period
                     self.simTaskManagerRef.taskList[newTaskID].highlightTask(multi=False)
+
+                if self.algorithmType == "sapf":
+                    # Only do this for one agent
+                    break
+                elif self.algorithmType == "mapf":
+                    # Do this for all agents
+                    continue
         elif generationStyle == "Fixed Rate":
             # Unimplemented
             pass
