@@ -49,7 +49,7 @@
     Method 2 ===
     When a path is needed,
         Remove edges connecting blocked nodes to the graph
-        Search for a path with A*
+        Search for a path with A*   
 
     Determine which is faster to save on simulation time.
 - task generation descriptive text for auto options could be text instead of label, for wrapping dynamically
@@ -57,6 +57,7 @@
 - task generation pane should have object instantiation decouple from attribute population to decrease hacky interreliance solutions like hasttr() and try:
 - ui can be made more adaptive with .grid_info(), so that new widgets are always placed at edges of the frame
 - may need an integer spinbox for extra restriction on numeric spinbox (agent charge costs)
+- task generation should allow assignment and intermediate state setting to an agent in the editor mode
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores

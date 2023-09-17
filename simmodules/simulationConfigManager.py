@@ -111,13 +111,13 @@ class simulationConfigManager(tk.Toplevel):
     def createAlgorithmOptions(self):
         # Creates a drop down menu for the user to select the driving algorithm for the simulation
         # Using types to separate multi-agent and single-agent pathfinding algorithms
-        optionTypeDict = {
+        self.algorithmOptionTypeDict = {
             "Dummy": "mapf",
             "Single-agent A*": "sapf"
         }
 
         # Keys of the dict are the displayed options
-        algorithmOptions = list(optionTypeDict.keys())
+        algorithmOptions = list(self.algorithmOptionTypeDict.keys())
 
         # Stringvar to hold the algorithm selection
         self.algorithmSelectionStringVar = tk.StringVar()
@@ -129,7 +129,7 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
 
         # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
-        for algorithm, type in optionTypeDict.items():
+        for algorithm, type in self.algorithmOptionTypeDict.items():
             if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
                 self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
 
@@ -702,14 +702,33 @@ class simulationConfigManager(tk.Toplevel):
         # Needs work for handling branched options (nested)
         ### Algorithm Options
         dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
+        dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmSelectionStringVar.get()]
+        
+        # Agent Configuration Options
+        ### Limited Charge
+        dataPackage["agentChargeLimitationValue"] = self.agentChargeLimitationValue.get()
+        dataPackage["agentLimitedChargeCostStyleValue"] = self.agentLimitedChargeCostStyleValue.get()
+        dataPackage["agentLimitedChargeCapacityValue"] = self.agentLimitedChargeCapacityValue.get()
+        dataPackage["agentLimitedChargeStepCostValue"] = self.agentLimitedChargeStepCostValue.get()
+        dataPackage["agentLimitedChargeActionCostValue"] = self.agentLimitedChargeActionCostValue.get()
+        dataPackage["agentLimitedChargeMovementCostValue"] = self.agentLimitedChargeMovementCostValue.get()
+        dataPackage["agentLimitedChargePickupCostValue"] = self.agentLimitedChargePickupCostValue.get()
+        dataPackage["agentLimitedChargeDropoffCostValue"] = self.agentLimitedChargeDropoffCostValue.get()
 
-        ### Agent Configuration Options
-        # dataPackage["agentChargeLimitation"] = self.agentChargeOptionValue.get()
-        dataPackage["agentBreakdownStyle"] = self.agentBreakdownOptionValue.get()
-        # dataPackage["agentBreakdownHandlingStyle"] = self.agentBreakdownHandlingOptionValue.get()
-        dataPackage["agentStartPositionStyle"] = self.agentStartPosStyleValue.get()
-        dataPackage["agentRotationCost"] = self.agentMiscOptionRotateCostValue.get()
-        dataPackage["agentTaskActionCost"] = self.agentMiscOptionTaskInteractCostValue.get()
+        ### Breakdowns
+        dataPackage["agentBreakdownOptionValue"] = self.agentBreakdownOptionValue.get()
+        dataPackage["agentBreakdownFixedRateValue"] = self.agentBreakdownFixedRateValue.get()
+        dataPackage["agentBreakdownChancePerStepValue"] = self.agentBreakdownChancePerStepValue.get()
+
+        ### Start position
+        dataPackage["agentStartPosStyleValue"] = self.agentStartPosStyleValue.get()
+
+        ### Movement Costs
+        dataPackage["agentMiscOptionRotateCostValu"] = self.agentMiscOptionRotateCostValue.get()
+
+        ### Interaction Costs
+        dataPackage["agentMiscOptionTaskInteractCostValue"] = self.agentMiscOptionTaskInteractCostValue.get()
+
 
         ### Task Generation Options
         dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()

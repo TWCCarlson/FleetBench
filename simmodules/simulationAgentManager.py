@@ -96,6 +96,7 @@ class simAgentClass:
         self.orientation = kwargs.get("orientation")
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
+        self.taskStatus = kwargs.get("taskStatus")
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
@@ -108,6 +109,7 @@ class simAgentClass:
             "S" : 2,
             "E" : 3
         }
+
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
         logging.debug(f"Agent '{self.ID}:{self.numID}' requests highlighting from 'mainCanvas'.")

@@ -122,6 +122,9 @@ class simCanvas(tk.Canvas):
 
         # Set default layer visibilities
         self.setAllLayersVisible()
+        
+        # Initialize highlight containers
+        self.images = {}
 
     def drawGridlines(self):
         # Drawn for every linewidth in appearanceValues

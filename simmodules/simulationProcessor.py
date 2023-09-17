@@ -2,14 +2,50 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import logging
 import tkinter as tk
+import time
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
         self.parent = parent
         self.simulationSettings = simulationSettings
 
+        # Map states to actions
+        self.simulationStateMachineMap = {
+            "start": {
+                "nextState": "resetIterables",
+                "exec": None
+            },
+            "resetIterables": {
+                "nextState": "taskGeneration",
+                "exec": self.resetIterables
+            },
+            "taskGeneration": {
+                "nextState": "selectAgent",
+                "exec": self.taskGeneration
+            },
+            "selectAgent": {
+                "nextState": "movementExecute",
+                "exec": self.selectAgent
+            },
+            "movementExecute": {
+                "nextState": "renderState",
+                "exec": self.moveAgent
+            },
+            "renderState": {
+                "nextState": "incrementStepCounter",
+                "exec": self.renderGraphState
+            },
+            "incrementStepCounter": {
+                "nextState": "taskGeneration",
+                "exec": self.incrementStepCounter
+            }
+        }
+
         # Default values
         self.simulationStepCount = 0
+        self.simulationStateID = "resetIterables"
+        self.requestedStateID = None
+        self.agentGenerator = None
 
         # Acquire state information references
         self.simGraphDataRef = self.parent.simGraphData
@@ -17,39 +53,47 @@ class simProcessor:
         self.simTaskManagerRef = self.parent.simTaskManager
         self.simConfigRef = self.parent.parent.parent.simulationConfigWindow
 
-        pp.pprint(self.simConfigRef)
+        # Acquire algorithm setting
+        self.algorithmSelection, self.algorithmType = self.getSelectedSimulationAlgorithm()
 
-    def simulationUpdateTick(self):
-        frameDelay = self.simulationSettings['playbackFrameDelay']
-        if frameDelay == "":
-            # Use the default value
-            frameDelay = 1000
-            
-        logging.debug(f"User triggered simulationUpdateTick with rate: {frameDelay}ms")
-        try:
-            self.simulateStep()
-            self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, self.simulationUpdateTick)
-        except tk.TclError as e:
-            logging.warning(f"Simulation Window was destroyed. Timer cannot execute next simulation step.")
+        # Map options to functions
+        algorithmDict = {
+            "Dummy": self.algorithmDummy,
+            "Single-agent A*": self.algorithmSingleAgentAStar
+        }
 
-        
-        print(self.simulationUpdateTimer)
+        # Call option's function
+        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection]
 
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
 
-    def simulateStep(self):
+    def simulateStep(self, stateID):
         """
-            Check for selected algorithm
-            Feed algorithm all the simulation state information
-            - Iterate over agents, top->bottom? bottom->top? some kind of adaptive technique? short distances to go first? long first?
-            Collect algorithm Orders
-            Validate any interactions
-            - Pickup, dropoff, resting, task completion
-            Record the history for replay
-            Render the new state
-            - Update statistics
+            FSM:
+                Check for selected algorithm
+                Feed algorithm all the simulation state information
+                - Iterate over agents, top->bottom? bottom->top? some kind of adaptive technique? short distances to go first? long first?
+                Collect algorithm Orders
+                Validate any interactions
+                - Pickup, dropoff, resting, task completion
+                Record the history for replay
+                Render the new state
+                - Update statistics
         """
+        
+        # Take actions
+        self.simulationStateMachineMap[stateID]["exec"]()
+
+        # Trigger the next state machine update
+        if self.requestedStateID == None:
+            nextStateID = self.simulationStateMachineMap[stateID]["nextState"]
+        else:
+            nextStateID = self.requestedStateID
+            self.requestedStateID = None
+
+        self.simulationStateID = nextStateID
+        self.simulationStateMachineNextStep(nextStateID)
         ### Generate new tasks
         ### Calculate/execute agent moves
             # Charge expenditures
@@ -57,32 +101,72 @@ class simProcessor:
         ### Execute task interactions if applicable
         ### Verify task states
 
-        
+    def simulationStateMachineNextStep(self, stateID=None):
+        # Call the state machine to evaluate the next state
+        frameDelay = self.simulationSettings['playbackFrameDelay']
+        if frameDelay == "":
+            # Use the default value
+            frameDelay = 1000
 
-        # Generate new tasks, conditionally
+        # If a specific state is called for, use it
+        if stateID == None:
+            # Else, use the stored state value
+            stateID = self.simulationStateID
 
+        # Trigger state machine update
+        self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, 
+            lambda stateID=stateID: self.simulateStep(stateID))
 
+    def resetIterables(self):
+        # Certain objects need to be reset on new steps
+        # These objects cause loopbacks in the FSM
 
+        # Looping over every agent
+        self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
 
-        algorithmSelection = self.getSelectedSimulationAlgorithm()
+    def taskGeneration(self):
+        print("taskGen")
 
-        algorithmDict = {
-            "Dummy": self.algorithmDummy,
-            "Single-agent A*": self.algorithmSingleAgentAStar
-        }
-        algorithmDict[algorithmSelection]()
-    
-        # pp.pprint(simGraphData.simMapGraph.nodes(data=True))
-
+    def renderGraphState(self):
+        print("re-render")
         self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
 
+    def incrementStepCounter(self):
+        print("incrementStepCounter")
+
+    def selectAgent(self):
+        print("highlight agent")
+        if self.algorithmType == "sapf":
+            # Single-agent pathfinding methods
+            # Only use the first agent in the list, user error if multiple agents
+            self.currentAgent = self.simAgentManagerRef.agentList[0]
+        elif self.algorithmType == "mapf":
+            # agentGenerator acts as a queue for what agents still need to be moved
+            try:
+                self.currentAgent = next(self.agentGenerator)
+                self.requestedStateID = "selectAgent"
+            except StopIteration:
+                # No more agents in the queue
+                return   
+            else:
+                logging.error("Algorithm type is not SAPF/MAPF")
+                raise Exception("Algorithm type is not SAPF/MAPF")
+        
+        # Highlight the agent
+        self.currentAgent.highlightAgent(multi=False)
+        
+    def moveAgent(self):
+        print("agentAction")
+        self.agentActionAlgorithm()
+    
     def getSelectedSimulationAlgorithm(self):
         logging.info(f"Advancing the simulation step to: {self.simulationStepCount+1}.")
         # Check what the currently in use algorithm is
         algorithmSelection = self.simulationSettings["algorithmSelection"]
+        algorithmType = self.simulationSettings["algorithmType"]
         logging.debug(f"Next step started with algorithm: {algorithmSelection}")
-        return algorithmSelection
-    
+        return algorithmSelection, algorithmType
+
     def algorithmDummy(self):
         """
             Temporary algorithm that just moves agents directly upward
@@ -107,6 +191,7 @@ class simProcessor:
             validMove = simAgentManager.agentList[agent].validateCandidateMove(agentTargetNode)
             if validMove:
                 simAgentManager.agentList[agent].executeMove(agentTargetNode)
+                simAgentManager.agentList[agent].highlightAgent(multi=False)
             else:
                 logging.error(f"'{agentTargetNode}' is not a valid node for movement.")
 
@@ -116,23 +201,16 @@ class simProcessor:
             Set up to use the first agent in the agent list, so that other agents can act as blockers
             Useful as a way to find the shortest current path
         """
-        # Acquire state information references
-        simGraphData = self.parent.simGraphData
-        simAgentManager = self.parent.simAgentManager
-        simTaskManager = self.parent.simTaskManager
-
-        # Grab the first agent in the agent list
-        agent = simAgentManager.agentList[0]
-        
-        # Assume it has a task for now
-        agentTask = agent.currentTask
+        # If the agent has a task, move it toward the task
+        if not self.currentAgent.currentTask == None:
+            agentTask = self.currentAgent.currentTask
         agentTargetNode = agentTask.pickupNode
         
         # Take a step toward the task if not already there
-        if agent.currentNode != agentTargetNode:
-            bestAStarPathLength = agent.calculateAStarBestPath(agentTargetNode)
-            bestPathsList = agent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
-            currentNodeListIndex = bestPathsList[0].index(agent.currentNode)
+        if self.currentAgent.currentNode != agentTargetNode:
+            bestAStarPathLength = self.currentAgent.calculateAStarBestPath(agentTargetNode)
+            bestPathsList = self.currentAgent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
+            currentNodeListIndex = bestPathsList[0].index(self.currentAgent.currentNode)
             nextNodeInList = bestPathsList[0][currentNodeListIndex+1]
-            if agent.validateCandidateMove(nextNodeInList):
-                agent.executeMove(nextNodeInList)
+            if self.currentAgent.validateCandidateMove(nextNodeInList):
+                self.currentAgent.executeMove(nextNodeInList)

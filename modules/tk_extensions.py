@@ -157,8 +157,6 @@ class ConfigOption(tk.Frame):
             self._addCustomText(elementData=elementData)
 
     def _addCustomText(self, elementData):
-        pp.pprint(elementData)
-
         if elementData["elementType"] == "descriptiveTracedText":
             # Create the label to contain text
             self.descriptiveText = tk.Text(self, fg="black", bg="SystemButtonFace", bd=0, font=(tkfont.nametofont("TkDefaultFont")))
@@ -278,7 +276,6 @@ class ConfigOption(tk.Frame):
 
     def _addCheckButton(self, elementData):
         # Build the checkbutton widget
-        pp.pprint(elementData)
         self.checkButtonWidget = tk.Checkbutton(self, variable=elementData["optionValue"])
 
         # Assign a default value

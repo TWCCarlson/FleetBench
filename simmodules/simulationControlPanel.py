@@ -103,7 +103,7 @@ class simControlPanel(tk.Frame):
             # Disable the other buttons
             self.disableOtherPlaybackControls(self.toggleSimulationRunButton)
             # Start the updating ticking process
-            self.simulationProcess.simProcessor.simulationUpdateTick()
+            self.simulationProcess.simProcessor.simulationStateMachineNextStep()
         elif self.toggleSimulationRunButton['relief'] == tk.SUNKEN:
             logging.debug("Play button released. Pausing playback.")
             # Set the button to have the appearance of being released
