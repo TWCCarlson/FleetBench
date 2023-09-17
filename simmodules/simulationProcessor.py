@@ -13,31 +13,38 @@ class simProcessor:
         self.simulationStateMachineMap = {
             "start": {
                 "nextState": "resetIterables",
-                "exec": None
+                "exec": None,
+                "stateLabel": "Preparing . . ."
             },
             "resetIterables": {
                 "nextState": "taskGeneration",
-                "exec": self.resetIterables
+                "exec": self.resetIterables,
+                "stateLabel": "Preparing Next Step"
             },
             "taskGeneration": {
                 "nextState": "selectAgent",
-                "exec": self.taskGeneration
+                "exec": self.taskGeneration,
+                "stateLabel": "Generating Tasks"
             },
             "selectAgent": {
                 "nextState": "movementExecute",
-                "exec": self.selectAgent
+                "exec": self.selectAgent,
+                "stateLabel": "Selecting Next Agent"
             },
             "movementExecute": {
                 "nextState": "renderState",
-                "exec": self.executeAgentAction
+                "exec": self.executeAgentAction,
+                "stateLabel": "Agent Acting"
             },
             "renderState": {
                 "nextState": "incrementStepCounter",
-                "exec": self.renderGraphState
+                "exec": self.renderGraphState,
+                "stateLabel": "Updating Canvas View"
             },
             "incrementStepCounter": {
                 "nextState": "taskGeneration",
-                "exec": self.incrementStepCounter
+                "exec": self.incrementStepCounter,
+                "stateLabel": "Finish Current Step"
             }
         }
 
@@ -82,6 +89,10 @@ class simProcessor:
                 - Update statistics
         """
         
+        # Update step display label
+        targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepTextValue
+        targetLabelText.set(self.simulationStateMachineMap[stateID]["stateLabel"])
+
         # Take actions
         self.simulationStateMachineMap[stateID]["exec"]()
 

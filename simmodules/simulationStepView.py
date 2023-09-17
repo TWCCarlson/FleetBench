@@ -32,7 +32,7 @@ class simStepView(tk.Frame):
         # Header text is static
         self.headerText = tk.Label(self, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"),
             text="Simulation Step")
-        self.headerText.grid(row=0, column=0)
+        self.headerText.grid(row=0, column=0, sticky=tk.W)
 
         # Descriptive text is dynamic, needs a stringVar
         self.simStepTextValue = tk.StringVar(value="Waiting . . .")
