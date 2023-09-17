@@ -125,17 +125,15 @@ class simProcessor:
         self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
 
     def taskGeneration(self):
-        print("taskGen")
+        pass
 
     def renderGraphState(self):
-        print("re-render")
         self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
 
     def incrementStepCounter(self):
-        print("incrementStepCounter")
+        pass
 
     def selectAgent(self):
-        print("highlight agent")
         if self.algorithmType == "sapf":
             # Single-agent pathfinding methods
             # Only use the first agent in the list, user error if multiple agents
@@ -156,7 +154,6 @@ class simProcessor:
         self.currentAgent.highlightAgent(multi=False)
         
     def moveAgent(self):
-        print("agentAction")
         self.agentActionAlgorithm()
     
     def getSelectedSimulationAlgorithm(self):
@@ -201,16 +198,25 @@ class simProcessor:
             Set up to use the first agent in the agent list, so that other agents can act as blockers
             Useful as a way to find the shortest current path
         """
-        # If the agent has a task, move it toward the task
-        if not self.currentAgent.currentTask == None:
-            agentTask = self.currentAgent.currentTask
-        agentTargetNode = agentTask.pickupNode
+        # If the agent has a task, move it toward completing the task
+        if self.currentAgent.currentTask == None:
+            # If not, do nothing
+            return
+        
+        agentTargetNode = self.currentAgent.returnTargetNode()
         
         # Take a step toward the task if not already there
-        if self.currentAgent.currentNode != agentTargetNode:
+        if self.currentAgent.currentNode == agentTargetNode:
+            self.currentAgent.taskInteraction(agentTargetNode)
+        elif self.currentAgent.currentNode != agentTargetNode:
+            # Find the best path length
             bestAStarPathLength = self.currentAgent.calculateAStarBestPath(agentTargetNode)
+            # Find the list of best paths sharingf that length
             bestPathsList = self.currentAgent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
+            # Use the first path in the list for now, and 
             currentNodeListIndex = bestPathsList[0].index(self.currentAgent.currentNode)
+            # Fetch the next node to move to
             nextNodeInList = bestPathsList[0][currentNodeListIndex+1]
             if self.currentAgent.validateCandidateMove(nextNodeInList):
+                # If it is a valid node, move there
                 self.currentAgent.executeMove(nextNodeInList)

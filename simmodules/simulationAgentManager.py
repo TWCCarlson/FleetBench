@@ -70,6 +70,7 @@ class simAgentManager:
             className = dataPackage[agent]["className"]
             if "currentTask" in dataPackage[agent]:
                 currentTask = dataPackage[agent]["currentTask"]
+                taskStatus = "retrieving"
             else:
                 currentTask = None
             self.createNewAgent(
@@ -77,7 +78,8 @@ class simAgentManager:
                 position=position, 
                 orientation=orientation, 
                 className=className,
-                currentTask=currentTask
+                currentTask=currentTask,
+                taskStatus=taskStatus
                 )
         logging.info("All agents ported from main session state into simulation state.")
 
@@ -109,6 +111,38 @@ class simAgentClass:
             "S" : 2,
             "E" : 3
         }
+
+        # Dict that maps agent status when task is assigned to target nodes
+        
+
+    def taskInteraction(self, targetNode):
+        # Called when the agent is sharing a node with its task target node
+        if self.currentNode == targetNode:
+            targetNodeIDDict = {
+                self.currentTask.pickupNode: "pickup",
+                self.currentTask.dropoffNode: "dropoff"
+            }
+            action = targetNodeIDDict[targetNode]
+
+            if action == "pickup":
+                # Update task status fields
+                self.taskStatus = "transporting"
+                self.currentTask.taskStatus = "traveling"
+            elif action == "dropoff":
+                self.taskStatus = "free"
+                self.currentTask.taskStatus = "completed"
+                self.currentTask = None
+            print(f"Task interaction: {action}")
+            print(f"New task status: {self.taskStatus}")
+
+    def returnTargetNode(self):
+        # Called to determine the target node for pathfinding, dependant on task status
+        taskStatusMapping = {
+            "retrieving": self.currentTask.pickupNode,
+            "transporting": self.currentTask.dropoffNode
+        }
+        targetNode = taskStatusMapping[self.taskStatus]
+        return targetNode
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas

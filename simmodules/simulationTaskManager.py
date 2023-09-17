@@ -86,6 +86,7 @@ class simTaskClass:
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.assignee = kwargs.get("assignee")
+        self.taskStatus = kwargs.get("taskStatus")
 
     def highlightTask(self, multi):
         # Hightlight the pickup position
