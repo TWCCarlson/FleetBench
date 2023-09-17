@@ -3,6 +3,7 @@ pp = pprint.PrettyPrinter(indent=4)
 import logging
 import tkinter as tk
 import time
+import random
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -136,7 +137,41 @@ class simProcessor:
         self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
 
     def taskGeneration(self):
-        pass
+        generationStyle = self.simulationSettings["taskGenerationFrequencyMethod"]
+        
+        if generationStyle == "As Available":
+            # Check if there are agents needing work
+            for agentID, agent in self.simAgentManagerRef.agentList.items():
+                if agent.taskStatus == self.simulationSettings["taskGenerationAsAvailableTrigger"]:
+                    # If agents share the triggering status, create a task and assign it
+                    newTaskID = self.generateTask()
+                    
+                    # Assign the task to the agent, and the agent to the task
+                    self.simTaskManagerRef.assignAgentToTask(newTaskID, agent)
+
+                    # Highlight the task during the wait period
+                    self.simTaskManagerRef.taskList[newTaskID].highlightTask(multi=False)
+        elif generationStyle == "Fixed Rate":
+            # Unimplemented
+            pass
+
+    def generateTask(self):
+        # Kwargs for generating a task
+        # Packaged taskData: {'name': 'task1', 'pickupPosition': (0, 1), 'dropoffPosition': (4, 8), 'timeLimit': 0, 'assignee': 0}
+        # name is optional, no need to generate one
+        pickupNodes = self.simulationSettings["taskNodeAvailableDict"]["pickup"]
+        dropoffNodes = self.simulationSettings["taskNodeAvailableDict"]["dropoff"]
+        
+        pickupNode = random.choice(list(pickupNodes.keys()))
+        dropoffNode = random.choice(list(dropoffNodes.keys()))
+        timeLimit = 0
+        assignee = None
+        taskStatus = "unassigned"
+
+        newTaskID = self.simTaskManagerRef.createNewTask(pickupNode=pickupNode, dropoffNode=dropoffNode,
+                        timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus)
+
+        return newTaskID
 
     def renderGraphState(self):
         self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()

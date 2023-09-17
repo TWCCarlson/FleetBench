@@ -125,18 +125,18 @@ class simAgentClass:
 
             if action == "pickup":
                 # Update task status fields
-                self.taskStatus = "transporting"
-                self.currentTask.taskStatus = "traveling"
+                self.taskStatus = "pickedUp"
+                self.currentTask.taskStatus = "pickedUp"
             elif action == "dropoff":
-                self.taskStatus = "free"
-                self.currentTask.taskStatus = "completed"
+                self.taskStatus = "droppedOff"
+                self.currentTask.taskStatus = "droppedOff"
                 self.currentTask = None
 
     def returnTargetNode(self):
         # Called to determine the target node for pathfinding, dependant on task status
         taskStatusMapping = {
             "retrieving": self.currentTask.pickupNode,
-            "transporting": self.currentTask.dropoffNode
+            "pickedUp": self.currentTask.dropoffNode
         }
         targetNode = taskStatusMapping[self.taskStatus]
         return targetNode

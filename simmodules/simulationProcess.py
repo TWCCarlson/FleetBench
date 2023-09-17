@@ -9,6 +9,8 @@ class simulationProcess():
     def __init__(self, parent, simulationSettings):
         self.parent = parent
 
+        # Build simulation RNG decider
+
         # Build simulation graph data store
         self.simGraphData = simGraphManager(self)
         logging.info("Simulation Info Class 'simGraphManager' instantiated successfully.")

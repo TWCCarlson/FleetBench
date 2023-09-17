@@ -178,6 +178,15 @@ class simulationConfigManager(tk.Toplevel):
         self.agentChargeOptionSetUI.buildOutOptionSetUI(self.agentOptionSet)
 
     def buildTaskGenerationPage(self):
+        # StringVars declared here for reference
+        self.taskFrequencySelectionStringvar = tk.StringVar()
+        self.taskFixedRateSelectionStringvar = tk.StringVar()
+        self.taskFixedRateCustomIntervalValue = tk.StringVar()
+        self.taskFixedRateCustomTasksPerIntervalValue = tk.StringVar()
+        self.taskFixedRateCustomTaskBatchingStrategyValue = tk.StringVar()
+        self.taskAsAvailableDelayValue = tk.StringVar()
+        self.taskAsAvailableTriggerStringvar = tk.StringVar()
+
         # Intermediate function grouping together declarations and renders for the task generation page
         self.taskGenerationRateFrame = tk.Frame(self.taskGenerationFrame)
         self.taskGenerationRateFrame.grid(row=0, column=0)
@@ -278,19 +287,16 @@ class simulationConfigManager(tk.Toplevel):
 
         # Creates a drop-down for task frequency type
         # Based on selection, creates options specific to the frequency type
-        self.taskFrequencyMethodOptionsLabel = tk.Label(self.taskFrequencyChoicesFrame, text="Task Gen. Freq.:")
+        self.taskFrequencyMethodOptionsLabel = tk.Label(self.taskFrequencyChoicesFrame, text="As Available:")
 
         # Dict pairing options and respective ui creation functions
         taskFrequencyMethodOptionsDict = {
-            "Fixed Rate": self.buildFixedRateTaskGenerationOptions,
+            # "Fixed Rate": self.buildFixedRateTaskGenerationOptions,
             "As Available": self.buildAsAvailableTaskGenerationOptions
         }
 
         # Menu options are the text in the dict keys
         taskFrequencyMethodMenuOptions = list(taskFrequencyMethodOptionsDict.keys())
-
-        # Stringvar to hold the option selection
-        self.taskFrequencySelectionStringvar = tk.StringVar()
 
         # Add a trace to the stringvar to call the associated UI function when the user makes a selection from the menu
         self.taskFrequencySelectionStringvar.trace_add("write", lambda *args, selection=self.taskFrequencySelectionStringvar, parentFrame=self.taskFrequencyChoicesFrame: taskFrequencyMethodOptionsDict[selection.get()](parentFrame))
@@ -328,9 +334,6 @@ class simulationConfigManager(tk.Toplevel):
         # Menu options are the text in the dict keys
         taskFixedRateMethodOptions = list(taskFixedRateMethodOptionsDict.keys())
 
-        # Stringvar to hold the option selection
-        self.taskFixedRateSelectionStringvar = tk.StringVar()
-
         # Add a trace to the stringvar to call the associated UI function when the user makes a selection from the menu
         self.taskFixedRateSelectionStringvar.trace_add("write", lambda *args, selection=self.taskFixedRateSelectionStringvar, parentFrame=self.taskFixedRateOptionsFrame: taskFixedRateMethodOptionsDict[selection.get()](parentFrame))
 
@@ -356,7 +359,6 @@ class simulationConfigManager(tk.Toplevel):
         # Creates UI elements relevant to setting options for task generation at fixed custom rates
         # Interval label and value
         self.taskFixedRateCustomIntervalLabel = tk.Label(self.taskFixedCustomRateOptionsFrame, text="Interval:")
-        self.taskFixedRateCustomIntervalValue = tk.StringVar()
 
         # Interval validation callback on spinbox entry
         self.validateCustomIntervalValue = self.register(self.validateNumericSpinbox)
@@ -379,7 +381,6 @@ class simulationConfigManager(tk.Toplevel):
 
         # Amount of tasks per interval label and value
         self.taskFixedRateCustomTasksPerIntervalLabel = tk.Label(self.taskFixedCustomRateOptionsFrame, text="Tasks per Interval:")
-        self.taskFixedRateCustomTasksPerIntervalValue = tk.StringVar()
 
         # Tasks per interval validation callback on spinbox entry
         self.validateCustomTasksPerIntervalValue = self.register(self.validateNumericSpinbox)
@@ -401,7 +402,6 @@ class simulationConfigManager(tk.Toplevel):
 
         # Radiobuttons to select task batching strategy
         self.taskFixedRateCustomTaskBatchingStrategyFrame = tk.Frame(self.taskFixedCustomRateOptionsFrame)
-        self.taskFixedRateCustomTaskBatchingStrategyValue = tk.StringVar()
         self.taskFixedRateCustomTaskSingleBatchStrategy = tk.Radiobutton(self.taskFixedRateCustomTaskBatchingStrategyFrame, text="Single Batch", variable=self.taskFixedRateCustomTaskBatchingStrategyValue, value="singlebatch")
         self.taskFixedRateCustomTaskEvenSpreadStrategy = tk.Radiobutton(self.taskFixedRateCustomTaskBatchingStrategyFrame, text="Even Spread", variable=self.taskFixedRateCustomTaskBatchingStrategyValue, value="evenspread")
         self.taskFixedRateCustomTaskSingleBatchStrategy.select()
@@ -470,7 +470,6 @@ class simulationConfigManager(tk.Toplevel):
         # Create a delay option, specifying how long after an agent becomes an available a new task will be generated
         # Delay label and value
         self.taskAsAvailableDelayLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Post-completion delay:")
-        self.taskAsAvailableDelayValue = tk.StringVar()
 
         # Delay validation callback on spinbox entry
         self.validateCustomDelayValue = self.register(self.validateNumericSpinbox)
@@ -495,19 +494,16 @@ class simulationConfigManager(tk.Toplevel):
         self.taskAsAvailableTriggerLabel = tk.Label(self.taskAsAvailableOptionsFrame, text="Determine agent availability: ")
 
         # When an agent is 'available' to pick up a new task can be configured
-        agentAvailabilityTriggerDict = {
-            "On Dropoff": "ondeposit", 
-            "On Pickup": "onpickup", 
-            "On Assignment": "onassignment", 
-            "On Rest": "onrest",
+        self.agentAvailabilityTriggerDict = {
+            "On Dropoff": "droppedOff", 
+            # "On Pickup": "onpickup", 
+            # "On Assignment": "onassignment", 
+            # "On Rest": "onrest",
             # "On Recharge": "onrecharge"
         }
 
         # Menu options are the keys of the dict
-        agentAvailabilityTriggerOptions = list(agentAvailabilityTriggerDict.keys())
-
-        # Stringvar holding menu selection
-        self.taskAsAvailableTriggerStringvar = tk.StringVar()
+        agentAvailabilityTriggerOptions = list(self.agentAvailabilityTriggerDict.keys())
 
         # Set a default value - maybe skip this to force a choice
         self.taskAsAvailableTriggerStringvar.set(agentAvailabilityTriggerOptions[0])
@@ -730,8 +726,21 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["agentMiscOptionTaskInteractCostValue"] = self.agentMiscOptionTaskInteractCostValue.get()
 
 
-        ### Task Generation Options
+        # Task Generation Options
+        ### Frequency Options
         dataPackage["taskGenerationFrequencyMethod"] = self.taskFrequencySelectionStringvar.get()
+        dataPackage["taskGenerationFixedRateMethod"] = self.taskFixedRateSelectionStringvar.get()
+        dataPackage["taskGenerationFixedRateCustomInterval"] = self.taskFixedRateCustomIntervalValue.get()
+        dataPackage["taskGenerationFixedRateCustomTasksPerInterval"] = self.taskFixedRateCustomTasksPerIntervalValue.get()
+        dataPackage["taskGenerationFixedRateCustomTaskDistribution"] = self.taskFixedRateCustomTaskBatchingStrategyValue.get()
+        dataPackage["taskGenerationFixedRateMeanTasksPerAgent"] = round(self.meanOptimalTaskPathLength)
+        dataPackage["taskGenerationFixedRateMaxTasksPerAgent"] = self.maximumOptimalPathLength
+        dataPackage["taskGenerationFixedRateMinTasksPerAgent"] = self.minimumOptimalPathLength
+        dataPackage["taskGenerationFixedRateMedianTasksPerAgent"] = self.medianOptimalTaskPathLength
+        dataPackage["taskGenerationAsAvailableDelayTime"] = self.taskAsAvailableDelayValue.get()
+        dataPackage["taskGenerationAsAvailableTrigger"] = self.agentAvailabilityTriggerDict[self.taskAsAvailableTriggerStringvar.get()]
+
+        ### Node selection options
         dataPackage["taskNodeWeightDict"] = self.nodeWeightVarDict
         dataPackage["taskNodeAvailableDict"] = self.nodeAvailableVarDict
 
