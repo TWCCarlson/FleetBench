@@ -113,7 +113,6 @@ class simAgentClass:
         }
 
         # Dict that maps agent status when task is assigned to target nodes
-        
 
     def taskInteraction(self, targetNode):
         # Called when the agent is sharing a node with its task target node
@@ -132,8 +131,6 @@ class simAgentClass:
                 self.taskStatus = "free"
                 self.currentTask.taskStatus = "completed"
                 self.currentTask = None
-            print(f"Task interaction: {action}")
-            print(f"New task status: {self.taskStatus}")
 
     def returnTargetNode(self):
         # Called to determine the target node for pathfinding, dependant on task status

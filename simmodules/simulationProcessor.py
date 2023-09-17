@@ -29,7 +29,7 @@ class simProcessor:
             },
             "movementExecute": {
                 "nextState": "renderState",
-                "exec": self.moveAgent
+                "exec": self.executeAgentAction
             },
             "renderState": {
                 "nextState": "incrementStepCounter",
@@ -153,7 +153,7 @@ class simProcessor:
         # Highlight the agent
         self.currentAgent.highlightAgent(multi=False)
         
-    def moveAgent(self):
+    def executeAgentAction(self):
         self.agentActionAlgorithm()
     
     def getSelectedSimulationAlgorithm(self):
@@ -206,7 +206,8 @@ class simProcessor:
         agentTargetNode = self.currentAgent.returnTargetNode()
         
         # Take a step toward the task if not already there
-        if self.currentAgent.currentNode == agentTargetNode:
+        if (self.currentAgent.currentNode == agentTargetNode
+                and self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step"):
             self.currentAgent.taskInteraction(agentTargetNode)
         elif self.currentAgent.currentNode != agentTargetNode:
             # Find the best path length
@@ -220,3 +221,8 @@ class simProcessor:
             if self.currentAgent.validateCandidateMove(nextNodeInList):
                 # If it is a valid node, move there
                 self.currentAgent.executeMove(nextNodeInList)
+
+        # If after moving, it has reached the target node and can interact
+        if (self.currentAgent.currentNode == agentTargetNode 
+                and self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "No cost for pickup/dropoff"):
+            self.currentAgent.taskInteraction(agentTargetNode)

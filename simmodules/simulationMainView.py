@@ -33,7 +33,7 @@ class simMainView(tk.Frame):
 
         # Render the frame
         self.grid_propagate(False)
-        self.grid(row=1, column=0, sticky=tk.N)
+        self.grid(row=1, column=0, sticky=tk.N, rowspan=2)
         logging.debug("Containing frame rendered.")
 
         # Build the mainView canvas
