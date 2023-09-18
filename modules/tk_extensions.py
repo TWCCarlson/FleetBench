@@ -207,6 +207,21 @@ class ConfigOption(tk.Frame):
             inputWidget = self._addCheckButton(elementData=elementData)
             inputWidget.grid(row=gridLoc[0], column=1)
 
+            # If there are no other element datas provided, stop here
+            if elementData["elementData"] == None:
+                return
+
+            # Build out suboptions
+            for key, newElementData in elementData["elementData"].items():
+                tempRef = ConfigOptionSet(self)
+                tempRef.buildOutOptionSetUI(newElementData)
+                setattr(self, key, tempRef)
+
+            # Build a trace that toggles usability of suboptions
+            self._traceCheckButton(elementData=elementData)
+            # Set the default value
+            elementData["optionValue"].set(elementData["elementDefault"])
+
     def _addLabel(self, elementData):
         # Build the label
         self.labelWidget = tk.Label(self, text=elementData["labelText"])
@@ -220,14 +235,13 @@ class ConfigOption(tk.Frame):
     def _traceOptionMenu(self, elementData):
         # Reference to the optionMenu control variable
         optionValue = elementData["optionValue"]
-        optionValue.trace_add("write", lambda *args, menuChoice=optionValue, elementData=elementData: self._doUIChange(elementData=elementData, menuChoice=menuChoice.get()))
+        optionValue.trace_add("write", lambda *args, menuChoice=optionValue, elementData=elementData: self._createSuboptions(elementData=elementData, menuChoice=menuChoice.get()))
 
-    def _doUIChange(self, elementData, menuChoice):
+    def _createSuboptions(self, elementData, menuChoice):
         self._clearSubframes()
 
         if elementData["elementData"][menuChoice] == None:
             return
-        # elif 
         
         tempRef = ConfigOptionSet(self)
         tempRef.buildOutOptionSetUI(elementData["elementData"][menuChoice])
@@ -281,6 +295,27 @@ class ConfigOption(tk.Frame):
         # Assign a default value
         elementData["optionValue"].set(elementData["elementDefault"])
         return self.checkButtonWidget
+    
+    def _traceCheckButton(self, elementData):
+        optionValue = elementData["optionValue"]
+        optionValue.trace_add("write", lambda *args, checkButtonState=optionValue: self._toggleSuboptionUsability(optionChoice=checkButtonState.get()))
+
+    def _toggleSuboptionUsability(self, optionChoice):
+        # Set the activity state of all child widgets
+        for child in self.winfo_children():
+            if optionChoice == False:
+                self.setChildrenStates(child, tk.DISABLED)
+            elif optionChoice == True:
+                self.setChildrenStates(child, tk.NORMAL)
+
+    def setChildrenStates(self, parent, newState):
+        for child in parent.winfo_children():
+            # Frame type tk objects lack a state field, exclude them
+            wtype = child.winfo_class()
+            if wtype not in ("Frame", "Labelframe"):
+                child.configure(state=newState)
+            else:
+                self.setChildrenStates(child, newState)
 
     def _findNextWidgetLoc(self):
         # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found

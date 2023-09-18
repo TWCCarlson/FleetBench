@@ -604,15 +604,20 @@ class simulationConfigManager(tk.Toplevel):
             nodeTick.grid(row=index, column=1, sticky=tk.W)
 
     def buildDisplayOptionsPage(self):
+        SPINBOX_DEFAULT_RANGE = (1, 100000, 50)
 
         self.displayHeadlessPlaybackValue = tk.IntVar()
         self.frameDelayValue = tk.StringVar()
+        
+        self.renderResetIterables = tk.BooleanVar()
+        self.resetIterablesTime = tk.IntVar()
+
 
         self.displayOptionSet = [
             {
                 "labelText": "Headless Mode:",
                 "elementType": "checkButton",
-                "elementDefault": 0,
+                "elementDefault": False,
                 "optionValue": self.displayHeadlessPlaybackValue,
                 "gridLoc": "auto",
                 "elementData": None
@@ -624,10 +629,42 @@ class simulationConfigManager(tk.Toplevel):
                 "optionValue": self.frameDelayValue,
                 "gridLoc": "auto",
                 "elementData": (300, 100000, 50)
+            },
+            {
+                "labelText": "Render Loop Prep Step",
+                "elementType": "checkButton",
+                "elementDefault": False,
+                "optionValue": self.renderResetIterables,
+                "gridLoc": "auto",
+                "elementData": {
+                    "subOpt1": [
+                        {
+                            "labelText": "Display Time (ms):",
+                            "elementType": "numericSpinbox",
+                            "elementDefault": 300,
+                            "optionValue": self.resetIterablesTime,
+                            "gridLoc": "auto",
+                            "elementData" : SPINBOX_DEFAULT_RANGE
+                        },
+                        {
+                            "labelText": "Display Time (ms):",
+                            "elementType": "numericSpinbox",
+                            "elementDefault": 150,
+                            "optionValue": self.resetIterablesTime,
+                            "gridLoc": "auto",
+                            "elementData": SPINBOX_DEFAULT_RANGE
+                        }
+                    ]
+                }
             }
         ]
         self.displayOptionSetUI = tk_e.ConfigOptionSet(self.displayOptionsFrame)
         self.displayOptionSetUI.buildOutOptionSetUI(self.displayOptionSet)
+
+        self.frameDelayOptionSetFrame = tk.LabelFrame(self.displayOptionsFrame, text="Frame Display Time Configuration")
+        self.frameDelayOptionSetFrame.grid(row=2, column=0)
+        self.frameDelayOptionSetUI = tk_e.ConfigOptionSet(self.frameDelayOptionSetFrame)
+        self.frameDelayOptionSetUI.buildOutOptionSetUI(self.displayOptionSet)
 
     def toggleWidgetsInRow(self, index, stateCycler, targetFrame, controlWidgetColumn):
         # Using the index of the grid row the widget callback exists in, toggle every other widget
