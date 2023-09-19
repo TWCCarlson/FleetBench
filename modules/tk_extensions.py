@@ -127,8 +127,11 @@ class ConfigOptionSet(tk.Frame):
             self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
 
     def buildOutOptionSetUI(self, uiDefineDict):
+        self.configOptions = []
         for element in uiDefineDict:
-            self.childElements[element["labelText"][:-1]] = ConfigOption(self, element)
+            # self.childElements[element["labelText"][:-1]] = ConfigOption(self, element)
+            newConfigOption = ConfigOption(self, element)
+            self.configOptions.append(newConfigOption)
         
 class ConfigOption(tk.Frame):
     """
@@ -152,6 +155,7 @@ class ConfigOption(tk.Frame):
             self.grid(row=parentGridSize[1], column=0, sticky=tk.W)
 
         type = elementData["elementType"]
+        self.childOptionSets = []
         if type == "optionMenu" or type == "numericSpinbox" or type == "checkButton":
             self._addUIElements(elementData=elementData)
         elif type == "descriptiveTracedText" or type=="descriptiveText":
@@ -196,17 +200,17 @@ class ConfigOption(tk.Frame):
 
         # Check the requested element type
         if elementData["elementType"] == "optionMenu":
-            inputWidget = self._addOptionMenu(elementData=elementData)
-            inputWidget.grid(row=gridLoc[0], column=1)
+            self.inputWidget = self._addOptionMenu(elementData=elementData)
+            self.inputWidget.grid(row=gridLoc[0], column=1)
             self._traceOptionMenu(elementData=elementData)
             # Set the default value
             elementData["optionValue"].set(list(elementData["elementData"].keys())[0])
         elif elementData["elementType"] == "numericSpinbox":
-            inputWidget = self._addNumericSpinbox(elementData=elementData)
-            inputWidget.grid(row=gridLoc[0], column=1)
+            self.inputWidget = self._addNumericSpinbox(elementData=elementData)
+            self.inputWidget.grid(row=gridLoc[0], column=1)
         elif elementData["elementType"] == "checkButton":
-            inputWidget = self._addCheckButton(elementData=elementData)
-            inputWidget.grid(row=gridLoc[0], column=1)
+            self.inputWidget = self._addCheckButton(elementData=elementData)
+            self.inputWidget.grid(row=gridLoc[0], column=1)
 
             # If there are no other element datas provided, stop here
             if elementData["elementData"] == None:
@@ -215,6 +219,7 @@ class ConfigOption(tk.Frame):
             # Build out suboptions
             for key, newElementData in elementData["elementData"].items():
                 tempRef = ConfigOptionSet(self)
+                self.childOptionSets.append(tempRef)
                 tempRef.buildOutOptionSetUI(newElementData)
                 setattr(self, key, tempRef)
 
@@ -299,29 +304,78 @@ class ConfigOption(tk.Frame):
     
     def _traceCheckButton(self, elementData):
         optionValue = elementData["optionValue"]
-        optionValue.trace_add("write", lambda *args, checkButtonState=optionValue: self._toggleSuboptionUsability(optionChoice=checkButtonState.get()))
+        # optionValue.trace_add("write", lambda *args, checkButtonState=optionValue: self._toggleSuboptionUsability(optionChoice=checkButtonState.get()))
+        optionValue.trace_add("write", lambda *args, checkButtonState=optionValue: self._manageSubOptionUsability(optionChoice=checkButtonState.get()))
 
-    def _toggleSuboptionUsability(self, optionChoice):
-        # Set the activity state of all child widgets
-        for child in self.winfo_children():
-            if optionChoice == False:
-                self._setChildrenStates(child, tk.DISABLED)
-            elif optionChoice == True:
-                self._setChildrenStates(child, tk.NORMAL)
 
-    def _setChildrenStates(self, parent, newState):
+    def _manageSubOptionUsability(self, optionChoice):
+        """
+            Each frame contains a label + input widget combination
+            Each input widget has a traced variable which should be used to update the widgets BENEATH it
+            When an input widget is ticked ON, the widgets immediately beneath it should be tk.NORMAL
+            When an input widget is ticked OFF, all widgets beneath it should be tk.DISABLED
+            The widgets beneath those depend on those widgets immediately beneath the interact widget
+            Structure
+            ConfigOptionSet(tk.frame)
+            ConfigOption(tk.frame)
+                labelWidget(tk.label)
+                inputWidget(tk.optionMenu/numericSpinbox/checkButton)
+                ConfigOptionSet(tk.frame)
+                    ConfigOption
+                    labelWidget
+                    inputWidget
+                    ConfigOptionSet
+                        . . . etc
+            labelWidgets and inputWidgets need to be controlled by their immediate parents
+            frames are ignored
+        """
+        # State map
+        stateMap = {
+            True: tk.NORMAL,
+            False: tk.DISABLED
+        }
+        self.intendedState = stateMap[optionChoice]
+
+        # If the optionChoice value is TRUE, turn on the widgets immediately beneath self
+        if optionChoice == True:
+            # First manipulate the immediate descendants' state
+            for child in self.winfo_children():
+                # Exclude frames from this process as they lack a state field
+                wtype = child.winfo_class()
+                if wtype not in ("Frame", "Labelframe"):
+                    # If it is a widget, directly manipulate its state
+                    child.configure(state=stateMap[optionChoice])
+                else:
+                    # If it is a frame (configOptionSet), manipulate the immediate children
+                    for configOption in child.configOptions:
+                        configOption.inputWidget.configure(state=stateMap[optionChoice])
+                        configOption.labelWidget.configure(state=stateMap[optionChoice])
+
+            # Then rectify descendants' descendants states to match descendant's inputWidget value
+            self._rectifyChildStates(self)
+
+        # If the optionChoice value is FALSE, turn off all widgets beneath self
+        elif optionChoice == False:
+            for child in self.winfo_children():
+                self.disableAllSuboptions(child)
+
+    def _rectifyChildStates(self, parent):
+        for childOptionSet in parent.childOptionSets:
+            for childConfigOption in childOptionSet.configOptions:
+                targetState = parent.intendedState
+                childConfigOption.inputWidget.configure(state=targetState)
+                childConfigOption.labelWidget.configure(state=targetState)
+                self._rectifyChildStates(childConfigOption)
+
+    def disableAllSuboptions(self, parent):
+        # Recursively disable all widgets
         for child in parent.winfo_children():
-            # Frame type tk objects lack a state field, exclude them
+            # Exclude frames from this process
             wtype = child.winfo_class()
             if wtype not in ("Frame", "Labelframe"):
-                child.configure(state=newState)
+                child.configure(state=tk.DISABLED)
             else:
-                self._setChildrenStates(child, newState)
-
-    def _updateChildrenStates(self):
-        # Used to set child states back to normal
-        state = self.elementData["optionValue"].get()
-        self._setChildrenStates(self, state)
+                self.disableAllSuboptions(child)
 
     def _findNextWidgetLoc(self):
         # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found
