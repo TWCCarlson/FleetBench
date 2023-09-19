@@ -28,11 +28,11 @@ class simProcessor:
                 "stateLabel": "Generating Tasks"
             },
             "selectAgent": {
-                "nextState": "movementExecute",
+                "nextState": "agentAction",
                 "exec": self.selectAgent,
                 "stateLabel": "Selecting Next Agent"
             },
-            "movementExecute": {
+            "agentAction": {
                 "nextState": "renderState",
                 "exec": self.executeAgentAction,
                 "stateLabel": "Agent Acting"

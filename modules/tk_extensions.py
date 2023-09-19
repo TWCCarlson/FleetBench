@@ -142,6 +142,7 @@ class ConfigOption(tk.Frame):
     def __init__(self, parent, elementData, **kwargs):
         super().__init__(parent)
         self.parent = parent
+        self.elementData = elementData
 
         # Place this containing frame
         parentGridSize = parent.grid_size()   # (Column, row) tuple
@@ -291,7 +292,7 @@ class ConfigOption(tk.Frame):
     def _addCheckButton(self, elementData):
         # Build the checkbutton widget
         self.checkButtonWidget = tk.Checkbutton(self, variable=elementData["optionValue"])
-
+        
         # Assign a default value
         elementData["optionValue"].set(elementData["elementDefault"])
         return self.checkButtonWidget
@@ -304,18 +305,23 @@ class ConfigOption(tk.Frame):
         # Set the activity state of all child widgets
         for child in self.winfo_children():
             if optionChoice == False:
-                self.setChildrenStates(child, tk.DISABLED)
+                self._setChildrenStates(child, tk.DISABLED)
             elif optionChoice == True:
-                self.setChildrenStates(child, tk.NORMAL)
+                self._setChildrenStates(child, tk.NORMAL)
 
-    def setChildrenStates(self, parent, newState):
+    def _setChildrenStates(self, parent, newState):
         for child in parent.winfo_children():
             # Frame type tk objects lack a state field, exclude them
             wtype = child.winfo_class()
             if wtype not in ("Frame", "Labelframe"):
                 child.configure(state=newState)
             else:
-                self.setChildrenStates(child, newState)
+                self._setChildrenStates(child, newState)
+
+    def _updateChildrenStates(self):
+        # Used to set child states back to normal
+        state = self.elementData["optionValue"].get()
+        self._setChildrenStates(self, state)
 
     def _findNextWidgetLoc(self):
         # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found
