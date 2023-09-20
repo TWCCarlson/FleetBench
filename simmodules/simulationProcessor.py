@@ -15,37 +15,51 @@ class simProcessor:
             "start": {
                 "nextState": "resetIterables",
                 "exec": None,
-                "stateLabel": "Preparing . . ."
+                "stateLabel": "Preparing . . .",
+                "renderStateBool": False,
+                "stateRenderDuration": 0
             },
             "resetIterables": {
                 "nextState": "taskGeneration",
                 "exec": self.resetIterables,
-                "stateLabel": "Preparing Next Step"
+                "stateLabel": "Preparing Next Step",
+                "renderStateBool": simulationSettings["renderResetIterablesStep"],
+                "stateRenderDuration": simulationSettings["durationResetIterablesStep"]
             },
             "taskGeneration": {
                 "nextState": "selectAgent",
                 "exec": self.taskGeneration,
-                "stateLabel": "Generating Tasks"
+                "stateLabel": "Generating Tasks",
+                "renderStateBool": simulationSettings["renderTaskGenerationStep"],
+                "stateRenderDuration": simulationSettings["durationTaskGenerationStep"]
             },
             "selectAgent": {
                 "nextState": "agentAction",
                 "exec": self.selectAgent,
-                "stateLabel": "Selecting Next Agent"
+                "stateLabel": "Selecting Next Agent",
+                "renderStateBool": simulationSettings["renderAgentSelectionStep"],
+                "stateRenderDuration": simulationSettings["durationAgentSelectionStep"]
             },
             "agentAction": {
                 "nextState": "renderState",
                 "exec": self.executeAgentAction,
-                "stateLabel": "Agent Acting"
+                "stateLabel": "Agent Acting",
+                "renderStateBool": simulationSettings["renderAgentActionStep"],
+                "stateRenderDuration": simulationSettings["durationAgentActionStep"]
             },
             "renderState": {
                 "nextState": "incrementStepCounter",
                 "exec": self.renderGraphState,
-                "stateLabel": "Updating Canvas View"
+                "stateLabel": "Updating Canvas View",
+                "renderStateBool": simulationSettings["renderGraphUpdateStep"],
+                "stateRenderDuration": simulationSettings["durationGraphUpdateStep"]
             },
             "incrementStepCounter": {
                 "nextState": "taskGeneration",
                 "exec": self.incrementStepCounter,
-                "stateLabel": "Finish Current Step"
+                "stateLabel": "Finish Current Step",
+                "renderStateBool": simulationSettings["renderSimStepCounterUpdate"],
+                "stateRenderDuration": simulationSettings["durationSimStepCounterUpdate"]
             }
         }
 
@@ -114,20 +128,26 @@ class simProcessor:
         ### Verify task states
 
     def simulationStateMachineNextStep(self, stateID=None):
-        # Call the state machine to evaluate the next state
-        frameDelay = self.simulationSettings['playbackFrameDelay']
-        if frameDelay == "":
-            # Use the default value
-            frameDelay = 1000
-
         # If a specific state is called for, use it
         if stateID == None:
             # Else, use the stored state value
             stateID = self.simulationStateID
 
-        # Trigger state machine update
-        self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, 
-            lambda stateID=stateID: self.simulateStep(stateID))
+        # Check if the state needs to be rendered
+        if self.simulationStateMachineMap[stateID]["renderStateBool"]:
+            # If so, get the render duration
+            frameDelay = self.simulationStateMachineMap[stateID]["stateRenderDuration"]
+            if frameDelay == "":
+                # Use the default value
+                frameDelay = 300
+            # Trigger state machine update after the specified duration
+            self.simulationUpdateTimer = self.parent.parent.parent.after(frameDelay, 
+                lambda stateID=stateID: self.simulateStep(stateID))
+        else:
+            # State does not need to be displayed, so call it "immediately"
+            # Use after so that the UI doesn't lock up while doing this
+            self.simulationUpdateTimer = self.parent.parent.parent.after(1, 
+                lambda stateID=stateID: self.simulateStep(stateID))
 
     def resetIterables(self):
         # Certain objects need to be reset on new steps

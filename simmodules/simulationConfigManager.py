@@ -607,12 +607,9 @@ class simulationConfigManager(tk.Toplevel):
         SPINBOX_DEFAULT_RANGE = (0, 100000, 50)
 
         # Headless mode checkbutton
-        self.displayHeadlessPlaybackValue = tk.BooleanVar()
-        # self.displayHeadlessPlaybackCheckbutton = tk.Checkbutton(self.displayOptionsFrame, text="Headless mode?",
-        #         variable=self.displayHeadlessPlaybackValue)
-        # self.displayHeadlessPlaybackCheckbutton.grid(row=0, column=0)
+        self.renderPlaybackValue = tk.BooleanVar()
         
-        # Control vars instantiated here for organization and reference
+        # Render duration vars instantiated here for organization and reference
         self.renderResetIterables = tk.BooleanVar()
         self.renderResetIterablesTime = tk.IntVar()
         self.renderTaskGen = tk.BooleanVar()
@@ -628,136 +625,9 @@ class simulationConfigManager(tk.Toplevel):
 
         # UI Definition Dict
         # Sorcery
-        # cwd = Path(__file__).parent
-        # filePath = (cwd / 'simdisplaymenuconfig.txt').resolve()
-        # self.displayOptionSet = eval(open(filePath, "r").read())
-        self.displayOptionSet = [
-            {
-                "labelText": "Render Simulation?:",
-                "elementType": "checkButton",
-                "elementDefault": True,
-                "optionValue": self.displayHeadlessPlaybackValue,
-                "gridLoc": "auto",
-                "elementData": {
-                    "subOpt1": [
-                        {
-                            "labelText": "Render Loop Prep Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderResetIterables,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderResetIterablesTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    },
-                                ]
-                            }
-                        },
-                        {
-                            "labelText": "Render Task Generation Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderTaskGen,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderTaskGenTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "labelText": "Render Agent Selection Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderSelectAgent,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderSelectAgentTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "labelText": "Render Agent Action Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderAgentAction,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderAgentActionTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "labelText": "Render Graph Update Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderGraphUpdate,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderGraphUpdateTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "labelText": "Render Step Counter Step",
-                            "elementType": "checkButton",
-                            "elementDefault": False,
-                            "optionValue": self.renderStepCounterUpdate,
-                            "gridLoc": "auto",
-                            "elementData": {
-                                "subOpt1": [
-                                    {
-                                        "labelText": "Display Time (ms):",
-                                        "elementType": "numericSpinbox",
-                                        "elementDefault": 300,
-                                        "optionValue": self.renderStepCounterUpdateTime,
-                                        "gridLoc": "auto",
-                                        "elementData": SPINBOX_DEFAULT_RANGE
-                                    }
-                                ]
-                            }
-                        },
-                    ]
-                }
-            }
-        ]
+        cwd = Path(__file__).parent
+        filePath = (cwd / 'simdisplaymenuconfig.txt').resolve()
+        self.displayOptionSet = eval(open(filePath, "r").read())
 
         self.frameDelayOptionSetFrame = tk.LabelFrame(self.displayOptionsFrame, text="Frame Display Time Configuration")
         self.frameDelayOptionSetFrame.grid(row=1, column=0)
@@ -880,8 +750,22 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["taskNodeAvailableDict"] = self.nodeAvailableVarDict
 
         ### Display Options
-        dataPackage["playbackHeadlessMode"] = self.displayHeadlessPlaybackValue.get()
-        dataPackage["playbackFrameDelay"] = self.frameDelayValue.get()
+        # Headless mode checkbutton
+        dataPackage["renderSimulationPlayback"] = self.renderPlaybackValue.get()
+        
+        # Render duration vars instantiated here for organization and reference
+        dataPackage["renderResetIterablesStep"] = self.renderResetIterables.get()
+        dataPackage["durationResetIterablesStep"] = self.renderResetIterablesTime.get()
+        dataPackage["renderTaskGenerationStep"] = self.renderTaskGen.get()
+        dataPackage["durationTaskGenerationStep"] = self.renderTaskGenTime.get()
+        dataPackage["renderAgentSelectionStep"] = self.renderSelectAgent.get()
+        dataPackage["durationAgentSelectionStep"] = self.renderSelectAgentTime.get()
+        dataPackage["renderAgentActionStep"] = self.renderAgentAction.get()
+        dataPackage["durationAgentActionStep"] = self.renderAgentActionTime.get()
+        dataPackage["renderGraphUpdateStep"] = self.renderGraphUpdate.get()
+        dataPackage["durationGraphUpdateStep"] = self.renderGraphUpdateTime.get()
+        dataPackage["renderSimStepCounterUpdate"] = self.renderStepCounterUpdate.get()
+        dataPackage["durationSimStepCounterUpdate"] = self.renderStepCounterUpdateTime.get()
 
         return dataPackage
     

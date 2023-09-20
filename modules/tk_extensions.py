@@ -360,6 +360,7 @@ class ConfigOption(tk.Frame):
                 self.disableAllSuboptions(child)
 
     def _rectifyChildStates(self, parent):
+        # Move into the sub optionset's configOptions to adjust their states
         for childOptionSet in parent.childOptionSets:
             for childConfigOption in childOptionSet.configOptions:
                 targetState = parent.intendedState
@@ -370,7 +371,7 @@ class ConfigOption(tk.Frame):
     def disableAllSuboptions(self, parent):
         # Recursively disable all widgets
         for child in parent.winfo_children():
-            # Exclude frames from this process
+            # Exclude frames from this process as they do not have a state field
             wtype = child.winfo_class()
             if wtype not in ("Frame", "Labelframe"):
                 child.configure(state=tk.DISABLED)
