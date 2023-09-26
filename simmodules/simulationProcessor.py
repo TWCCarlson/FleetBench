@@ -55,7 +55,7 @@ class simProcessor:
                 "stateRenderDuration": simulationSettings["durationGraphUpdateStep"]
             },
             "incrementStepCounter": {
-                "nextState": "taskGeneration",
+                "nextState": "resetIterables",
                 "exec": self.incrementStepCounter,
                 "stateLabel": "Finish Current Step",
                 "renderStateBool": simulationSettings["renderSimStepCounterUpdate"],
@@ -87,6 +87,17 @@ class simProcessor:
         # Call option's function
         self.agentActionAlgorithm = algorithmDict[self.algorithmSelection]
 
+        # Profiling
+        # self.stateStartTime = time.perf_counter()
+        # self.loopStartTime = time.perf_counter()
+        # self.resetIterablesCounter = 0
+        # self.taskGenerationCounter = 0
+        # self.selectAgentCounter = 0
+        # self.executeAgentActionCounter = 0
+        # self.renderGraphStateCounter = 0
+        # self.incrementStepCounterCounter = 0
+        # self.currentState = None
+
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
 
@@ -103,7 +114,12 @@ class simProcessor:
                 Render the new state
                 - Update statistics
         """
-        
+        # Profiling
+        # self.stateEndTime = time.perf_counter()
+        # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
+        # self.stateStartTime = time.perf_counter()
+        # self.currentState = stateID
+
         # Update step display label
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepTextValue
         targetLabelText.set(self.simulationStateMachineMap[stateID]["stateLabel"])
@@ -118,8 +134,14 @@ class simProcessor:
             nextStateID = self.requestedStateID
             self.requestedStateID = None
 
+        # Save the next state's ID for state machine's memory
         self.simulationStateID = nextStateID
+
+        # Call the next state
+        
         self.simulationStateMachineNextStep(nextStateID)
+        
+
         ### Generate new tasks
         ### Calculate/execute agent moves
             # Charge expenditures
@@ -133,6 +155,7 @@ class simProcessor:
             # Else, use the stored state value
             stateID = self.simulationStateID
 
+        # print(f"Render frame: {self.simulationStateMachineMap[stateID]["renderStateBool"]}")
         # Check if the state needs to be rendered
         if self.simulationStateMachineMap[stateID]["renderStateBool"]:
             # If so, get the render duration
@@ -150,13 +173,24 @@ class simProcessor:
                 lambda stateID=stateID: self.simulateStep(stateID))
 
     def resetIterables(self):
+        # self.resetIterablesCounter = self.resetIterablesCounter + 1
+        # print(f"     Call count: {self.resetIterablesCounter}")
         # Certain objects need to be reset on new steps
         # These objects cause loopbacks in the FSM
+
+        # Profiling
+        # self.loopEndTime = time.perf_counter()
+        # print("====== NEW LOOP =======")
+        # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
+        # self.loopStartTime = time.perf_counter()
+
 
         # Looping over every agent
         self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
 
     def taskGeneration(self):
+        # self.taskGenerationCounter = self.taskGenerationCounter + 1
+        # print(f"     Call count: {self.taskGenerationCounter}")
         generationStyle = self.simulationSettings["taskGenerationFrequencyMethod"]
         
         if generationStyle == "As Available":
@@ -201,12 +235,18 @@ class simProcessor:
         return newTaskID
 
     def renderGraphState(self):
+        # self.renderGraphStateCounter = self.renderGraphStateCounter + 1
+        # print(f"     Call count: {self.renderGraphStateCounter}")
         self.parent.parent.simulationWindow.simMainView.simCanvas.renderGraphState()
 
     def incrementStepCounter(self):
+        # self.incrementStepCounterCounter = self.incrementStepCounterCounter + 1
+        # print(f"     Call count: {self.incrementStepCounterCounter}")
         pass
 
     def selectAgent(self):
+        # self.selectAgentCounter = self.selectAgentCounter + 1
+        # print(f"     Call count: {self.selectAgentCounter}")
         if self.algorithmType == "sapf":
             # Single-agent pathfinding methods
             # Only use the first agent in the list, user error if multiple agents
@@ -227,6 +267,8 @@ class simProcessor:
         self.currentAgent.highlightAgent(multi=False)
         
     def executeAgentAction(self):
+        # self.executeAgentActionCounter = self.executeAgentActionCounter + 1
+        # print(f"     Call count: {self.executeAgentActionCounter}")
         self.agentActionAlgorithm()
     
     def getSelectedSimulationAlgorithm(self):
@@ -284,13 +326,23 @@ class simProcessor:
             self.currentAgent.taskInteraction(agentTargetNode)
         elif self.currentAgent.currentNode != agentTargetNode:
             # Find the best path length
-            bestAStarPathLength = self.currentAgent.calculateAStarBestPath(agentTargetNode)
-            # Find the list of best paths sharingf that length
-            bestPathsList = self.currentAgent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
-            # Use the first path in the list for now, and 
-            currentNodeListIndex = bestPathsList[0].index(self.currentAgent.currentNode)
-            # Fetch the next node to move to
-            nextNodeInList = bestPathsList[0][currentNodeListIndex+1]
+            # bestAStarPathLength = self.currentAgent.calculateAStarBestPathLength(agentTargetNode)
+            # # Find the list of best paths sharingf that length
+            # bestPathsList = self.currentAgent.findAllSimplePathsOfCutoffK(agentTargetNode, bestAStarPathLength)
+            # # Use the first path in the list for now, and 
+            # currentNodeListIndex = bestPathsList[0].index(self.currentAgent.currentNode)
+            # # Fetch the next node to move to
+            # nextNodeInList = bestPathsList[0][currentNodeListIndex+1]
+
+            # Find the best path
+            start = time.perf_counter()
+            bestPath = self.currentAgent.calculateAStarPath(self.currentAgent.currentNode, agentTargetNode)
+            # bestPath = self.currentAgent.calculateAStarBestPath(agentTargetNode)
+            end = time.perf_counter()
+            print(f"Pathfinder runtime: {end-start}")
+            nextNodeInList = bestPath[1]
+            # print(path)
+
             if self.currentAgent.validateCandidateMove(nextNodeInList):
                 # If it is a valid node, move there
                 self.currentAgent.executeMove(nextNodeInList)
