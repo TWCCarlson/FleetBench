@@ -145,12 +145,16 @@ class simulationManager:
 
         self.buildReferences()
 
+        self.simulationProcess.simGraphData.pushDataToCanvas()
+        self.simulationProcess.simAgentManager.pushDataToCanvas()
         self.simulationWindow.simMainView.simCanvas.renderGraphState()
+        self.simulationWindow.simInfoBox.simInfoBoxFrame.buildInfoBox()
 
     def buildReferences(self):
         # Build necessary references for inner classes
         self.simulationWindow.simControlPanel.buildReferences()
         self.simulationWindow.simDataView.buildReferences()
+        self.simulationWindow.simInfoBox.simInfoBoxFrame.buildReferences()
         self.simulationProcess.buildReferences()
 
 def initLogging():

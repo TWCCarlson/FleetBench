@@ -6,6 +6,8 @@ pp = pprint.PrettyPrinter(indent=4)
 from functools import partial
 from PIL import Image, ImageDraw, ImageTk
 
+from modules.mainCanvas import mainCanvas
+
 class simMainView(tk.Frame):
     """
         The primary viewfield of the warehouse
@@ -37,7 +39,9 @@ class simMainView(tk.Frame):
         logging.debug("Containing frame rendered.")
 
         # Build the mainView canvas
-        self.simCanvas = simCanvas(self, self.appearanceValues)
+        # mapGraphRef = self.parent.parent.simulationProcess.simGraphData.simMapGraph
+        # self.simCanvas = simCanvas(self, self.appearanceValues)
+        self.simCanvas = mainCanvas(self, self.appearanceValues, "simCanvas", gridLoc=(0, 0))
         logging.debug("Simulation canvas rendered.")
 
         # Create scrollbars
@@ -386,7 +390,7 @@ class simCanvas(tk.Canvas):
 
     def agentClickHighlighter(self, agentName, agentID, event):
         # Remove previous highlighting
-        logging.debug("Handling click on agent in main canvas.")
+        # logging.debug("Handling click on agent in main canvas.")
         self.clearHighlight()
         logging.debug(f"Clicked agentName: {agentName}, agentID: {agentID}")
 

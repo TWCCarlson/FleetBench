@@ -64,6 +64,9 @@ class simAgentManager:
                 # print(self.simTaskManager.taskList)
                 self.agentList[agent].currentTask = self.simTaskManager.taskList[self.agentList[agent].currentTask]
 
+    def pushDataToCanvas(self):
+        self.parent.parent.simulationWindow.simMainView.simCanvas.ingestAgentData(self)
+
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
         dataPackage = self.parent.parent.parent.agentManager.packageAgentData()
@@ -116,8 +119,6 @@ class simAgentClass:
             "S" : 2,
             "E" : 3
         }
-
-        # Dict that maps agent status when task is assigned to target nodes
 
     def taskInteraction(self, targetNode):
         # Called when the agent is sharing a node with its task target node

@@ -30,8 +30,9 @@ class simGraphManager:
         for node in dataPackage:
             if 'mapDimensions' in node:
                 # Sets the max dimensions of the map, only shows up once
-                self.simMapDimensionX = node['mapDimensions']['Xdim'] - 1
-                self.simMapDimensionY = node['mapDimensions']['Ydim'] - 1
+                self.simMapDimensionX = node['mapDimensions']['Xdim']
+                self.simMapDimensionY = node['mapDimensions']['Ydim']
+                self.simMapCanvas.setCanvasDimensions(self.simMapDimensionX, self.simMapDimensionY)
                 logging.debug(f"New simulation mapGraph dimensions: X={self.simMapDimensionX}, Y={self.simMapDimensionY}")
                 continue
 
@@ -100,10 +101,10 @@ class simGraphManager:
         logging.info("New simulation mapData edges loaded.")
 
         # Update simulation mainView canvas size
-        canvasWidth = (self.simMapDimensionX+1)
-        canvasHeight = (self.simMapDimensionY+1)
-        self.simMapCanvas.setCanvasDimensions(canvasWidth, canvasHeight)
         logging.info("All new simulation mapData finished loading.")
+
+    def pushDataToCanvas(self):
+        self.parent.parent.simulationWindow.simMainView.simCanvas.ingestGraphData(self.simMapGraph)
 
     def updateAgentLocations(self, agentList):
         logging.debug("Updating agent locations in the simulation mapGraph . . .")

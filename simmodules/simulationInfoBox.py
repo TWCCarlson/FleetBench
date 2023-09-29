@@ -44,39 +44,29 @@ class infoBoxFrame(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
 
-        # Intvars store the state of each checkbox
-        self.danglingEdgeVisibility = tk.IntVar()
-        self.edgeVisibility = tk.IntVar()
-        self.nodeVisibility = tk.IntVar()
-        self.agentVisibility = tk.IntVar()
-        self.agentOrienationVisibility = tk.IntVar()
+    def buildReferences(self):
+        self.simMainView = self.parent.parent.simMainView.simCanvas
 
+    def buildInfoBox(self):
         # Create checkboxes for each canvas layer
         self.danglingEdgeTick = tk.Checkbutton(self.parent, text='Dangling Edges', 
-                variable=self.danglingEdgeVisibility, onvalue=1, offvalue=0,
-                command=self.setDanglingEdgeVisibility
-                )
+                variable=self.simMainView.danglingEdgeVisibility, onvalue=True, offvalue=False)
         self.edgeTick = tk.Checkbutton(self.parent, text='Edges', 
-                variable=self.edgeVisibility, onvalue=1, offvalue=0,
-                command=self.setEdgeVisibility
-                )
+                variable=self.simMainView.edgeVisibility, onvalue=True, offvalue=False)
         self.nodeTick = tk.Checkbutton(self.parent, text='Nodes', 
-                variable=self.nodeVisibility, onvalue=1, offvalue=0,
-                command=self.setNodeVisibility
-                )
+                variable=self.simMainView.nodeVisibility, onvalue=True, offvalue=False)
         self.agentTick = tk.Checkbutton(self.parent, text='Agents',
-                variable=self.agentVisibility, onvalue=1, offvalue=0,
-                command=self.setAgentVisibility
-                )
+                variable=self.simMainView.agentVisibility, onvalue=True, offvalue=False)
         self.agentOrientationTick = tk.Checkbutton(self.parent, text='Agent Orientation',
-                variable=self.agentOrienationVisibility, onvalue=1, offvalue=0,
-                command=self.setAgentOrientationVisibility
-                )
+                variable=self.simMainView.agentOrientationVisibility, onvalue=True, offvalue=False)
         logging.debug("Created canvas layer visibility toggles.`")
 
+        # Trigger info tile generation in the associated canvas
+        self.hoverInfoText = self.simMainView.hoverText
+
         # Create the hover info text
-        self.hoverInfoText = tk.StringVar()
-        self.hoverInfoText.set(". . .") # default value
+        # self.hoverInfoText = tk.StringVar()
+        self.hoverInfoText.set(". . . ?") # default value
         font = self.parent.appearanceValues.simulationInfoBoxFont
         self.hoverInfo = tk.Label(self.parent, textvariable=self.hoverInfoText, font=font)
         logging.debug("Created canvas layer hover info display.")
@@ -94,28 +84,3 @@ class infoBoxFrame(tk.Frame):
         self.parent.columnconfigure(5, weight=1)
         self.hoverInfo.grid(row=0, column=5, sticky=tk.E)
         logging.debug("Rendered canvas layer hover info display.")
-
-    def setDanglingEdgeVisibility(self):
-        # Call the canvas function for toggling the state of the layer
-        logging.debug("Requesting 'danglingEdge' visibility toggle.")
-        self.parent.parent.simMainView.simCanvas.toggleDanglingEdgeVisibility()
-
-    def setEdgeVisibility(self):
-        # Call the canvas function for toggling the state of the layer
-        logging.debug("Requesting 'edge' visibility toggle.")
-        self.parent.parent.simMainView.simCanvas.toggleEdgeVisibility()
-
-    def setNodeVisibility(self):
-        # Call the canvas function for toggling the state of the layer
-        logging.debug("Requesting 'node' visibility toggle.")
-        self.parent.parent.simMainView.simCanvas.toggleNodeVisibility()
-
-    def setAgentVisibility(self):
-        # Call the canvas function for toggling the state of the layer
-        logging.debug("Requesting 'agent' visibility toggle.")
-        self.parent.parent.simMainView.simCanvas.toggleAgentVisibility()
-
-    def setAgentOrientationVisibility(self):
-        # Call the canvas function for toggling the state of the layer
-        logging.debug("Requesting 'agentOrientation' visibility toggle.")
-        self.parent.parent.simMainView.simCanvas.toggleAgentOrientationVisibility()

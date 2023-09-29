@@ -87,6 +87,8 @@ class simDataView(tk.Frame):
         self.agentTreeView.bind('<Motion>', 'break')
         self.simAgentListFrame.bind('<Enter>', self.bindAgentClicks)
         self.simAgentListFrame.bind('<Leave>', self.unbindAgentClicks)
+        agentSelectVar = self.parent.simMainView.simCanvas.currentClickedAgent
+        agentSelectVar.trace_add("write", lambda *args, agentSelected=agentSelectVar: self.selectAgent(agentSelectVar.get()))
         logging.debug("Bound mouse events to Simulation agentTreeView")
 
         # Initialize scrolling
@@ -159,6 +161,10 @@ class simDataView(tk.Frame):
     def unbindAgentClicks(self, *event):
         self.agentTreeView.unbind('<Button-1>', self.agentClickBindFunc)
         self.agentTreeView.unbind('<Button-3>', self.agentRClickBindFunc)
+
+    def selectAgent(self, selectedAgentName):
+        agentIID = self.agentTreeView.tag_has(selectedAgentName)
+        self.agentTreeView.selection_set(agentIID)
 
     def handleAgentSelect(self, event):
         # Identify the selected row

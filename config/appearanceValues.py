@@ -4,6 +4,55 @@ import logging
 
 class appearanceValues():
     def __init__(self, parent):
+        """
+            Node style values
+        """
+        self.openNodeColor = "black"
+        self.openNodeSizeRatio = 0.1
+        self.chargeNodeColor = "yellow"
+        self.chargeNodeSizeRatio = 0.28
+        self.depositNodeColor = "light green"
+        self.depositNodeSizeRatio = 0.28
+        self.pickupNodeColor = "light blue"
+        self.pickupNodeSizeRatio = 0.28
+        self.restNodeColor = "brown"
+        self.restNodeSizeRatio = 0.28
+
+        """
+            Edge style values
+        """
+        self.edgeColor = "black"
+        self.edgeWidth = 3
+        self.danglingEdgeColor = "green"
+        self.danglingEdgeWidth = 3
+
+        """
+            Agent style values
+        """
+        self.agentSizeRatio = 0.4
+        self.agentBorderColor = 'gray50'
+        self.agentBorderWidth = 2
+        self.agentFillColor = 'orange'
+        self.agentPointerWidth = 3
+        self.agentWindowRatio = 0.12
+        self.agentWindowWidth = 1
+
+        """
+            Highlight style values
+        """
+        self.highlightAlpha = 0.4
+        self.depositHighlightColor = "light blue"
+        self.pickupHighlightColor = "light green"
+        self.agentHighlightColor = "red"
+        self.pathfindHighlightColor = "purple4"
+        self.highlightTextSize = 8
+        self.defaultHighlightColor = "orange red"
+        self.defaultHighlightAlpha = 0.4
+
+        """
+            Editor window style
+        """
+
         self.parent = parent
         # Get screen dimensions for fractional measurements
         screen_width = self.parent.winfo_screenwidth()

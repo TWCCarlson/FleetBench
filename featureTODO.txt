@@ -64,6 +64,7 @@ The redraw/validation loop should probably rely on the graph as much as possible
     This should be decoupled from the functional code and called after every change
 
 GRAPHICS OVERHAUL
+8-neighborhood graph options
 
 Informational Classes are then:
     mapData
