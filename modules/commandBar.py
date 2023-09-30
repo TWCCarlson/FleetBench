@@ -115,6 +115,7 @@ class fileCommands(tk.Menu):
                 currentTask=currentTask
                 )
         logging.info("Loaded new agent data to session state.")
+        self.parent.parent.agentManager.pushDataToCanvas()
 
         # Reconstruct the tasks from the data
         logging.debug("Received new taskData:")
@@ -144,10 +145,6 @@ class fileCommands(tk.Menu):
         logging.debug("Received new random generator engine data:")
         self.parent.parent.randomGenerator.randomGeneratorState.currentSeed = data["randomGenerator"]["currentSeed"]
         logging.info("Loaded new random generator engine state.")
-
-        # Rerender the main canvas
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
-        logging.info("New session state rendered successfully.")
 
     def promptSave(self):
         # Create a message box asking to save the current session

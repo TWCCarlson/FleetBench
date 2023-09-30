@@ -48,8 +48,9 @@ class mapDataClass:
         for node in mapData:
             if 'mapDimensions' in node:
                 # This json entry is only for setting max dims
-                self.dimensionX = node['mapDimensions']['Xdim']-1
-                self.dimensionY = node['mapDimensions']['Ydim']-1
+                self.dimensionX = node['mapDimensions']['Xdim']
+                self.dimensionY = node['mapDimensions']['Ydim']
+                self.mainView.mainCanvas.setCanvasDimensions(self.dimensionX, self.dimensionY)
                 logging.debug(f"New mapGraph dimensions: X={self.dimensionX}, Y={self.dimensionY}")
                 continue
             
@@ -124,33 +125,6 @@ class mapDataClass:
                         self.mapGraph.add_edge(node[0], candidateE)
                         logging.debug(f". . . . .  E: {candidateE}, edge connection added.")
         logging.info("New mapData edges loaded to mapGraph.")
-        
-        # Update mainView canvas size
-        canvasWidth = (self.dimensionX+1) * self.appearanceValues.canvasTileSize
-        canvasHeight = (self.dimensionY+1) * self.appearanceValues.canvasTileSize
-        self.mainView.mainCanvas["width"] = canvasWidth
-        self.mainView.mainCanvas["height"] = canvasHeight
-        self.mainView.mainCanvas["scrollregion"] = (0, 0, canvasWidth, canvasHeight)
-        logging.debug(f"Main Canvas dimensions updated: canvasWidth={self.dimensionX+1}, canvasHeight={self.dimensionY+1}")
-
-        try:
-            # pos = {node: eval(node) for node in self.mapGraph}
-            # tsm = TSM(self.mapGraph, pos)
-            # tsm.display()
-            # plt.subplot(111)
-            # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
-            # plt.show()
-            logging.debug("Attempting to render the new mapGraph on the mainCanvas . . .")
-            self.mainView.mainCanvas.setAllLayersVisible()
-            self.mainView.mainCanvas.renderGraphState()
-        except:
-            logging.debug("Failed to load map. Prompting user to verify the connectivity of nodes . . .")
-            tk.messagebox.showwarning(title="Failed to load map", message="Map's graph is invalid. Verify there are no unconnected nodes...")
-            # plt.subplot(111)
-            # nx.draw(self.mapGraph, with_labels=True, font_weight='bold')
-            # plt.show()
-            self.mainView.mainCanvas.setAllLayersVisible()
-            self.mainView.mainCanvas.renderGraphState()
 
         # Enable the rest of the program options to work
         self.mapLoadedBool = True
@@ -162,8 +136,10 @@ class mapDataClass:
         self.parent.contextView.enableSimulationConfiguration()
         logging.info("New mapData successfully ingested to new mapGraph.")
 
-        # for node in self.mapGraph:
-        #     pp.pprint(eval(node))
+        self.pushDataToCanvas()
+
+    def pushDataToCanvas(self):
+        self.mainView.mainCanvas.ingestGraphData(self.mapGraph)
 
     def updateAgentLocations(self, agentList, ):
         logging.debug("Updating agent locations in the mapGraph . . .")

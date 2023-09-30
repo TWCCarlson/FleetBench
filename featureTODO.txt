@@ -65,6 +65,7 @@ The redraw/validation loop should probably rely on the graph as much as possible
 
 GRAPHICS OVERHAUL
 8-neighborhood graph options
+expand canvas delete and clear to accept area args (using a bbox and .find_overlapping/.find_enclosed)
 
 Informational Classes are then:
     mapData

@@ -14,6 +14,7 @@ class agentManager:
         # Generate agent class definitions
         # Generate the agent class with inputs
         self.agentList = {}
+        self.agentDict = {}
         self.agentPositionList = {}
         self.currentAgent = []
         logging.debug("Class 'agentManager' initialized.")
@@ -43,6 +44,7 @@ class agentManager:
         # Create a new agent and add it to the manager's list
         self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = self.dictLength)
         self.agentList[self.dictLength] = self.latestAgent
+        self.agentDict[ID] = self.latestAgent
         logging.info(f"Agent added to the dict of agents.")
         logging.debug(f"Simulation agent dict now reads:")
         for key in self.agentList:
@@ -96,6 +98,9 @@ class agentManager:
 
         # Update the agent treeView to reflect the changes
         self.parent.contextView.updateAgentTreeView()
+
+    def pushDataToCanvas(self):
+        self.parent.mainView.mainCanvas.ingestAgentData(self)
 
     def packageAgentData(self):
         """

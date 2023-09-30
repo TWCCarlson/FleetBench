@@ -105,6 +105,9 @@ class contextView(tk.Frame):
         self.agentTreeView.bind('<Motion>', 'break') # Prevents resizing
         self.agentListFrame.bind('<Enter>', self.bindAgentClicks)
         self.agentListFrame.bind('<Leave>', self.unbindAgentClicks)
+        agentSelectVar = self.parent.mainView.mainCanvas.currentClickedAgent
+        agentSelectVar.trace_add("write", lambda *args, agentSelected=agentSelectVar:
+                self.selectAgent(agentSelectVar.get()))
         logging.debug("Bound mouse events to agentTreeView")
 
         # Initialize scrolling
@@ -189,25 +192,35 @@ class contextView(tk.Frame):
         self.agentTreeView.unbind('<Button-1>', self.agentClickBindFunc)
         self.agentTreeView.unbind('<Button-3>', self.agentRClickBindFunc)
 
+    def updateCurrentAgent(self):
+        agentName = self.parent.mainView.mainCanvas.currentClickedAgent.get()
+        self.currentAgent = self.parent.agentManager.agentDict[agentName]
+
+    def selectAgent(self, selectedAgentName):
+        agentIID = self.agentTreeView.tag_has(selectedAgentName)
+        self.agentTreeView.selection_set(agentIID)
+        self.updateCurrentAgent()
+
     def handleAgentSelect(self, event):
         # Identify the selected row
         selectedRow = self.agentTreeView.identify_row(event.y)
         self.agentTreeView.selection_set(selectedRow)
 
         if selectedRow in self.agentTreeView.tag_has("agent"):
-            # Clear existing highlights
-            self.parent.mainView.mainCanvas.clearHighlight()
-            rowData = self.agentTreeView.item(selectedRow)
-            # Hightlight the selected agent
-            agentID = rowData["tags"][1]
-            agentRef = self.parent.agentManager.agentList.get(agentID)
-            agentRef.highlightAgent(multi=False)
-            if agentRef.currentTask:
-                agentRef.currentTask.highlightTask(multi=False)
-            # Update agentManager's currentAgent prop
-            self.parent.agentManager.currentAgent = agentRef
-            self.parent.toolBar.enableAgentManagement()
-            logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
+            # Update context view's tracked agent
+            self.updateCurrentAgent()
+
+            # # Clear existing highlights
+            # self.parent.mainView.mainCanvas.clearHighlight()
+            # rowData = self.agentTreeView.item(selectedRow)
+            # # Hightlight the selected agent
+            # agentID = rowData["tags"][1]
+            # agentRef = self.parent.agentManager.agentList.get(agentID)
+            # agentRef.highlightAgent(multi=False)
+            # if agentRef.currentTask:
+            #     agentRef.currentTask.highlightTask(multi=False)
+            # # Update agentManager's currentAgent prop
+            logging.debug(f"User clicked on agent '{self.currentAgent.ID}' in agentTreeView.")
             # Trigger movement button state validation
             self.validateMovementButtonStates()
 
@@ -379,6 +392,10 @@ class contextView(tk.Frame):
         self.movementFrame.columnconfigure(2, weight=1)
         logging.debug("Rendered movement interface containing frame.")
 
+        # Event binding to check movement button validity upon agent selection
+        agentSelectVar = self.parent.mainView.mainCanvas.currentClickedAgent
+        agentSelectVar.trace_add("write", lambda *args: self.validateMovementButtonStates())
+
         ## Movement buttons
         # These should probably not be hotkeyed — its an extra state to manage without much benefit. 
         # Most movement is algorithmic, not manual, a few clicks won't be a significant problem
@@ -413,7 +430,7 @@ class contextView(tk.Frame):
 
     def validateMovementButtonStates(self):
         # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
+        agentRef = self.currentAgent
         # agentRef = self.parent.agentManager.agentList.get(agentID)
         agentID = agentRef.ID
 
@@ -455,40 +472,22 @@ class contextView(tk.Frame):
         logging.info("Validated all movement interface button states.")
 
     def moveAgentUp(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.moveUp()
+        self.currentAgent.moveUp()
 
     def moveAgentLeft(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.moveLeft()
+        self.currentAgent.moveLeft()
 
     def moveAgentRight(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.moveRight()
+        self.currentAgent.moveRight()
 
     def moveAgentDown(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.moveDown()
+        self.currentAgent.moveDown()
 
     def rotateAgentCW(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.rotateCW()
+        self.currentAgent.rotateCW()
 
     def rotateAgentCCW(self):
-        # Retrieve the current agent's object
-        agentRef = self.parent.agentManager.currentAgent
-        # Call movement method
-        agentRef.rotateCCW()
+        self.currentAgent.rotateCCW()
 
     def pauseAgent(self):
         logging.info("User paused the agent.")

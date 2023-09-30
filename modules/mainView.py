@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageTk
 pp = pprint.PrettyPrinter(indent=4)
 import networkx as nx
 import logging
+from modules.mainCanvas import mainCanvas as newCanvas
 
 class mainView(tk.Frame):
     """
@@ -42,7 +43,7 @@ class mainView(tk.Frame):
         
         # Build the canvas containing the display information
         logging.debug("Building the canvas . . .")
-        self.mainCanvas = mainCanvas(self, self.appearanceValues)
+        self.mainCanvas = newCanvas(self, self.appearanceValues, "editCanvas", gridLoc=(0,0))
 
         # Initialize scrolling behavior
         self.initScrolling()

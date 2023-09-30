@@ -9,7 +9,7 @@ class appearanceValues():
         """
         self.openNodeColor = "black"
         self.openNodeSizeRatio = 0.1
-        self.chargeNodeColor = "yellow"
+        self.chargeNodeColor = "sandy brown"
         self.chargeNodeSizeRatio = 0.28
         self.depositNodeColor = "light green"
         self.depositNodeSizeRatio = 0.28
@@ -22,9 +22,9 @@ class appearanceValues():
             Edge style values
         """
         self.edgeColor = "black"
-        self.edgeWidth = 3
+        self.edgeWidth = 5
         self.danglingEdgeColor = "green"
-        self.danglingEdgeWidth = 3
+        self.danglingEdgeWidth = 5
 
         """
             Agent style values
@@ -48,6 +48,13 @@ class appearanceValues():
         self.highlightTextSize = 8
         self.defaultHighlightColor = "orange red"
         self.defaultHighlightAlpha = 0.4
+
+        """
+            Misc. Canvas item style values
+        """
+        self.defaultTextColor = "white"
+        self.canvasArrowDefaultColor = "white"
+        self.canvasArrowDefaultWidth = 3
 
         """
             Editor window style
@@ -79,7 +86,7 @@ class appearanceValues():
         self.canvasTileSize = 48
         self.canvasTileCircleRatio = 0.28
         self.canvasGridlineColor = "black"
-        self.canvasEdgeWidth = 4
+        self.canvasEdgeWidth = 6
 
         # Contextview style
         self.contextViewHeight = screen_height - window_unusable

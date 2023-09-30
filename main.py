@@ -114,6 +114,7 @@ class App(tk.Tk):
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test_manytask")
         self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/oneagent_onetask_assigned")
+        self.mainView.mainCanvas.initialRender()
 
         self.mainloop()
 
