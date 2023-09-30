@@ -188,69 +188,87 @@ class agentClass:
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' upwards.")
         # Set the target node to be north
         targetNode = (self.position[0], self.position[1]-1)
-        self.position = targetNode
         # Change orientation to represent turning to move north
-        self.orientation = "N"
+        targetOrientation = "N"
         # Update the canvas with the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.position, "targetNodeID": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": targetOrientation, "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "move", {"highlightTag": "agent"+str(self.numID)+"Highlight", "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Update the movement buttons with the change
+        self.position = targetNode
+        self.orientation = targetOrientation
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.contextView.validateMovementButtonStates()
-        # Shift the highlighting with the change
         logging.debug(f"Agent '{self.ID}:{self.numID}' moved upwards.")
-        self.highlightAgent(multi=False)
         
     def moveLeft(self):
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' leftwards.")
         # Set the target node to be west
         targetNode = (self.position[0]-1, self.position[1])
-        self.position = targetNode
         # Change orientation to represent turning to move north
-        self.orientation = "W"
+        targetOrientation = "W"
         # Update the canvas with the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.position, "targetNodeID": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": targetOrientation, "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "move", {"highlightTag": "agent"+str(self.numID)+"Highlight", "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Update the movement buttons with the change
+        self.position = targetNode
+        self.orientation = targetOrientation
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.contextView.validateMovementButtonStates()
-        # Shift the highlighting with the change
         logging.debug(f"Agent '{self.ID}:{self.numID}' moved leftwards.")
-        self.highlightAgent(multi=False)
-        
 
     def moveRight(self):
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' rightwards.")
         # Set the target node to be east
         targetNode = (self.position[0]+1, self.position[1])
-        self.position = targetNode
         # Change orientation to represent turning to move north
-        self.orientation = "E"
+        targetOrientation = "E"
         # Update the canvas with the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.position, "targetNodeID": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": targetOrientation, "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "move", {"highlightTag": "agent"+str(self.numID)+"Highlight", "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Update the movement buttons with the change
+        self.position = targetNode
+        self.orientation = targetOrientation
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.contextView.validateMovementButtonStates()
-        # Shift the highlighting with the change
         logging.debug(f"Agent '{self.ID}:{self.numID}' moved rightwards.")
-        self.highlightAgent(multi=False)
         
-
     def moveDown(self):
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' downwards.")
         # Set the target node to be south
         targetNode =  (self.position[0], self.position[1]+1)
-        self.position = targetNode
         # Change orientation to represent turning to move north
-        self.orientation = "S"
+        targetOrientation = "S"
         # Update the canvas with the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.position, "targetNodeID": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": targetOrientation, "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "move", {"highlightTag": "agent"+str(self.numID)+"Highlight", "position": targetNode})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Update the movement buttons with the change
+        self.position = targetNode
+        self.orientation = targetOrientation
+        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
         self.parent.parent.contextView.validateMovementButtonStates()
-        # Shift the highlighting with the change
-        logging.debug(f"Agent '{self.ID}:{self.numID}' moved downwards.")
-        self.highlightAgent(multi=False)
         
-
+        logging.debug(f"Agent '{self.ID}:{self.numID}' moved downwards.")
+        
     def rotateCW(self):
         logging.debug(f"User tried to rotate agent '{self.ID}:{self.numID}' clockwise.")
         # Fetch current orientation as a number from the direction dictionary
@@ -260,13 +278,12 @@ class agentClass:
         # Find the new direction as a char
         self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
         # Redraw the canvas to reflect the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": self.orientation, "position": self.position})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Maintain the highlighting with the change
         logging.debug(f"Agent '{self.ID}:{self.numID}' rotated clockwise.")
-        self.highlightAgent(multi=False)
         
-
     def rotateCCW(self):
         logging.debug(f"User tried to rotate agent '{self.ID}:{self.numID}' counter-clockwise.")
         # Fetch current orientation as a number from the direction dictionary
@@ -276,9 +293,9 @@ class agentClass:
         # Find the new direction as a char
         self.orientation = list(self.dirDict.keys())[list(self.dirDict.values()).index(newOrient)]
         # Redraw the canvas to reflect the change
-        self.parent.parent.mapData.updateAgentLocations(self.parent.agentList)
-        self.parent.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "agent", "rotate", {"agentNumID": self.numID, "orientation": self.orientation, "position": self.position})
+        self.parent.parent.mainView.mainCanvas.handleRenderQueue()
         # Maintain the highlighting with the change
         logging.debug(f"Agent '{self.ID}:{self.numID}' rotated counterclockwise.")
-        self.highlightAgent(multi=False)
         

@@ -415,10 +415,10 @@ class contextView(tk.Frame):
         # Rotational movement
         self.rotateCW = tk.Button(self.movementFrame, text="CW", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.rotateAgentCW)
-        self.rotateCW.grid(row=0, column=0, pady=4, padx=4, columnspan=1, sticky=tk.SE)
+        self.rotateCW.grid(row=0, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SW)
         self.rotateCCW = tk.Button(self.movementFrame, text="CCW", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.rotateAgentCCW)
-        self.rotateCCW.grid(row=0, column=2, pady=4, padx=4, columnspan=1, sticky=tk.SW)
+        self.rotateCCW.grid(row=0, column=0, pady=4, padx=4, columnspan=1, sticky=tk.SE)
         # Meta controls
         self.pause = tk.Button(self.movementFrame, text="Pause", width=8, height=3, relief=tk.GROOVE, borderwidth=6,
             command=self.pauseAgent, background='yellow')

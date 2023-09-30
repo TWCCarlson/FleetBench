@@ -102,30 +102,26 @@ class mainCanvas(tk.Canvas):
 
     def initialRender(self):
         self.renderGraphState()
-        nodeID = "(2, 2)"
-        self.renderTileText(nodeID, "100", "pathfind", tk.NE)
-        self.renderTileText("(1,1)", "100", "pathfind", tk.NE)
-        self.renderTileText("(1,2)", "100", "pathfind", tk.NE)
-        self.renderTileText("(2,1)", "100", "pathfind", tk.NE)
+        # nodeID = "(2, 2)"
         # self.renderDirectionArrow([nodeID, "(1,2)", "(1,1)"], lineType="pathfind")
-        self.requestRender("agent", "move", {"agentNumID": 0, "sourceNodeID": "(6, 6)", "targetNodeID": "(1, 1)"})
+        # self.requestRender("agent", "move", {"agentNumID": 0, "sourceNodeID": "(6, 6)", "targetNodeID": "(1, 1)"})
         # self.requestRender("agent", "delete", {"agentNumID": 0})
         # self.requestRender("agent", "clear", {"regenerate": True})
-        self.requestRender("agent", "new", {"agentNumID": 1, "position": "(4, 5)", "color":"red"})
-        self.requestRender("agent", "rotate", {"agentNumID": 1, "orientation": "E", "position": "(4, 5)"})
+        # self.requestRender("agent", "new", {"agentNumID": 1, "position": "(4, 5)", "color":"red"})
+        # self.requestRender("agent", "rotate", {"agentNumID": 1, "orientation": "E", "position": "(4, 5)"})
         # self.requestRender("highlight", "move", {"agentNumID": 0, "position": "(1, 1)"})
         # self.requestRender("highlight", "delete", {"agentNumID": 0})
-        self.requestRender("highlight", "new", {"targetNodeID": "(5, 2)", "highlightType": "pathfindHighlight", "multi": True})
+        # self.requestRender("highlight", "new", {"targetNodeID": "(5, 2)", "highlightType": "pathfindHighlight", "multi": True})
         # self.requestRender("highlight", "clear", {})
-        self.requestRender("pathfind", "new", {"nodePath": ["(2, 2)", "(1,2)", "(1,1)"], "lineType": "pathfind"})
-        self.requestRender("pathfind", "extend", {"oldNodePath": ["(2, 2)", "(1,2)", "(1,1)"], "pathExtension": ["(2, 1)", "(3,1)"]})
-        self.requestRender("pathfind", "delete", {"oldNodePath": ["(2, 2)", "(1,2)", "(1,1)", "(2, 1)", "(3,1)"]})
+        # self.requestRender("pathfind", "new", {"nodePath": ["(2, 2)", "(1,2)", "(1,1)"], "lineType": "pathfind"})
+        # self.requestRender("pathfind", "extend", {"oldNodePath": ["(2, 2)", "(1,2)", "(1, 1)"], "pathExtension": ["(2, 1)", "(3,1)"]})
+        # self.requestRender("pathfind", "delete", {"oldNodePath": ["(2, 2)", "(1,2)", "(1,1)", "(2, 1)", "(3,1)"]})
         # self.requestRender("pathfind", "clear", {})
-        self.requestRender("text", "new", {"position": "(4, 3)", "text": " I", "anchor": "nw", "textType": "memes", "textColor": "black"})
-        self.requestRender("text", "new", {"position": "(4, 3)", "text": "AM ", "anchor": "ne", "textType": "memes", "textColor": "black"})
-        self.requestRender("text", "new", {"position": "(4, 3)", "text": "STUPID :)", "anchor": "s", "textType": "memes", "textColor": "black"})
-        self.requestRender("text", "delete", {"textType": "memes"})
-        self.requestRender("text", "new", {"position": "(4, 3)", "text": "henlo :)", "anchor": "center", "textType": "memes", "textColor": "black"})
+        # self.requestRender("text", "new", {"position": "(4, 3)", "text": " I", "anchor": "nw", "textType": "memes", "textColor": "black"})
+        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "AM ", "anchor": "ne", "textType": "memes", "textColor": "black"})
+        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "STUPID :)", "anchor": "s", "textType": "memes", "textColor": "black"})
+        # self.requestRender("text", "delete", {"textType": "memes"})
+        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "henlo :)", "anchor": "center", "textType": "memes", "textColor": "black"})
         # self.requestRender("canvas", "clear", {})
         # self.requestRender("canvas", "render", {})
         self.handleRenderQueue()
@@ -133,6 +129,7 @@ class mainCanvas(tk.Canvas):
 
     def renderGraphState(self):
         # Run once, on start
+        self.renderQueue = []
         self.renderNodes()
         self.renderEdges()
         self.renderDanglingEdges()
@@ -145,7 +142,6 @@ class mainCanvas(tk.Canvas):
 
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
-        self.renderQueue = []
         acceptedRenderTypes = {
             "agent": {
                 "move": self.moveAgentObject,
@@ -182,8 +178,10 @@ class mainCanvas(tk.Canvas):
         self.renderQueue.append((actionFunction, renderData))
 
     def handleRenderQueue(self):
-        for action, data in self.renderQueue:
+        while len(self.renderQueue) != 0:
+            (action, data) = self.renderQueue.pop(0)
             action(data)
+        self.sortCanvasLayers()
 
     def moveAgentObject(self, renderData):
         # Get tag, source, target nodes
@@ -230,17 +228,17 @@ class mainCanvas(tk.Canvas):
             self.renderAgents()
 
     def moveHighlightObject(self, renderData):
-        agentNumID = renderData["agentNumID"]
         newPos = renderData["position"]
+        highlightTag = renderData["highlightTag"]
         newCanvasPosX, newCanvasPosY = self.nodeToCanvasTile(newPos)
         newCanvasPosX = newCanvasPosX - 0.5 * self.canvasTileSize
         newCanvasPosY = newCanvasPosY - 0.5 * self.canvasTileSize
         # Find a specifically tagged highlight, and shift it to a new position
-        # agentHighlight = self.find_withtag()
-        self.moveto("agent"+str(agentNumID)+"Highlight", newCanvasPosX, newCanvasPosY)
+        obj = self.find_withtag(highlightTag)
+        self.moveto(obj, newCanvasPosX, newCanvasPosY)
 
     def deleteHighlightObject(self, renderData):
-        self.delete("agent"+str(renderData["agentNumID"])+"Highlight")
+        self.delete(renderData["highlightTag"])
 
     def newHighlightObject(self, renderData):
         nodeID = renderData["targetNodeID"] #req'd
@@ -277,13 +275,14 @@ class mainCanvas(tk.Canvas):
             oldNodePath = tuple(renderData["oldNodePath"])
         obj = self.find_withtag(oldNodePath)
         tags = list(self.gettags(obj))
-        extensionPath = renderData["pathExtension"]
-        fill = self.itemcget(obj, "fill")
-        width = self.itemcget(obj, "width")
-        lineType = tags.pop(1)
-        newPath = oldNodePath + tuple(eval(node) for node in extensionPath)
-        self.delete(obj)
-        self.renderDirectionArrow(newPath, lineType, color=fill, width=width)
+        if tags:
+            extensionPath = renderData["pathExtension"]
+            fill = self.itemcget(obj, "fill")
+            width = self.itemcget(obj, "width")
+            lineType = tags.pop(1)
+            newPath = oldNodePath + tuple(eval(node) for node in extensionPath)
+            self.delete(obj)
+            self.renderDirectionArrow(newPath, lineType, color=fill, width=width)
 
     def clearPathfindObjects(self, *args):
         # Possible this should be expanded into a general arrows method with variable tag acceptance
