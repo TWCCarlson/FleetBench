@@ -435,6 +435,7 @@ class mainCanvas(tk.Canvas):
         logging.info("Rendered all agents in agentManager.")
 
     def agentClickHighlighter(self, agentName, agentID, event):
+        print("captured agent clicked event")
         # Remove previous highlighting
         logging.debug("Handling click on agent in main canvas.")
         self.clearHighlight()

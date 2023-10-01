@@ -61,6 +61,8 @@ class toolBar(tk.Frame):
         # Create a labeled container for manual agent manipulation
         self.agentManageFrame = tk.LabelFrame(self, text="Agent Manager")
         self.agentManageFrame.grid(row=1, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
+        self.mainView.mainCanvas.currentClickedAgent.trace_add("write",
+                lambda *args : self.enableAgentManagement())
         self.agentManagePrompt()
         logging.info("Agent Manager UI created successfully.")
 
@@ -467,7 +469,9 @@ class toolBar(tk.Frame):
         self.taskManagePrompt()
 
         # Display the currently managed agent
-        agentRef = self.parent.agentManager.currentAgent
+        agentName = self.mainView.mainCanvas.currentClickedAgent.get()
+        agentRef = self.parent.agentManager.agentDict[agentName]
+        self.managedAgentObjectReference = agentRef
         self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentRef.numID}:{agentRef.ID} at {agentRef.position}")
         self.managedAgentLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
@@ -503,30 +507,31 @@ class toolBar(tk.Frame):
             self.agentNoTasksAvailableLabel.grid(row=1, column=1)
 
     def prepSelectedTaskForAssignment(self, event):
-        # Find the task object ID
-        selectedTaskOption = self.agentTaskStringVar.get()
-        selectedTaskID = next((taskID for taskID, task in self.taskManager.taskList.items() if task.name == selectedTaskOption))
-        self.taskManager.taskList[selectedTaskID].highlightTask(multi=False)
-        
-        # Save the task into an attribute for external access
-        self.parent.taskManager.currentTask = self.parent.taskManager.taskList[selectedTaskID]
+        # Find the task object
+        selectedTaskName = self.agentTaskStringVar.get()
+        taskRef = self.taskManager.taskDict[selectedTaskName]
+        self.managedAgentNewTaskObjectReference = taskRef
+
+        # Highlight to preview the assignment for the user
+        taskRef.highlightTask(multi=False)
+        self.mainView.mainCanvas.handleRenderQueue()
 
         # Enable the assignment action button
         self.agentTaskAssignmentButton.configure(state=tk.ACTIVE)
 
     def assignSelectedTask(self):
         # Execute the task assignment
-        self.parent.taskManager.assignAgentToTask()
-        self.parent.agentManager.assignTaskToAgent()
+        self.parent.agentManager.unassignAgent(self.managedAgentObjectReference)
+        self.parent.taskManager.unassignTask(self.managedAgentNewTaskObjectReference)
+        self.parent.agentManager.assignTaskToAgent(self.managedAgentNewTaskObjectReference, self.managedAgentObjectReference)
+        self.parent.taskManager.assignAgentToTask(self.managedAgentObjectReference, self.managedAgentNewTaskObjectReference)
 
         # Reset the UI
         self.agentManagePrompt()
 
         # Clear highlights on the mainView
-        self.parent.mainView.mainCanvas.clearHighlight()
-
-        # Re-render the app state
-        self.parent.mainView.mainCanvas.renderGraphState()
+        self.mainView.mainCanvas.requestRender("highlight", "clear", {})
+        self.mainView.mainCanvas.handleRenderQueue()
 
     def taskCreationPrompt(self):
         logging.debug("Creating task creation prompt UI elements.")   
@@ -1003,6 +1008,7 @@ class toolBar(tk.Frame):
 
         # Display the currently managed task
         taskRef = self.parent.taskManager.currentTask
+        self.managedTaskObjectReference = taskRef
         self.managedTaskLabel = tk.Label(self.taskManageFrame, text=f"Managing Task {taskRef.numID}:{taskRef.name}. Pickup node is: {taskRef.pickupPosition} Dropoff node is: {taskRef.dropoffPosition}")
         self.managedTaskLabel.grid(row=0, column=0, columnspan=3, sticky=tk.W)
 
@@ -1040,28 +1046,29 @@ class toolBar(tk.Frame):
     def prepSelectedAgentForAssignment(self, event):
         # Find the agent object ID
         selectedAgentOption = self.taskAgentStringVar.get()
-        selectedAgentID = next((agentID for agentID, agent in self.agentManager.agentList.items() if agent.ID == selectedAgentOption))
-        self.agentManager.agentList[selectedAgentID].highlightAgent(multi=False)
+        agentRef = self.agentManager.agentDict[selectedAgentOption]
+        self.managedTaskNewAgentObjectReference = agentRef
 
-        # Save the task into an attribute for external access
-        self.parent.agentManager.currentAgent = self.parent.agentManager.agentList[selectedAgentID]
+        # Highlight to preview the assignment for the user
+        agentRef.highlightAgent(multi=False)
+        self.mainView.mainCanvas.handleRenderQueue()
 
         # Enable the assignment action button
         self.taskAgentAssignmentButton.configure(state=tk.ACTIVE)
 
     def assignSelectedAgent(self):
         # Execute the task assignment
-        self.parent.taskManager.assignAgentToTask()
-        self.parent.agentManager.assignTaskToAgent()
+        self.parent.agentManager.unassignAgent(self.managedTaskNewAgentObjectReference)
+        self.parent.taskManager.unassignTask(self.managedTaskObjectReference)
+        self.parent.agentManager.assignTaskToAgent(self.managedTaskObjectReference, self.managedTaskNewAgentObjectReference)
+        self.parent.taskManager.assignAgentToTask(self.managedTaskNewAgentObjectReference, self.managedTaskObjectReference)
 
         # Reset the UI
         self.taskManagePrompt()
 
-        # Clear the highlights on the mainView
-        self.parent.mainView.mainCanvas.clearHighlight()
-
-        # Re-render the app state
-        self.parent.mainView.mainCanvas.renderGraphState()
+        # Clear highlights on the mainView
+        self.mainView.mainCanvas.requestRender("highlight", "clear", {})
+        self.mainView.mainCanvas.handleRenderQueue()
 
     def createRandomSeedPane(self):
         logging.debug("Creating random generator engine UI panel elements . . .")

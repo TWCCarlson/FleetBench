@@ -18,6 +18,7 @@ class taskManager:
         # Leave room for misc details (weight, etc)
         # Each task should be an instance of a task class
         self.taskList = {}
+        self.taskDict = {}
         self.taskPositionList = {}
         self.currentTask = []
         logging.info("Task manager initialized.")
@@ -42,6 +43,7 @@ class taskManager:
             taskName = str(self.dictLength)
         self.latestTask = taskClass(self, **kwargs, taskName=taskName, numID=self.dictLength)
         self.taskList[self.dictLength] = self.latestTask
+        self.taskDict[taskName] = self.latestTask
         logging.info("Task added to taskManager taskList.")
 
         # Update the treeview
@@ -75,19 +77,16 @@ class taskManager:
         self.parent.mainView.mainCanvas.renderGraphState()
         logging.info(f"Task '{targetTaskName}:{targetTaskID}' successfully deleted.")
 
-    def assignAgentToTask(self):
-        # Retrieve the managed agent and target task IDs
-        agentRef = self.parent.agentManager.currentAgent
-        taskRef = self.currentTask
-
+    def assignAgentToTask(self, agentRef, taskRef):
         # Assign the agent to the task
         taskRef.assignee = agentRef
 
         # Update the task treeView to reflect the changes
         self.parent.contextView.updateTaskTreeView()
 
-        # # Assign the task to the agent
-        # self.parent.agentManager.agentList[agentRef.numID].currentTask = taskRef
+    def unassignTask(self, taskRef):
+        if taskRef.assignee is not None and taskRef.assignee.currentTask is not None:
+            taskRef.assignee.currentTask = None
 
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
@@ -185,7 +184,7 @@ class taskClass:
         self.pickupNode = f"({self.pickupPosition[0]}, {self.pickupPosition[1]})"
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
-        self.assignee = kwargs.get("assignee")
+        self.assignee = kwargs.get("assignee", None)
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:

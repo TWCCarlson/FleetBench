@@ -633,15 +633,11 @@ class mainCanvas(tk.Canvas):
         self.generateInfoTileEvents()
 
     def generateInfoTileEvents(self):
-        # For each tile, attach mouse interaction events reflecting 
+        # For each tile, attach mouse interaction events reflecting contents of the tile
         for tileNode, (tileRef, tileID)  in self.infoTiles.items():
             self.tag_bind(tileID, "<Leave>", self.hoverText.set(". . ."))
             self.tag_bind(tileID, "<Enter>", partial(self.setInfoTileHoverText, tileNode))
-            if "agent" in self.graphRef.nodes[tileNode]:
-                nodeData = self.graphRef.nodes[tileNode]
-                nodeAgentName = nodeData["agent"].ID
-                nodeAgentID = nodeData["agent"].numID
-                self.tag_bind(tileID, "<Button-1>", partial(self.agentSelectHandler, tileNode, nodeAgentName, nodeAgentID))
+            self.tag_bind(tileID, "<Button-1>", partial(self.agentSelectHandler, tileNode))
 
     def setInfoTileHoverText(self, tileNode, event):
         nodeData = self.graphRef.nodes[tileNode]
@@ -650,10 +646,14 @@ class mainCanvas(tk.Canvas):
             hoverString = hoverString + f", Agent Name: {nodeData['agent'].ID}"
         self.hoverText.set(hoverString)
 
-    def agentSelectHandler(self, tileNode, agentName, agentID, event=None):
-        self.requestHighlight(tileNode, "agentHighlight", multi=False, highlightTags=["agent" + str(agentID) + "Highlight"])
-        self.sortCanvasLayers(targetLayer="agentHighlight", layerMotion="lower")
-        self.currentClickedAgent.set(agentName)
+    def agentSelectHandler(self, tileNode, event=None):
+        nodeData = self.graphRef.nodes[tileNode]
+        if "agent" in nodeData:
+            agentName = nodeData["agent"].ID
+            agentNumID = nodeData["agent"].numID
+            self.requestHighlight(tileNode, "agentHighlight", multi=False, highlightTags=["agent" + str(agentNumID) + "Highlight"])
+            self.sortCanvasLayers(targetLayer="agentHighlight", layerMotion="lower")
+            self.currentClickedAgent.set(agentName)
 
     def buildHighlightManager(self):
         # Establishes the format of the highlight manager

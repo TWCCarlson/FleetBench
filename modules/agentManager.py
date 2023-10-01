@@ -81,15 +81,16 @@ class agentManager:
         self.parent.mainView.mainCanvas.renderGraphState()
         logging.debug(f"Agent '{targetAgentName}:{targetAgent}' successfully deleted.")
 
-    def assignTaskToAgent(self):
-        agentRef = self.currentAgent
-        taskRef = self.parent.taskManager.currentTask
-
+    def assignTaskToAgent(self, taskRef, agentRef):
         # Assign the task to the agent
         agentRef.currentTask = taskRef
 
         # Update the agent treeView to reflect the changes
         self.parent.contextView.updateAgentTreeView()
+
+    def unassignAgent(self, agentRef):
+        if agentRef.currentTask is not None and agentRef.currentTask.assignee is not None:
+            agentRef.currentTask.assignee = None
 
     def fixAssignments(self):
         # Iterate through the list of all agents, fixing currentTask to refer to objects instead of IDs

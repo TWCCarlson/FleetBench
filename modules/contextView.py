@@ -194,6 +194,8 @@ class contextView(tk.Frame):
 
     def updateCurrentAgent(self):
         agentName = self.parent.mainView.mainCanvas.currentClickedAgent.get()
+        if agentName.isnumeric():
+            agentName = int(agentName)
         self.currentAgent = self.parent.agentManager.agentDict[agentName]
 
     def setCurrentAgent(self, agentName):
