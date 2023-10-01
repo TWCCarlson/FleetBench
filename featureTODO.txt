@@ -68,6 +68,8 @@ GRAPHICS OVERHAUL
 expand canvas delete and clear to accept area args (using a bbox and .find_overlapping/.find_enclosed)
 fully decouple the canvas by passing it by reference to any and all functions which use it, thus letting user update any particular graph
 'current' task/agent selections need to be handled in a traced way such that selecting another doesnt leave a lingering selected agent intercepting movement
+highlights need a way of being hidden instead of deleted and remade
+render requests should be made tag-safe (agentobjects dont accidentally get deleted by highlight delete requests)
 
 Informational Classes are then:
     mapData

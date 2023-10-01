@@ -320,6 +320,8 @@ class mainCanvas(tk.Canvas):
     """
 
     def graphCoordToCanvasCoord(self, nodePos):
+        if isinstance(nodePos, str):
+            nodePos = eval(nodePos)
         # Returns the pixel coordinate at the center of the tile
         return nodePos * self.canvasTileSize + 0.5 * self.canvasTileSize
     

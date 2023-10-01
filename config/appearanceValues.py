@@ -41,8 +41,8 @@ class appearanceValues():
             Highlight style values
         """
         self.highlightAlpha = 0.5
-        self.depositHighlightColor = "light blue"
-        self.pickupHighlightColor = "light green"
+        self.depositHighlightColor = "blue"
+        self.pickupHighlightColor = "green"
         self.agentHighlightColor = "red"
         self.pathfindHighlightColor = "purple4"
         self.highlightTextSize = 8

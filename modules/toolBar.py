@@ -255,41 +255,40 @@ class toolBar(tk.Frame):
         yPos = stringVarY.get()
         logging.debug(f"Received request to highlight tile: '({xPos},{yPos}):{highlightType}'")
 
-        # Color selection dictionary
-        highlightColors = {
-            "agentHighlight": "red",
-            "pickupHighlight": "green",
-            "dropoffHighlight": "cyan"
-        }
-        highlightColor = highlightColors[highlightType]
-        logging.debug(f"Hightlight setting '{highlightType}:{highlightColor}")
-
         # Using guard clauses, check that
         # The x input is numeric
         if not xPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.clearHighlight(highlightType)
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": highlightType})
+            self.mainView.mainCanvas.handleRenderQueue()
             logging.debug(f"Variable xPos='{xPos}' is not numeric. Highlight impossible.")
             return
         # The y input is numeric
         if not yPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.clearHighlight(highlightType)
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": highlightType})
+            self.mainView.mainCanvas.handleRenderQueue()
             logging.debug(f"Variable yPos='{yPos}' is not numeric. Highlight impossible.")
             return
         # If all guard clauses are passed, highlight the tile
         if highlightType == 'agentHighlight':
-            self.mainView.mainCanvas.highlightTile(xPos, yPos, highlightColor, multi=False, highlightType=highlightType)
-            logging.debug(f"{highlightType} highlight on tile '({xPos},{yPos})' executed successfully.")
+            self.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": (xPos, yPos), "highlightType": highlightType, "multi": False, "highlightTags": ["agentPlacement"]})
             # Validate for placing an agent
             self.validateAgentPlacement(xPos, yPos, highlightType)
-        elif highlightType == 'pickupHighlight' or highlightType == 'dropoffHighlight':
-            self.mainView.mainCanvas.highlightTile(xPos, yPos, highlightColor, multi=False, highlightType=highlightType)
-            logging.debug(f"{highlightType} highlight on tile '({xPos},{yPos})' executed successfully.")
+        elif highlightType == 'pickupHighlight':
+            self.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": (xPos, yPos), "highlightType": highlightType, "multi": False, "highlightTags": ["agentPlacement"]})
             # Validate for placing a task
             self.validateTaskPlacement(highlightType)
+        elif highlightType == 'depositHighlight':
+            self.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": (xPos, yPos), "highlightType": highlightType, "multi": False, "highlightTags": ["agentPlacement"]})
+            # Validate
+            self.validateTaskPlacement(highlightType)
+        self.mainView.mainCanvas.handleRenderQueue()
 
     def validateAgentPlacement(self, xPos, yPos, highlightType):
         # Using guard clauses, check that
@@ -399,13 +398,12 @@ class toolBar(tk.Frame):
 
     def cancelAgentCreation(self):
         logging.debug("Cancelling agent creation . . .")
-        self.mainView.mainCanvas.clearHighlight('agentHighlight')
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+        self.mainView.mainCanvas.handleRenderQueue()
         self.agentCreationPrompt()
 
     def createAgent(self):
         logging.debug("Creating agent using user-input settings.")
-        # Remove previous highlight of tile
-        self.mainView.mainCanvas.clearHighlight()
         # Create the agent, place it
         # https://networkx.org/documentation/stable/reference/generated/networkx.classes.function.set_node_attributes.html
         # Note that if the dictionary contains nodes that are not in G, the values are silently ignored:
@@ -420,14 +418,16 @@ class toolBar(tk.Frame):
         
         logging.debug(f"New agent settings: '(Name: {ID}, Class: {self.agentClass.get()}, Position: ({xPos}, {yPos}), Orientation: {agentOrientation})'")
 
-        self.agentManager.createNewAgent(
+        agentNumID = self.agentManager.createNewAgent(
             ID=ID,
             position=targetNode, 
             orientation=agentOrientation, 
             className=self.agentClass.get(),
             )
-        # Re-render the map state
-        self.mainView.mainCanvas.renderGraphState()
+        # Remove previous highlights
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+        self.mainView.mainCanvas.requestRender("agent", "new", {"position": targetNode, "agentNumID": agentNumID, "orientation": agentOrientation})
+        self.mainView.mainCanvas.handleRenderQueue()
         # Close agent generator
         self.agentCreationPrompt()
 
@@ -636,7 +636,7 @@ class toolBar(tk.Frame):
         self.dropoffYPosValue = tk.StringVar()
         # self.validateDropoffXPos = self.register(self.highlightTargetXPos)
         # self.commandDropoffXPos = partial(self.highlightTargetXPos, 'X', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue)
-        self.dropoffXPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('dropoffHighlight', b, c, *args))
+        self.dropoffXPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('depositHighlight', b, c, *args))
         self.dropoffXPosEntry = ttk.Spinbox(self.taskSpecsFrame,
             width=6,
             from_=0,
@@ -651,7 +651,7 @@ class toolBar(tk.Frame):
         )
         # self.validateDropoffYPos = self.register(self.highlightTargetYPos)
         # self.commandDropoffYPos = partial(self.highlightTargetYPos, 'Y', 'dropoffHighlight', self.dropoffXPosValue, self.dropoffYPosValue)
-        self.dropoffYPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('dropoffHighlight', b, c, *args))
+        self.dropoffYPosValue.trace_add("write", lambda *args, b=self.dropoffXPosValue, c=self.dropoffYPosValue : self.highlightTargetTile('depositHighlight', b, c, *args))
         self.dropoffYPosEntry = ttk.Spinbox(self.taskSpecsFrame,
             width=6,
             from_=0,
@@ -767,8 +767,9 @@ class toolBar(tk.Frame):
 
     def cancelTaskCreation(self):
         logging.debug("Cancelling task generation . . .")
-        self.mainView.mainCanvas.clearHighlight('pickupHighlight')
-        self.mainView.mainCanvas.clearHighlight('dropoffHighlight')
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+        self.mainView.mainCanvas.handleRenderQueue()
         self.taskCreationPrompt()
 
     def toggleRandomGeneratorRespectsNodeTypeState(self):
@@ -912,8 +913,6 @@ class toolBar(tk.Frame):
 
     def createTask(self):
         logging.debug("Attempting to create task . . .")
-        # Remove previous highlights
-        self.mainView.mainCanvas.clearHighlight()
 
         # Create the task, place it
         pickupXPos = eval(self.pickupXPosValue.get())
@@ -953,13 +952,15 @@ class toolBar(tk.Frame):
                 dropoffPosition = dropoffNode,
                 timeLimit = timeLimit
             )
-            # Re-render the map state
-            self.mainView.mainCanvas.renderGraphState()
+            # Remove previous highlights
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+            self.mainView.mainCanvas.handleRenderQueue()
             # Close the task generator
             self.taskCreationPrompt()
         except nx.NetworkXNoPath:
             # If the graph does not contain connections to allow path completion, display a warning
-            logging.warning("Task is not completable because there is on path between task nodes!")
+            logging.warning("Task is not completable because there is no path between task nodes!")
             tk.messagebox.showerror(title="Invalid Task Path", message=f"No path between {pickupNode} and {dropoffNode}!")
         except RWSE.RWSTaskTimeLimitImpossible as exc:
             logging.warning("Task is not completable because the time limit is too low for the best path to attain.")

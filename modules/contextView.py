@@ -214,11 +214,8 @@ class contextView(tk.Frame):
             # self.parent.mainView.mainCanvas.clearHighlight()
             rowData = self.agentTreeView.item(selectedRow)
             # Hightlight the selected agent
-            print(rowData)
             agentID = rowData["tags"][1]
             agentRef = self.parent.agentManager.agentList.get(agentID)
-            self.setCurrentAgent(agentRef.ID)
-            # Update context view's tracked agent
             agentRef.highlightAgent(multi=False)
             if agentRef.currentTask:
                 agentRef.currentTask.highlightTask(multi=False)
@@ -230,6 +227,7 @@ class contextView(tk.Frame):
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
 
             # Trigger movement button state validation
+            self.setCurrentAgent(agentRef.ID) # Update context view's tracked agent for movement
             self.validateMovementButtonStates()
 
     def handleAgentRClick(self, event):
@@ -359,6 +357,8 @@ class contextView(tk.Frame):
             taskRef.highlightTask(multi=False)
             if taskRef.assignee:
                 taskRef.assignee.highlightAgent(multi=False)
+            else:
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
             self.parent.mainView.mainCanvas.handleRenderQueue()
 
             # Update taskManager's currentTask prop
