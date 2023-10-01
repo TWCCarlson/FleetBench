@@ -176,7 +176,7 @@ class contextView(tk.Frame):
             self.agentTreeView.insert(parent="",
                 index='end',
                 iid=agentID,
-                text=f"A{str(agentNumID)}",
+                text=f"{str(agentNumID)}",
                 values=[agentID, agentPosition, agentClass, agentCurrentTask],
                 tags=["agent", agentNumID, agentID]
             )
@@ -242,7 +242,7 @@ class contextView(tk.Frame):
 
     def createTaskTreeView(self):
         logging.debug("Building taskTreeView page . . .")
-        self.columnList = {'Name': 50, 'Pickup': 50, 'Dropoff': 50, 'Time Limit': 40}
+        self.columnList = {'Name': 50, 'Pickup': 25, 'Dropoff': 25, 'Assignee': 40, 'Time Limit': 40, }
         self.taskTreeView = ttk.Treeview(self.taskListFrame, selectmode='browse')
         self.taskTreeView.grid(row=0, column=0, sticky=tk.S+tk.W+tk.E)
         self.taskTreeView["height"] = 20
@@ -322,12 +322,13 @@ class contextView(tk.Frame):
             taskName = taskData.name
             taskPickupPosition = taskData.pickupNode
             taskDropoffPosition = taskData.dropoffNode
+            taskAssignee = taskData.assignee.ID
             taskTimeLimit = taskData.timeLimit
             self.taskTreeView.insert(parent="",
                 index='end',
                 iid=taskNumID,
-                text=f"T{str(taskNumID)}",
-                values=[taskName, taskPickupPosition, taskDropoffPosition, taskTimeLimit],
+                text=f"{str(taskNumID)}",
+                values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
                 tags=["task", taskNumID, taskName]
             )
             logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")

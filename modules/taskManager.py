@@ -48,7 +48,8 @@ class taskManager:
 
         # Update the treeview
         logging.debug(f"Requesting update to taskTreeView with new taskList . . .")
-        self.parent.contextView.updateTaskTreeView()
+        if not kwargs.get("loadOp", False):
+            self.parent.contextView.updateTaskTreeView()
 
     def deleteTask(self, taskName=None, taskID=None):
         """

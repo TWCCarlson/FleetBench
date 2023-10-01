@@ -133,7 +133,8 @@ class fileCommands(tk.Menu):
                 pickupPosition=pickupPosition,
                 dropoffPosition=dropoffPosition,
                 timeLimit=timeLimit,
-                assignee=assignee
+                assignee=assignee,
+                loadOp=True
                 )
         logging.info("Loaded new task data to session state.")
         
