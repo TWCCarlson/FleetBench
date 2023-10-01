@@ -63,7 +63,6 @@ class mainCanvas(tk.Canvas):
         canvasWidth = tileWidth * self.canvasTileSize
         canvasHeight = tileHeight * self.canvasTileSize
         self.configure(height=canvasHeight, width=canvasWidth, scrollregion=self.bbox("all"))
-        self.drawGridlines()
         logging.debug(f"Canvas '{self.ID}' dimensions updated: canvasWidth={tileWidth}, canvasHeight={tileHeight}")
 
     def renderCanvas(self, *args):
@@ -104,34 +103,11 @@ class mainCanvas(tk.Canvas):
     """
 
     def initialRender(self):
-        self.renderGraphState()
-        # nodeID = "(2, 2)"
-        # self.renderDirectionArrow([nodeID, "(1,2)", "(1,1)"], lineType="pathfind")
-        # self.requestRender("agent", "move", {"agentNumID": 0, "sourceNodeID": "(6, 6)", "targetNodeID": "(1, 1)"})
-        # self.requestRender("agent", "delete", {"agentNumID": 0})
-        # self.requestRender("agent", "clear", {"regenerate": True})
-        # self.requestRender("agent", "new", {"agentNumID": 1, "position": "(4, 5)", "color":"red"})
-        # self.requestRender("agent", "rotate", {"agentNumID": 1, "orientation": "E", "position": "(4, 5)"})
-        # self.requestRender("highlight", "move", {"agentNumID": 0, "position": "(1, 1)"})
-        # self.requestRender("highlight", "delete", {"agentNumID": 0})
-        # self.requestRender("highlight", "new", {"targetNodeID": "(5, 2)", "highlightType": "pathfindHighlight", "multi": True})
-        # self.requestRender("highlight", "clear", {})
-        # self.requestRender("pathfind", "new", {"nodePath": ["(2, 2)", "(1,2)", "(1,1)"], "lineType": "pathfind"})
-        # self.requestRender("pathfind", "extend", {"oldNodePath": ["(2, 2)", "(1,2)", "(1, 1)"], "pathExtension": ["(2, 1)", "(3,1)"]})
-        # self.requestRender("pathfind", "delete", {"oldNodePath": ["(2, 2)", "(1,2)", "(1,1)", "(2, 1)", "(3,1)"]})
-        # self.requestRender("pathfind", "clear", {})
-        # self.requestRender("text", "new", {"position": "(4, 3)", "text": " I", "anchor": "nw", "textType": "memes", "textColor": "black"})
-        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "AM ", "anchor": "ne", "textType": "memes", "textColor": "black"})
-        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "STUPID :)", "anchor": "s", "textType": "memes", "textColor": "black"})
-        # self.requestRender("text", "delete", {"textType": "memes"})
-        # self.requestRender("text", "new", {"position": "(4, 3)", "text": "henlo :)", "anchor": "center", "textType": "memes", "textColor": "black"})
-        # self.requestRender("canvas", "clear", {})
-        # self.requestRender("canvas", "render", {})
-        self.handleRenderQueue()
-        self.sortCanvasLayers()
+        self.drawGridlines()
 
     def renderGraphState(self):
         # Run once, on start
+        self.drawGridlines()
         self.renderNodes()
         self.renderEdges()
         self.renderDanglingEdges()
