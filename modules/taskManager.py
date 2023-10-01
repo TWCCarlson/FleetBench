@@ -200,8 +200,10 @@ class taskClass:
     def highlightTask(self, multi):
         # Hightlight the pickup position
         logging.debug(f"Task '{self.name}:{self.numID}' requests highlighting from 'mainCanvas'.")
-        self.parent.parent.mainView.mainCanvas.highlightTile(self.pickupPosition[0], self.pickupPosition[1], 'green', multi=multi, highlightType='pickupHighlight')
-        self.parent.parent.mainView.mainCanvas.highlightTile(self.dropoffPosition[0], self.dropoffPosition[1], 'blue', multi=multi, highlightType='dropoffHighlight')
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": self.pickupNode, "highlightType": "pickupHighlight", "multi": multi})
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": self.dropoffNode, "highlightType": "depositHighlight", "multi": multi})
 
     # Pathfinding
     # It may be better to have the central AI compute all shortest paths and have agents reference a dict

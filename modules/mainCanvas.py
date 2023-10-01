@@ -246,7 +246,7 @@ class mainCanvas(tk.Canvas):
         multi = renderData["multi"] #req'd
         color = renderData.get("color", None) #optional
         alpha = renderData.get("alpha", None) #optional
-        highlightTags = renderData.get("tags", None) #optional
+        highlightTags = renderData.get("highlightTags", None) #optional
         self.requestHighlight(nodeID, highlightType, multi, color=color, alpha=alpha, highlightTags=highlightTags)
 
     def clearHighlightObjects(self, renderData):
@@ -639,7 +639,7 @@ class mainCanvas(tk.Canvas):
                 nodeData = self.graphRef.nodes[tileNode]
                 nodeAgentName = nodeData["agent"].ID
                 nodeAgentID = nodeData["agent"].numID
-                self.tag_bind(tileID, "<Button-1>", partial(self.agentClickHandler, tileNode, nodeAgentName, nodeAgentID))
+                self.tag_bind(tileID, "<Button-1>", partial(self.agentSelectHandler, tileNode, nodeAgentName, nodeAgentID))
 
     def setInfoTileHoverText(self, tileNode, event):
         nodeData = self.graphRef.nodes[tileNode]
@@ -648,7 +648,7 @@ class mainCanvas(tk.Canvas):
             hoverString = hoverString + f", Agent Name: {nodeData['agent'].ID}"
         self.hoverText.set(hoverString)
 
-    def agentClickHandler(self, tileNode, agentName, agentID, event):
+    def agentSelectHandler(self, tileNode, agentName, agentID, event=None):
         self.requestHighlight(tileNode, "agentHighlight", multi=False, highlightTags=["agent" + str(agentID) + "Highlight"])
         self.sortCanvasLayers(targetLayer="agentHighlight", layerMotion="lower")
         self.currentClickedAgent.set(agentName)
@@ -735,6 +735,7 @@ class mainCanvas(tk.Canvas):
         defaultLayerOrder = [
             "highlight",
             "edge",
+            "danglingEdge",
             "node",
             "agent",
             "canvasLine",

@@ -40,14 +40,13 @@ class appearanceValues():
         """
             Highlight style values
         """
-        self.highlightAlpha = 0.4
+        self.highlightAlpha = 0.5
         self.depositHighlightColor = "light blue"
         self.pickupHighlightColor = "light green"
         self.agentHighlightColor = "red"
         self.pathfindHighlightColor = "purple4"
         self.highlightTextSize = 8
         self.defaultHighlightColor = "orange red"
-        self.defaultHighlightAlpha = 0.4
 
         """
             Misc. Canvas item style values

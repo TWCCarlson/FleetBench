@@ -66,6 +66,8 @@ The redraw/validation loop should probably rely on the graph as much as possible
 GRAPHICS OVERHAUL
 8-neighborhood graph options
 expand canvas delete and clear to accept area args (using a bbox and .find_overlapping/.find_enclosed)
+fully decouple the canvas by passing it by reference to any and all functions which use it, thus letting user update any particular graph
+'current' task/agent selections need to be handled in a traced way such that selecting another doesnt leave a lingering selected agent intercepting movement
 
 Informational Classes are then:
     mapData

@@ -179,10 +179,11 @@ class agentClass:
         # pathfind
         # set orientation
 
-    def highlightAgent(self, multi):
+    def highlightAgent(self, multi=False):
         # Have the agent request highlighting from the main canvas
         logging.debug(f"Agent '{self.ID}:{self.numID}' requests highlighting from 'mainCanvas'.")
-        self.parent.parent.mainView.mainCanvas.highlightTile(self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
+        self.parent.parent.mainView.mainCanvas.requestRender(
+                "highlight", "new", {"targetNodeID": self.position, "highlightType": "agentHighlight", "multi": multi, "highlightTags": ["agent"+str(self.numID)+"Highlight"]})
 
     def moveUp(self):
         logging.debug(f"User tried to move agent '{self.ID}:{self.numID}' upwards.")

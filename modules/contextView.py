@@ -196,6 +196,9 @@ class contextView(tk.Frame):
         agentName = self.parent.mainView.mainCanvas.currentClickedAgent.get()
         self.currentAgent = self.parent.agentManager.agentDict[agentName]
 
+    def setCurrentAgent(self, agentName):
+        self.parent.mainView.mainCanvas.currentClickedAgent.set(agentName)
+
     def selectAgent(self, selectedAgentName):
         agentIID = self.agentTreeView.tag_has(selectedAgentName)
         self.agentTreeView.selection_set(agentIID)
@@ -207,20 +210,25 @@ class contextView(tk.Frame):
         self.agentTreeView.selection_set(selectedRow)
 
         if selectedRow in self.agentTreeView.tag_has("agent"):
-            # Update context view's tracked agent
-            self.updateCurrentAgent()
-
-            # # Clear existing highlights
+            # Clear existing highlights
             # self.parent.mainView.mainCanvas.clearHighlight()
-            # rowData = self.agentTreeView.item(selectedRow)
-            # # Hightlight the selected agent
-            # agentID = rowData["tags"][1]
-            # agentRef = self.parent.agentManager.agentList.get(agentID)
-            # agentRef.highlightAgent(multi=False)
-            # if agentRef.currentTask:
-            #     agentRef.currentTask.highlightTask(multi=False)
-            # # Update agentManager's currentAgent prop
-            logging.debug(f"User clicked on agent '{self.currentAgent.ID}' in agentTreeView.")
+            rowData = self.agentTreeView.item(selectedRow)
+            # Hightlight the selected agent
+            print(rowData)
+            agentID = rowData["tags"][1]
+            agentRef = self.parent.agentManager.agentList.get(agentID)
+            self.setCurrentAgent(agentRef.ID)
+            # Update context view's tracked agent
+            agentRef.highlightAgent(multi=False)
+            if agentRef.currentTask:
+                agentRef.currentTask.highlightTask(multi=False)
+            self.parent.mainView.mainCanvas.handleRenderQueue()
+
+            # Update agentManager's currentAgent prop
+            self.parent.agentManager.currentAgent = agentRef
+            self.parent.toolBar.enableAgentManagement()
+            logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
+
             # Trigger movement button state validation
             self.validateMovementButtonStates()
 
@@ -340,15 +348,19 @@ class contextView(tk.Frame):
         self.taskTreeView.selection_set(selectedRow)
 
         if selectedRow in self.taskTreeView.tag_has("task"):
-            # Clear existing highlights
-            self.parent.mainView.mainCanvas.clearHighlight()
+            # Clear existing task highlights
+            self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "taskHighlight"})
+
+            # Get task data for highlighting
             rowData = self.taskTreeView.item(selectedRow)
-            # Hightlight the selected tasks's pickup and dropoff points
             taskID = rowData["tags"][1]
             taskRef = self.parent.taskManager.taskList.get(taskID)
+            # Perform highlighting
             taskRef.highlightTask(multi=False)
             if taskRef.assignee:
                 taskRef.assignee.highlightAgent(multi=False)
+            self.parent.mainView.mainCanvas.handleRenderQueue()
+
             # Update taskManager's currentTask prop
             self.parent.taskManager.currentTask = taskRef
             self.parent.toolBar.enableTaskManagement()
@@ -496,7 +508,7 @@ class contextView(tk.Frame):
         logging.info("User deleted the agent.")
 
     def createSimulationInformationInterface(self):
-        self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Information")
+        self.contextLabelFrame = tk.LabelFrame(self, text="Simulation Configuration")
         self.contextLabelFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.W, padx=4, columnspan=2)
         self.configureSimulationButton = tk.Button(self.contextLabelFrame, text="Simulation Details", width=20,  command=self.openSimulationInformationWindow, state=tk.DISABLED)
         self.contextLabelFrame.columnconfigure(0, weight=1)
