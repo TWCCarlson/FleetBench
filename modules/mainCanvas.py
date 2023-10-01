@@ -37,6 +37,9 @@ class mainCanvas(tk.Canvas):
             gridlineColor = self.appearanceValues.canvasGridlineColor
         self.setCanvasStyle(bg, width, height, tileSize, gridlineColor)
 
+        # Build render queue storage
+        self.renderQueue = []
+
         # Graph should always be rendered into its frame
         self.renderCanvas()
 
@@ -129,7 +132,6 @@ class mainCanvas(tk.Canvas):
 
     def renderGraphState(self):
         # Run once, on start
-        self.renderQueue = []
         self.renderNodes()
         self.renderEdges()
         self.renderDanglingEdges()

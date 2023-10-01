@@ -47,6 +47,13 @@ class toolBar(tk.Frame):
         # Establish buttons and inputs
         self.initUI()
 
+    def clearManagementHighlights(self):
+        # Remove any residual highlights
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+        self.mainView.mainCanvas.handleRenderQueue()
+
     def initUI(self):
         logging.debug("Creating tool bar ui elements . . .")
         self.columnconfigure(0, weight=1)
@@ -435,6 +442,7 @@ class toolBar(tk.Frame):
 
     def agentManagePrompt(self):
         logging.debug("Creating agent management prompt UI elements.")
+        # Reset UI
         self.clearAgentManagementUI()
         # Create a button that starts prompting the user
         self.manageAgentButton = tk.Button(self.agentManageFrame,
@@ -472,19 +480,12 @@ class toolBar(tk.Frame):
         agentName = self.mainView.mainCanvas.currentClickedAgent.get()
         agentRef = self.parent.agentManager.agentDict[agentName]
         self.managedAgentObjectReference = agentRef
-        self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent {agentRef.numID}:{agentRef.ID} at {agentRef.position}")
-        self.managedAgentLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent '{agentRef.numID}:{agentRef.ID}' at {agentRef.position}", anchor=tk.CENTER)
+        self.managedAgentLabel.grid(row=0, column=0, columnspan=4)
 
         # Create a label for the task assignment drop down
         self.agentTaskAssignmentLabel = tk.Label(self.agentManageFrame, text="Assign task: ")
         self.agentTaskAssignmentLabel.grid(row=1, column=0)
-
-        # Create an action button to assign the task
-        self.agentTaskAssignmentButton = tk.Button(self.agentManageFrame,
-            command=self.assignSelectedTask, text="Assign Task", width=10,
-            state=tk.DISABLED
-            )
-        self.agentTaskAssignmentButton.grid(row=1, column=2, padx=4, pady=4)
 
         # Create the drop down menu
         taskList = self.taskManager.taskList
@@ -505,6 +506,20 @@ class toolBar(tk.Frame):
             # There are no tasks to choose from
             self.agentNoTasksAvailableLabel = tk.Label(self.agentManageFrame, text="No tasks available to assign!")
             self.agentNoTasksAvailableLabel.grid(row=1, column=1)
+
+        # Create an action button to assign the task
+        self.agentTaskAssignmentButton = tk.Button(self.agentManageFrame,
+            command=self.assignSelectedTask, text="Assign Task", width=10,
+            state=tk.DISABLED
+            )
+        self.agentTaskAssignmentButton.grid(row=2, column=1, padx=4, pady=4)
+
+        # Create a cancel button to escape the UI
+        self.agentTaskAssignmentCancelButton = tk.Button(self.agentManageFrame,
+            command=lambda: [self.agentManagePrompt(), self.clearManagementHighlights()],
+            text="Cancel", width=10, state=tk.NORMAL
+            )
+        self.agentTaskAssignmentCancelButton.grid(row=2, column=2, padx=4, pady=4)
 
     def prepSelectedTaskForAssignment(self, event):
         # Find the task object
@@ -973,7 +988,9 @@ class toolBar(tk.Frame):
 
     def taskManagePrompt(self):
         logging.debug("Creating task management prompt UI eleemnts . . .")
+        # Reset the UI
         self.clearTaskManagementUI()
+
         # Create a button that starts prompting the user
         self.manageTaskButton = tk.Button(self.taskManageFrame,
             command=self.taskManagementUI, text="Manage Task . . .", width=15,
@@ -1009,8 +1026,8 @@ class toolBar(tk.Frame):
         # Display the currently managed task
         taskRef = self.parent.taskManager.currentTask
         self.managedTaskObjectReference = taskRef
-        self.managedTaskLabel = tk.Label(self.taskManageFrame, text=f"Managing Task {taskRef.numID}:{taskRef.name}. Pickup node is: {taskRef.pickupPosition} Dropoff node is: {taskRef.dropoffPosition}")
-        self.managedTaskLabel.grid(row=0, column=0, columnspan=3, sticky=tk.W)
+        self.managedTaskLabel = tk.Label(self.taskManageFrame, text=f"Managing Task '{taskRef.numID}:{taskRef.name}'. \nPickup node is: {taskRef.pickupPosition} Dropoff node is: {taskRef.dropoffPosition}", anchor=tk.CENTER)
+        self.managedTaskLabel.grid(row=0, column=0, columnspan=4)
 
         # Create a label for the agent assignment drop down
         self.taskAgentAssignmentLabel = tk.Label(self.taskManageFrame, text="Assign agent: ")
@@ -1041,7 +1058,14 @@ class toolBar(tk.Frame):
             command=self.assignSelectedAgent, text="Assign Agent", width=10,
             state=tk.DISABLED
             )
-        self.taskAgentAssignmentButton.grid(row=1, column=2, padx=4, pady=4)
+        self.taskAgentAssignmentButton.grid(row=2, column=1, padx=4, pady=4)
+
+        # Create a cancel button to escape the UI
+        self.taskAgentAssignmentCancelButton = tk.Button(self.taskManageFrame,
+            command=lambda:[self.taskManagePrompt(), self.clearManagementHighlights()], 
+            text="Cancel", width=10, state=tk.NORMAL
+            )
+        self.taskAgentAssignmentCancelButton.grid(row=2, column=2, padx=4, pady=4)
 
     def prepSelectedAgentForAssignment(self, event):
         # Find the agent object ID
