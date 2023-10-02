@@ -80,7 +80,6 @@ class simProcessor:
 
         # Map options to functions
         algorithmDict = {
-            "Dummy": self.algorithmDummy,
             "Single-agent A*": self.algorithmSingleAgentAStar
         }
 
@@ -278,34 +277,6 @@ class simProcessor:
         algorithmType = self.simulationSettings["algorithmType"]
         logging.debug(f"Next step started with algorithm: {algorithmSelection}")
         return algorithmSelection, algorithmType
-
-    def algorithmDummy(self):
-        """
-            Temporary algorithm that just moves agents directly upward
-        """
-        # Acquire state information references
-        simGraphData = self.parent.simGraphData
-        simAgentManager = self.parent.simAgentManager
-        simTaskManager = self.parent.simTaskManager
-
-        # Execute algorithm for every agent currently in the simulation
-        # Alternative ways of iterating through the agent list may be of interest later
-        for agent in simAgentManager.agentList:
-            logging.debug(f"Algorithm acting on agent: '{agent}:{simAgentManager.agentList[agent].ID}'")
-            agentCurrentNode = simAgentManager.agentList[agent].position
-            agentCurrentXPos = agentCurrentNode[0]
-            agentCurrentYPos = agentCurrentNode[1]
-            # print(f"({agentCurrentXPos}, {agentCurrentYPos})")
-            # Temporarily just move the agent upward
-            agentTargetNode = (agentCurrentXPos, agentCurrentYPos-1)
-            # print(agentTargetNode)
-            # print(type(agentTargetNode))
-            validMove = simAgentManager.agentList[agent].validateCandidateMove(agentTargetNode)
-            if validMove:
-                simAgentManager.agentList[agent].executeMove(agentTargetNode)
-                simAgentManager.agentList[agent].highlightAgent(multi=False)
-            else:
-                logging.error(f"'{agentTargetNode}' is not a valid node for movement.")
 
     def algorithmSingleAgentAStar(self):
         """

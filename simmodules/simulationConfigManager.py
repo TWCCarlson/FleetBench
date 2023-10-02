@@ -112,7 +112,6 @@ class simulationConfigManager(tk.Toplevel):
         # Creates a drop down menu for the user to select the driving algorithm for the simulation
         # Using types to separate multi-agent and single-agent pathfinding algorithms
         self.algorithmOptionTypeDict = {
-            "Dummy": "mapf",
             "Single-agent A*": "sapf"
         }
 
