@@ -76,6 +76,7 @@ class simProcessor:
         self.simulationStateID = "resetIterables"
         self.requestedStateID = None
         self.agentGenerator = None
+        self.doNextStep = True
 
         # Acquire state information references
         self.simGraphDataRef = self.parent.simGraphData
@@ -149,9 +150,8 @@ class simProcessor:
         self.simulationStateID = nextStateID
 
         # Call the next state
-        
-        self.simulationStateMachineNextStep(nextStateID)
-        
+        if self.doNextStep:
+            self.simulationStateMachineNextStep(nextStateID)
 
         ### Generate new tasks
         ### Calculate/execute agent moves
@@ -259,7 +259,6 @@ class simProcessor:
         # self.simStepCountTextValue.set()
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         targetLabelText.set(targetLabelText.get() + 1)
-        pass
 
     def selectAgent(self):
         # self.selectAgentCounter = self.selectAgentCounter + 1

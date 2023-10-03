@@ -56,7 +56,7 @@ class simControlPanel(tk.Frame):
         self.toggleSimulationRunButton = tk.Button(self, text="⏯", background="yellow", command=self.simulationPlayPauseToggle)
 
         # Declare step forward once button
-        self.simOneStepButton = tk.Button(self, text="⭲", command=self.simulationProcess.simProcessor.simulateStep)
+        self.simOneStepButton = tk.Button(self, text="⭲", command=self.simulationAdvanceOneStep)
 
         # Declare playback until event occurs button
         self.simUntilEventButton = tk.Button(self, text="⏭")
@@ -103,6 +103,7 @@ class simControlPanel(tk.Frame):
             # Disable the other buttons
             self.disableOtherPlaybackControls(self.toggleSimulationRunButton)
             # Start the updating ticking process
+            self.simulationProcess.simProcessor.doNextStep = True
             self.simulationProcess.simProcessor.simulationStateMachineNextStep()
         elif self.toggleSimulationRunButton['relief'] == tk.SUNKEN:
             logging.debug("Play button released. Pausing playback.")
@@ -112,6 +113,11 @@ class simControlPanel(tk.Frame):
             self.enableOtherPlaybackControls(self.toggleSimulationRunButton)
             # Stop the update ticking process
             self.simulationProcess.simProcessor.simulationStopTicking()
+
+    def simulationAdvanceOneStep(self):
+        logging.debug("User advanced the simulation forward by one step.")
+        self.simulationProcess.simProcessor.doNextStep = False
+        self.simulationProcess.simProcessor.simulationStateMachineNextStep()
 
     def disableOtherPlaybackControls(self, buttonInUse):
         # Iterate over all buttons in the frame, disabling those that are not the one being used
