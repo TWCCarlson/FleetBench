@@ -1,5 +1,15 @@
 [
     {
+        "labelText": "Agent Collisions",
+        "elementType": "optionMenu",
+        "elementDefault": "Respected",
+        "optionValue": self.agentCollisionsValue,
+        "elementData":{
+            "Respected": None,
+            "Ignored": None
+        }
+    },
+    {
         "labelText": "Agent Charge Limitation",
         "elementType": "optionMenu",
         "elementDefault": "Ignored / Unlimited",

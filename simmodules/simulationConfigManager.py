@@ -142,6 +142,9 @@ class simulationConfigManager(tk.Toplevel):
 
         # Control variables, saved here for custom naming and reference ease
 
+        ### Agent collisions
+        self.agentCollisionsValue = tk.StringVar()
+
         ### Limited Charge
         self.agentChargeLimitationValue = tk.StringVar()
         self.agentLimitedChargeCostStyleValue = tk.StringVar()
@@ -621,6 +624,8 @@ class simulationConfigManager(tk.Toplevel):
         self.renderGraphUpdateTime = tk.IntVar()
         self.renderStepCounterUpdate = tk.BooleanVar()
         self.renderStepCounterUpdateTime = tk.IntVar()
+        self.renderAgentPathfind = tk.BooleanVar()
+        self.renderAgentPathfindTime = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -705,6 +710,9 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmSelectionStringVar.get()]
         
         # Agent Configuration Options
+        ### Collisions
+        dataPackage["agentCollisionsValue"] = self.agentCollisionsValue.get()
+
         ### Limited Charge
         dataPackage["agentChargeLimitationValue"] = self.agentChargeLimitationValue.get()
         dataPackage["agentLimitedChargeCostStyleValue"] = self.agentLimitedChargeCostStyleValue.get()
@@ -765,6 +773,8 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["durationGraphUpdateStep"] = self.renderGraphUpdateTime.get()
         dataPackage["renderSimStepCounterUpdate"] = self.renderStepCounterUpdate.get()
         dataPackage["durationSimStepCounterUpdate"] = self.renderStepCounterUpdateTime.get()
+        dataPackage["renderAgentPathfindStep"] = self.renderAgentPathfind.get()
+        dataPackage["durationAgentPathfindStep"] = self.renderAgentActionTime.get()
 
         return dataPackage
     

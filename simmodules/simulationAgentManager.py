@@ -8,6 +8,7 @@ from heapq import heappop, heappush
 from itertools import count
 from numpy import inf
 from numpy import sqrt
+import time
 
 class simAgentManager:
     def __init__(self, parent):
@@ -23,6 +24,7 @@ class simAgentManager:
         self.simAgentManager = self.parent.simAgentManager
         self.simTaskManager = self.parent.simTaskManager
         self.simProcessor = self.parent.simProcessor
+        self.simMainView = self.parent.parent.simulationWindow.simMainView
 
     def createNewAgent(self, **kwargs):
         """
@@ -107,9 +109,12 @@ class simAgentClass:
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
         self.taskStatus = kwargs.get("taskStatus")
+        self.pathfinder = None
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
+        pp.pprint(self.mapGraphRef)
+        self.mainViewRef = self.parent.parent.parent.simulationWindow.simMainView
 
         # Dict of directions and their numerical values
         # Used for rotation + = CCW, - = CW
@@ -150,8 +155,9 @@ class simAgentClass:
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
         logging.debug(f"Agent '{self.ID}:{self.numID}' requests highlighting from 'mainCanvas'.")
-        self.parent.parent.parent.simulationWindow.simMainView.simCanvas.highlightTile(
-            self.position[0], self.position[1], 'green', multi=multi, highlightType='agentHighlight')
+        self.mainViewRef.simCanvas.requestRender("highlight", "new", {"targetNodeID": self.position,
+                "highlightType": "agentHighlight", "multi": False, "highlightTags": ["agent"+str(self.numID)+"Highlight"]})
+        self.mainViewRef.simCanvas.handleRenderQueue()
 
     def calculateAStarBestPathLength(self, targetNode):
         bestAStarPathLength = nx.astar_path_length(self.mapGraphRef, self.currentNode, targetNode, heuristic=None, weight=None)
@@ -268,6 +274,106 @@ class simAgentClass:
                     fScore[neighborNode] = node_fScore
 
         raise nx.NetworkXNoPath(f"Node {targetNode} not reachable from {sourceNode}")
+    
+    def showCalculatingAStarPath(self, sourceNode, targetNode, firstIterBool, heuristic="Dijkstra"):
+        # Seek the shortest path between the targetNode and agent's currentNode
+        # Render each step to visualize the process
+        
+        # Account for obstacles (other agents)
+        if firstIterBool:
+            # Heuristic a choice between Manhattan and Euclidean
+            if sourceNode not in self.mapGraphRef or targetNode not in self.mapGraphRef:
+                msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
+                raise nx.NodeNotFound(msg)
+            
+            # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
+            if heuristic == "Dijkstra":
+                def heuristic(u, v):
+                    # Dijkstra's always underestimates, making it admissible, but does nothing to speed up pathfinding
+                    return 0
+            elif heuristic == "Manhattan":
+                def heuristic(u, v):
+                    # Manhattan/taxicab distance is the absolute value of the difference 
+                    uPos = self.mapGraphRef.nodes[u]['pos']
+                    vPos = self.mapGraphRef.nodes[v]['pos']
+                    heuristicDistance = abs(uPos['X']-vPos['X']) + abs(uPos['Y']-vPos['Y'])
+                    return heuristicDistance
+            elif heuristic == "Euclidean":
+                def heuristic(u, v):
+                    # Euclidean/rectilinear/pythagoras distance is line length between two points
+                    uPos = self.mapGraphRef.nodes[u]['pos']
+                    vPos = self.mapGraphRef.nodes[v]['pos']
+                    heuristicDistance = sqrt((uPos['X']-vPos['X'])**2 + (uPos['Y']-vPos['Y'])**2)
+                    return heuristicDistance
+            elif heuristic == "Approx. Euclidean":
+                def heuristic(u, v):
+                    # An approximation of euclidean distance
+                    uPos = self.mapGraphRef.nodes[u]['pos']
+                    vPos = self.mapGraphRef.nodes[v]['pos']
+                    delta_1 = abs(uPos['X']-vPos['X'])
+                    delta_2 = abs(uPos['Y']-vPos['Y'])
+                    b = max(delta_1, delta_2)
+                    a = min(delta_1, delta_2)
+                    heuristicDistance = b + 0.428 * a * a / b
+                    return heuristicDistance
+            
+            # All edges in the graph should have a weight of "1"
+            # Therefore there is no need to calculate the weights, as neighborliness is assured by .items()
+            push = heappush
+            pop = heappop
+            weight = 1
+
+            # gScore is the distance from source to current node
+            gScore = {}
+            # fScore is the distance from source to target through current node
+            fScore = {}
+            # cameFrom holds the optimal previous node on the path to the current node
+            cameFrom = {}
+
+            # The openset, populated with the first node
+            # The heap queue pulls the smallest item from the heap
+            # The first element in the format is the fScore, minimizing this is an objective
+            # The second element is a counter, used to break ties in the fScore
+            counter = count()
+            openSet = []
+
+            # Initialize the starting node into the queue, alongside its appropriate maps
+            heappush(openSet, (0, next(counter), sourceNode))
+            gScore[sourceNode] = 0
+            fScore[sourceNode] = heuristic(sourceNode, targetNode)
+
+        # Recursively work through the queue
+        if openSet:
+            _, __, currentNode = pop(openSet)
+            if currentNode == targetNode:
+                # Return successfully, with the reconstructed path if the currentNode is the targetNode
+                path = [currentNode]
+                parentNode = cameFrom.get(currentNode, None)
+                while parentNode is not None:
+                    path.append(parentNode)
+                    parentNode = cameFrom.get(parentNode, None)
+                # Reverse the path to get the route from source to target
+                path.reverse()
+                return path
+            
+            for neighborNode, data in self.mapGraphRef[currentNode].items():
+                est_gScore = gScore[currentNode] + weight
+                # If this estimated gScore for the neighbor is less than the currently mapped one
+                if est_gScore < gScore.get(neighborNode, inf):
+                    # Then a new best path has been found to reach the neighbor node
+                    cameFrom[neighborNode] = currentNode
+                    # Record its new gScore
+                    gScore[neighborNode] = est_gScore       
+                    # Calculate the fScore for the neighbor node
+                    node_fScore = est_gScore + heuristic(currentNode, targetNode)             
+                    # If the node isn't already in the openSet, add it
+                    if neighborNode not in fScore:
+                        push(openSet, (node_fScore, next(counter), neighborNode))
+                    # Update the fScore of the neighbor node
+                    fScore[neighborNode] = node_fScore
+        else:
+            raise nx.NetworkXNoPath(f"Node {targetNode} not reachable from {sourceNode}")
+        return None
 
     def validateCandidateMove(self, targetNode):
         """
@@ -300,6 +406,8 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
+        self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):
             self.currentNode = targetNode    # String
             self.position = eval(targetNode) # Tuple

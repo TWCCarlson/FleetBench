@@ -119,6 +119,7 @@ class mainCanvas(tk.Canvas):
         self.traceLayerVisibility()
 
     def requestRender(self, renderType, renderAction, renderData):
+        print(f"Render requested: {renderType}, {renderAction}")
         # Maintains a list of things to do on the next render step
         acceptedRenderTypes = {
             "agent": {
@@ -134,11 +135,11 @@ class mainCanvas(tk.Canvas):
                 "new": self.newHighlightObject,
                 "clear": self.clearHighlightObjects
             },
-            "pathfind": {
-                "new": self.newPathfindObject,
-                "delete": self.deletePathfindObject,
-                "extend": self.extendPathfindObject,
-                "clear": self.clearPathfindObjects
+            "canvasLine": {
+                "new": self.newCanvasLineObject,
+                "delete": self.deleteCanvasLineObject,
+                "extend": self.extendCanvasLineObject,
+                "clear": self.clearCanvasLineObjects
             },
             "text": {
                 "new": self.newTextObject,
@@ -230,14 +231,15 @@ class mainCanvas(tk.Canvas):
     def clearHighlightObjects(self, renderData):
         self.delete("highlight")
 
-    def newPathfindObject(self, renderData):
+    def newCanvasLineObject(self, renderData):
+        print("requested new pathfind object")
         nodePath = renderData["nodePath"] #req'd
         lineType = renderData["lineType"] #req'd
         color = renderData.get("color", None) #optional
         width = renderData.get("width", None) #optional
         self.renderDirectionArrow(nodePath, lineType, color=color, width=width)
 
-    def deletePathfindObject(self, renderData):
+    def deleteCanvasLineObject(self, renderData):
         if isinstance(renderData["oldNodePath"][0], str):
             oldNodePath = tuple(eval(node) for node in renderData["oldNodePath"])
         else:
@@ -245,7 +247,7 @@ class mainCanvas(tk.Canvas):
         obj = self.find_withtag(oldNodePath)
         self.delete(obj)
 
-    def extendPathfindObject(self, renderData):
+    def extendCanvasLineObject(self, renderData):
         # The node path was saved as a tag, so it is searchable
         if isinstance(renderData["oldNodePath"][0], str):
             oldNodePath = tuple(eval(node) for node in renderData["oldNodePath"])
@@ -262,9 +264,9 @@ class mainCanvas(tk.Canvas):
             self.delete(obj)
             self.renderDirectionArrow(newPath, lineType, color=fill, width=width)
 
-    def clearPathfindObjects(self, *args):
+    def clearCanvasLineObjects(self, *args):
         # Possible this should be expanded into a general arrows method with variable tag acceptance
-        self.delete("pathfind")
+        self.delete("canvasLine")
 
     def newTextObject(self, renderData):
         nodeID = renderData["position"]
@@ -819,6 +821,7 @@ class mainCanvas(tk.Canvas):
         self.create_text(nodeTextPosX, nodeTextPosY, text=text, anchor=anchor, fill=textColor, font=textFont, tags=tags)
 
     def renderDirectionArrow(self, nodePath, lineType, color=None, width=None):
+        print(f"Requested arrow: {nodePath}")
         # NodePath is a list of nodes visited by the arrow, in order of visitation
         if isinstance(nodePath[0], str):
             tagPath = tuple(eval(node) for node in nodePath)

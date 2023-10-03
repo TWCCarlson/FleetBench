@@ -84,6 +84,25 @@
                     }
                 },
                 {
+                    "labelText": "Render Agent Pathfind Step",
+                    "elementType": "checkButton",
+                    "elementDefault": False,
+                    "optionValue": self.renderAgentPathfind,
+                    "gridLoc": "auto",
+                    "elementData": {
+                        "subOpt1": [
+                            {
+                                "labelText": "Display Time (ms):",
+                                "elementType": "numericSpinbox",
+                                "elementDefault": 300,
+                                "optionValue": self.renderAgentPathfindTime,
+                                "gridLoc": "auto",
+                                "elementData": SPINBOX_DEFAULT_RANGE
+                            }
+                        ]
+                    }
+                },
+                {
                     "labelText": "Render Graph Update Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
