@@ -131,7 +131,7 @@ class simProcessor:
         # self.currentState = stateID
 
         # Update step display label
-        targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepTextValue
+        targetLabelText = self.parent.parent.simulationWindow.simStepView.simStatusTextValue
         targetLabelText.set(self.simulationStateMachineMap[stateID]["stateLabel"])
 
         # Take actions
@@ -256,6 +256,9 @@ class simProcessor:
     def incrementStepCounter(self):
         # self.incrementStepCounterCounter = self.incrementStepCounterCounter + 1
         # print(f"     Call count: {self.incrementStepCounterCounter}")
+        # self.simStepCountTextValue.set()
+        targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
+        targetLabelText.set(targetLabelText.get() + 1)
         pass
 
     def selectAgent(self):
