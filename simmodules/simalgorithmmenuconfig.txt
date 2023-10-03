@@ -1,0 +1,24 @@
+[
+    {
+        "labelText": "Pathfinding Algorithm",
+        "elementType": "optionMenu",
+        "elementDefault": "Single-agent A*",
+        "optionValue": self.algorithmChoice,
+        "elementData": {
+            "Single-agent A*": [
+                    {
+                        "labelText": "Heuristic",
+                        "elementType": "optionMenu",
+                        "elementDefault": "Dijkstra",
+                        "optionValue": self.SAPFAstarHeuristic,
+                        "elementData": {
+                            "Dijkstra": None,
+                            "Manhattan": None,
+                            "Euclidean": None,
+                            "Approx. Euclidean": None
+                    }
+                }
+            ]
+        }
+    }
+]

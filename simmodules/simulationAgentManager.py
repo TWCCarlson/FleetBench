@@ -113,7 +113,6 @@ class simAgentClass:
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
-        pp.pprint(self.mapGraphRef)
         self.mainViewRef = self.parent.parent.parent.simulationWindow.simMainView
 
         # Dict of directions and their numerical values

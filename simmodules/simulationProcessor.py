@@ -88,24 +88,25 @@ class simProcessor:
         # Acquire algorithm setting
         self.algorithmSelection, self.algorithmType = self.getSelectedSimulationAlgorithm()
 
-        # Map options to functions
+        # Map options to pathfinders
         algorithmDict = {
-            "Single-agent A*": aStarPathfinder
+            "Single-agent A*": (aStarPathfinder, simulationSettings["algorithmSAPFAStarHeuristic"])
         }
 
         # Call option's pathfinder class
-        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection]
+        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection][0]
+        self.agentActionHeuristic = algorithmDict[self.algorithmSelection][1]
 
         # Profiling
-        self.stateStartTime = time.perf_counter()
-        self.loopStartTime = time.perf_counter()
-        self.resetIterablesCounter = 0
-        self.taskGenerationCounter = 0
-        self.selectAgentCounter = 0
-        self.executeAgentActionCounter = 0
-        self.renderGraphStateCounter = 0
-        self.incrementStepCounterCounter = 0
-        self.currentState = None
+        # self.stateStartTime = time.perf_counter()
+        # self.loopStartTime = time.perf_counter()
+        # self.resetIterablesCounter = 0
+        # self.taskGenerationCounter = 0
+        # self.selectAgentCounter = 0
+        # self.executeAgentActionCounter = 0
+        # self.renderGraphStateCounter = 0
+        # self.incrementStepCounterCounter = 0
+        # self.currentState = None
 
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
@@ -124,10 +125,10 @@ class simProcessor:
                 - Update statistics
         """
         # Profiling
-        self.stateEndTime = time.perf_counter()
-        print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
-        self.stateStartTime = time.perf_counter()
-        self.currentState = stateID
+        # self.stateEndTime = time.perf_counter()
+        # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
+        # self.stateStartTime = time.perf_counter()
+        # self.currentState = stateID
 
         # Update step display label
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepTextValue
@@ -189,10 +190,10 @@ class simProcessor:
         # These objects cause loopbacks in the FSM
 
         # Profiling
-        self.loopEndTime = time.perf_counter()
-        print("====== NEW LOOP =======")
-        print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
-        self.loopStartTime = time.perf_counter()
+        # self.loopEndTime = time.perf_counter()
+        # print("====== NEW LOOP =======")
+        # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
+        # self.loopStartTime = time.perf_counter()
 
 
         # Looping over every agent
@@ -250,7 +251,7 @@ class simProcessor:
         # self.renderGraphStateCounter = self.renderGraphStateCounter + 1
         # print(f"     Call count: {self.renderGraphStateCounter}")
         self.parent.parent.simulationWindow.simMainView.simCanvas.handleRenderQueue()
-        print(f"Objects in canvas: {len(self.parent.parent.simulationWindow.simMainView.simCanvas.find_all())}")
+        # print(f"Objects in canvas: {len(self.parent.parent.simulationWindow.simMainView.simCanvas.find_all())}")
 
     def incrementStepCounter(self):
         # self.incrementStepCounterCounter = self.incrementStepCounterCounter + 1
@@ -287,7 +288,7 @@ class simProcessor:
         # If so, identify the target node
         agentTargetNode = self.currentAgent.returnTargetNode()
 
-        # If the agent is at its target node
+        # If the agent is at its target node``
         if self.currentAgent.currentNode == agentTargetNode:
             self.currentAgent.pathfinder = None
             self.currentAgent.taskInteraction(agentTargetNode)
@@ -299,7 +300,7 @@ class simProcessor:
 
         # If the agent needs to move toward its target, ensure it has a pathfinder
         if self.currentAgent.pathfinder is None:
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode)
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionHeuristic)
 
         # If a path has already been planned, follow it
         if self.currentAgent.pathfinder.plannedPath:
@@ -313,7 +314,7 @@ class simProcessor:
                     self.currentAgent.pathfinder = None
             else:
                 # Node is blocked, have to replan
-                self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode)
+                self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionHeuristic)
                 self.requestedStateID = "agentPathfind"
         else:
             # Otherwise, keep searching
@@ -323,7 +324,11 @@ class simProcessor:
         self.simCanvasRef.requestRender("canvasLine", "clear", {})
         self.simCanvasRef.handleRenderQueue()
 
-        self.currentAgent.pathfinder.searchStepRender()
+        # For speed, only use the rendered version of the pathfinder if the frame is being rendered
+        if self.simulationStateMachineMap["agentPathfind"]["renderStateBool"]:
+            self.currentAgent.pathfinder.searchStepRender()
+        else:
+            self.currentAgent.pathfinder.searchStep()
 
         if not self.currentAgent.pathfinder.plannedPath:
             self.requestedStateID = "agentPathfind"

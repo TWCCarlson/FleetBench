@@ -105,16 +105,32 @@ class simulationConfigManager(tk.Toplevel):
             # Turns out this is NP hard and probably not all that useful anyway
 
     def buildPathfindingAlgorithmPage(self):
-        # Intermediate function grouping together declarations and renders for the algorithm choices page
-        self.createAlgorithmOptions()
-
-    def createAlgorithmOptions(self):
-        # Creates a drop down menu for the user to select the driving algorithm for the simulation
         # Using types to separate multi-agent and single-agent pathfinding algorithms
         self.algorithmOptionTypeDict = {
             "Single-agent A*": "sapf"
         }
 
+        ### Algorithm Selection
+        self.algorithmChoice = tk.StringVar()
+
+        ### A* SAPF Suboptions
+        self.SAPFAstarHeuristic = tk.StringVar()
+
+        # UI Definition Dict
+        # Sorcery
+        cwd = Path(__file__).parent
+        filePath = (cwd / 'simalgorithmmenuconfig.txt').resolve()
+        self.algorithmOptionSet = eval(open(filePath, "r").read())
+
+        # Build option menu from config file
+        self.algorithmChoiceOptionSetUI = tk_e.ConfigOptionSet(self.pathfindingAlgorithmFrame)
+        self.algorithmChoiceOptionSetUI.buildOutOptionSetUI(self.algorithmOptionSet)
+
+        # Intermediate function grouping together declarations and renders for the algorithm choices page
+        # self.createAlgorithmOptions()
+
+    def createAlgorithmOptions(self):
+        # Creates a drop down menu for the user to select the driving algorithm for the simulation
         # Keys of the dict are the displayed options
         algorithmOptions = list(self.algorithmOptionTypeDict.keys())
 
@@ -606,7 +622,7 @@ class simulationConfigManager(tk.Toplevel):
             nodeTick.grid(row=index, column=1, sticky=tk.W)
 
     def buildDisplayOptionsPage(self):
-        SPINBOX_DEFAULT_RANGE = (0, 100000, 50)
+        SPINBOX_DEFAULT_RANGE = (1, 100000, 50)
 
         # Headless mode checkbutton
         self.renderPlaybackValue = tk.BooleanVar()
@@ -706,8 +722,9 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage = {}
         # Needs work for handling branched options (nested)
         ### Algorithm Options
-        dataPackage["algorithmSelection"] = self.algorithmSelectionStringVar.get()
-        dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmSelectionStringVar.get()]
+        dataPackage["algorithmSelection"] = self.algorithmChoice.get()
+        dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmChoice.get()]
+        dataPackage["algorithmSAPFAStarHeuristic"] = self.SAPFAstarHeuristic.get()
         
         # Agent Configuration Options
         ### Collisions
@@ -774,7 +791,7 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["renderSimStepCounterUpdate"] = self.renderStepCounterUpdate.get()
         dataPackage["durationSimStepCounterUpdate"] = self.renderStepCounterUpdateTime.get()
         dataPackage["renderAgentPathfindStep"] = self.renderAgentPathfind.get()
-        dataPackage["durationAgentPathfindStep"] = self.renderAgentActionTime.get()
+        dataPackage["durationAgentPathfindStep"] = self.renderAgentPathfindTime.get()
 
         return dataPackage
     

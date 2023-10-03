@@ -180,8 +180,8 @@ class aStarPathfinder:
                     
                     # Display tile scores
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" g{est_gScore}", "textType": "pathfind", "anchor": "nw", "textColor": "black"})
-                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{hScore} ", "textType": "pathfind", "anchor": "ne", "textColor": "black"})
-                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{node_fScore} ", "textType": "pathfind", "anchor": "se", "textColor": "black"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{round(hScore)} ", "textType": "pathfind", "anchor": "ne", "textColor": "black"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{round(node_fScore)} ", "textType": "pathfind", "anchor": "se", "textColor": "black"})
 
             self.mapCanvas.handleRenderQueue()
             return False
