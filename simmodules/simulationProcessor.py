@@ -342,12 +342,3 @@ class simProcessor:
         algorithmType = self.simulationSettings["algorithmType"]
         logging.debug(f"Next step started with algorithm: {algorithmSelection}")
         return algorithmSelection, algorithmType
-
-    def algorithmSingleAgentAStar(self):
-        """
-            A* implementation for a single agent, does not work with multi-agent
-            Set up to use the first agent in the agent list, so that other agents can act as blockers
-            Useful as a way to find the shortest current path
-        """
-        pass
-        
