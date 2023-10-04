@@ -95,8 +95,11 @@ class simProcessor:
         }
 
         # Call option's pathfinder class
+        self.agentCollisionBehavior = self.simulationSettings["agentCollisionsValue"]
         self.agentActionAlgorithm = algorithmDict[self.algorithmSelection][0]
         self.agentActionConfig = algorithmDict[self.algorithmSelection][1]
+        self.agentActionConfig["agentCollisionsValue"] = self.agentCollisionBehavior
+        
 
         # Profiling
         # self.stateStartTime = time.perf_counter()
@@ -287,7 +290,7 @@ class simProcessor:
         # If so, identify the target node
         agentTargetNode = self.currentAgent.returnTargetNode()
 
-        # If the agent is at its target node``
+        # If the agent is at its target node
         if self.currentAgent.currentNode == agentTargetNode:
             self.currentAgent.pathfinder = None
             self.currentAgent.taskInteraction(agentTargetNode)
@@ -304,7 +307,7 @@ class simProcessor:
         # If a path has already been planned, follow it
         if self.currentAgent.pathfinder.plannedPath:
             nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
-            if self.currentAgent.validateCandidateMove(nextNodeInPath):
+            if self.currentAgent.validateCandidateMove(nextNodeInPath, self.agentCollisionBehavior):
                 # If the node is a valid, unobstructed move, move there
                 self.currentAgent.executeMove(nextNodeInPath)
                 # If, after moving, the target is interactable, do so

@@ -26,6 +26,7 @@ class aStarPathfinder:
         self.targetNode = targetNode
         self.heuristic = config["algorithmSAPFAStarHeuristic"]
         self.heuristicCoefficient = config["algorithmSAPFAStarHeuristicCoefficient"]
+        self.collisionBehavior = config["agentCollisionsValue"]
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
 
@@ -117,7 +118,10 @@ class aStarPathfinder:
                 self.plannedPath = path
                 return True
             
-            for neighborNode, data in self.mapGraphRef[currentNode].items():
+            for neighborNode in self.mapGraphRef.neighbors(currentNode):
+                if "agent" in self.mapGraphRef.nodes(data=True)[neighborNode] and self.collisionBehavior == "Respected":
+                    # If there's an agent in the neighbor, mark it but do not evaluate as it is not traversible
+                    continue
                 est_gScore = self.gScore[currentNode] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
                 if est_gScore < self.gScore.get(neighborNode, inf):
@@ -162,9 +166,14 @@ class aStarPathfinder:
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
                 self.mapCanvas.handleRenderQueue()
                 return True
-            
-            for neighborNode, data in self.mapGraphRef[currentNode].items():
+
+            for neighborNode in self.mapGraphRef.neighbors(currentNode):
                 # Indicate neighbors of currently explored tile
+                if "agent" in self.mapGraphRef.nodes(data=True)[neighborNode] and self.collisionBehavior == "Respected":
+                    # If there's an agent in the neighbor, mark it but do not evaluate as it is not traversible
+                    self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
+                    continue
+
                 self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "pathfindHighlight", "multi": True, "color": "yellow", "highlightTags": ["openSet"]})
                 est_gScore = self.gScore[currentNode] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
@@ -184,9 +193,9 @@ class aStarPathfinder:
                     self.fScore[neighborNode] = node_fScore
                     
                     # Display tile scores
-                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" g{est_gScore}", "textType": "pathfind", "anchor": "nw", "textColor": "black"})
-                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{round(hScore)} ", "textType": "pathfind", "anchor": "ne", "textColor": "black"})
-                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{round(node_fScore)} ", "textType": "pathfind", "anchor": "se", "textColor": "black"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" g{est_gScore}", "textType": "pathfind", "anchor": "nw"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{round(hScore)} ", "textType": "pathfind", "anchor": "ne"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{round(node_fScore)} ", "textType": "pathfind", "anchor": "se"})
 
             self.mapCanvas.handleRenderQueue()
             return False

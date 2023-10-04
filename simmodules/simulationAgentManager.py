@@ -178,7 +178,7 @@ class simAgentClass:
         
         return cutoffKPathsList
 
-    def validateCandidateMove(self, targetNode):
+    def validateCandidateMove(self, targetNode, respectCollisions):
         """
             Used to check whether an agent can move to a target node
             - There must be an edge between current node and target node
@@ -197,7 +197,7 @@ class simAgentClass:
         logging.debug("Edge exists.")
 
         logging.debug(f"Checking if targetNode '{targetNode}' is occupied by an agent . . .")
-        if 'agent' in self.mapGraphRef.nodes(data=True)[targetNode]:
+        if 'agent' in self.mapGraphRef.nodes(data=True)[targetNode] and respectCollisions == "Respected":
             logging.debug(f"TargetNode '{targetNode}' contains an agent. Cannot move here.")
             return False
         logging.debug("Node has space to be moved into.")

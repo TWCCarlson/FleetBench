@@ -70,6 +70,7 @@ fully decouple the canvas by passing it by reference to any and all functions wh
 'current' task/agent selections need to be handled in a traced way such that selecting another doesnt leave a lingering selected agent intercepting movement
 highlights need a way of being hidden instead of deleted and remade
 render requests should be made tag-safe (agentobjects dont accidentally get deleted by highlight delete requests)
+loading a second session needs to clear all values from the first
 
 Informational Classes are then:
     mapData
