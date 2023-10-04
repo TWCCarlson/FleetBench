@@ -11,27 +11,32 @@ class aStarPathfinder:
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, mapCanvas, mapGraph, sourceNode, targetNode, heuristic="Dijkstra"):
+    def __init__(self, mapCanvas, mapGraph, sourceNode, targetNode, config):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
             raise nx.NodeNotFound(msg)
         
+        # Heuristic coefficient is limited, has to be greater than 1
+        if config["algorithmSAPFAStarHeuristicCoefficient"] < 1:
+            config["algorithmSAPFAStarHeuristicCoefficient"] = 1
+
         # If a pathfind operation can be attempted, save the inputs
         self.sourceNode = sourceNode
         self.targetNode = targetNode
-        self.heuristic = heuristic
+        self.heuristic = config["algorithmSAPFAStarHeuristic"]
+        self.heuristicCoefficient = config["algorithmSAPFAStarHeuristicCoefficient"]
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
-        if heuristic == "Dijkstra":
+        if self.heuristic == "Dijkstra":
             def heuristic(u, v):
                 # Dijkstra's always underestimates, making it admissible, but does nothing to speed up pathfinding
                 return 0
             self.heuristic = heuristic
-        elif heuristic == "Manhattan":
+        elif self.heuristic == "Manhattan":
             def heuristic(u, v):
                 # Manhattan/taxicab distance is the absolute value of the difference 
                 uPos = self.mapGraphRef.nodes[u]['pos']
@@ -39,7 +44,7 @@ class aStarPathfinder:
                 heuristicDistance = abs(uPos['X']-vPos['X']) + abs(uPos['Y']-vPos['Y'])
                 return heuristicDistance
             self.heuristic = heuristic
-        elif heuristic == "Euclidean":
+        elif self.heuristic == "Euclidean":
             def heuristic(u, v):
                 # Euclidean/rectilinear/pythagoras distance is line length between two points
                 uPos = self.mapGraphRef.nodes[u]['pos']
@@ -47,7 +52,7 @@ class aStarPathfinder:
                 heuristicDistance = sqrt((uPos['X']-vPos['X'])**2 + (uPos['Y']-vPos['Y'])**2)
                 return heuristicDistance
             self.heuristic = heuristic
-        elif heuristic == "Approx. Euclidean":
+        elif self.heuristic == "Approx. Euclidean":
             def heuristic(u, v):
                 # An approximation of euclidean distance
                 uPos = self.mapGraphRef.nodes[u]['pos']
@@ -121,7 +126,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore       
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristic(currentNode, self.targetNode)             
+                    node_fScore = est_gScore + self.heuristic(currentNode, self.targetNode) * self.heuristicCoefficient
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
@@ -169,7 +174,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.heuristic(currentNode, self.targetNode)
+                    hScore = self.heuristic(currentNode, self.targetNode) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it

@@ -91,12 +91,12 @@ class simProcessor:
 
         # Map options to pathfinders
         algorithmDict = {
-            "Single-agent A*": (aStarPathfinder, simulationSettings["algorithmSAPFAStarHeuristic"])
+            "Single-agent A*": (aStarPathfinder, simulationSettings["aStarPathfinderConfig"])
         }
 
         # Call option's pathfinder class
         self.agentActionAlgorithm = algorithmDict[self.algorithmSelection][0]
-        self.agentActionHeuristic = algorithmDict[self.algorithmSelection][1]
+        self.agentActionConfig = algorithmDict[self.algorithmSelection][1]
 
         # Profiling
         # self.stateStartTime = time.perf_counter()
@@ -254,9 +254,6 @@ class simProcessor:
         # print(f"Objects in canvas: {len(self.parent.parent.simulationWindow.simMainView.simCanvas.find_all())}")
 
     def incrementStepCounter(self):
-        # self.incrementStepCounterCounter = self.incrementStepCounterCounter + 1
-        # print(f"     Call count: {self.incrementStepCounterCounter}")
-        # self.simStepCountTextValue.set()
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         targetLabelText.set(targetLabelText.get() + 1)
 
@@ -302,7 +299,7 @@ class simProcessor:
 
         # If the agent needs to move toward its target, ensure it has a pathfinder
         if self.currentAgent.pathfinder is None:
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionHeuristic)
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
 
         # If a path has already been planned, follow it
         if self.currentAgent.pathfinder.plannedPath:
@@ -316,7 +313,7 @@ class simProcessor:
                     self.currentAgent.pathfinder = None
             else:
                 # Node is blocked, have to replan
-                self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionHeuristic)
+                self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
                 self.requestedStateID = "agentPathfind"
         else:
             # Otherwise, keep searching

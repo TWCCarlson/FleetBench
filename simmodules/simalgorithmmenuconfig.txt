@@ -6,17 +6,24 @@
         "optionValue": self.algorithmChoice,
         "elementData": {
             "Single-agent A*": [
-                    {
-                        "labelText": "Heuristic",
-                        "elementType": "optionMenu",
-                        "elementDefault": "Dijkstra",
-                        "optionValue": self.SAPFAstarHeuristic,
-                        "elementData": {
-                            "Dijkstra": None,
-                            "Manhattan": None,
-                            "Euclidean": None,
-                            "Approx. Euclidean": None
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.SAPFAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
                     }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.SAPFAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
                 }
             ]
         }

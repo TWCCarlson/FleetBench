@@ -115,6 +115,7 @@ class simulationConfigManager(tk.Toplevel):
 
         ### A* SAPF Suboptions
         self.SAPFAstarHeuristic = tk.StringVar()
+        self.SAPFAstarHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -724,7 +725,9 @@ class simulationConfigManager(tk.Toplevel):
         ### Algorithm Options
         dataPackage["algorithmSelection"] = self.algorithmChoice.get()
         dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmChoice.get()]
-        dataPackage["algorithmSAPFAStarHeuristic"] = self.SAPFAstarHeuristic.get()
+        dataPackage["aStarPathfinderConfig"] = {}
+        dataPackage["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"] = self.SAPFAstarHeuristic.get()
+        dataPackage["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristicCoefficient"] = self.SAPFAstarHeuristicCoefficient.get()
         
         # Agent Configuration Options
         ### Collisions
@@ -753,7 +756,6 @@ class simulationConfigManager(tk.Toplevel):
 
         ### Interaction Costs
         dataPackage["agentMiscOptionTaskInteractCostValue"] = self.agentMiscOptionTaskInteractCostValue.get()
-
 
         # Task Generation Options
         ### Frequency Options
