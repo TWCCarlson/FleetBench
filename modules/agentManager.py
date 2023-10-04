@@ -84,6 +84,7 @@ class agentManager:
     def assignTaskToAgent(self, taskRef, agentRef):
         # Assign the task to the agent
         agentRef.currentTask = taskRef
+        agentRef.taskStatus = "retrieving"
 
         # Update the agent treeView to reflect the changes
         self.parent.contextView.updateAgentTreeView()
@@ -91,6 +92,7 @@ class agentManager:
     def unassignAgent(self, agentRef):
         if agentRef.currentTask is not None and agentRef.currentTask.assignee is not None:
             agentRef.currentTask.assignee = None
+            agentRef.taskStatus = None
 
     def fixAssignments(self):
         # Iterate through the list of all agents, fixing currentTask to refer to objects instead of IDs
@@ -128,7 +130,8 @@ class agentManager:
                 "position": self.agentList[agent].position,
                 "orientation": self.agentList[agent].orientation,
                 "className": self.agentList[agent].className,
-                "currentTask": currentTask
+                "currentTask": currentTask,
+                "taskStatus": self.agentList[agent].taskStatus
             }
             dataPackage[self.agentList[agent].numID] = agentData
             logging.debug(f"Packaged agentData: {agentData}")

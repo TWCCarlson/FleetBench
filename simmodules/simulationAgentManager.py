@@ -65,6 +65,8 @@ class simAgentManager:
                 # print(self.agentList)
                 # print(self.simTaskManager.taskList)
                 self.agentList[agent].currentTask = self.simTaskManager.taskList[self.agentList[agent].currentTask]
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
 
     def pushDataToCanvas(self):
         self.parent.parent.simulationWindow.simMainView.simCanvas.ingestAgentData(self)
@@ -80,9 +82,10 @@ class simAgentManager:
             className = dataPackage[agent]["className"]
             if "currentTask" in dataPackage[agent]:
                 currentTask = dataPackage[agent]["currentTask"]
-                taskStatus = "retrieving"
+                taskStatus = dataPackage[agent]["taskStatus"]
             else:
                 currentTask = None
+                taskStatus = None
             self.createNewAgent(
                 ID=ID, 
                 position=position, 
@@ -141,12 +144,14 @@ class simAgentClass:
                 self.taskStatus = "droppedOff"
                 self.currentTask.taskStatus = "droppedOff"
                 self.currentTask = None
+                self.taskStatus = "droppedOff"
 
     def returnTargetNode(self):
         # Called to determine the target node for pathfinding, dependant on task status
         taskStatusMapping = {
             "retrieving": self.currentTask.pickupNode,
-            "pickedUp": self.currentTask.dropoffNode
+            "pickedUp": self.currentTask.dropoffNode,
+            None: None
         }
         targetNode = taskStatusMapping[self.taskStatus]
         return targetNode

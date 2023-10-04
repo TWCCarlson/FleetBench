@@ -51,7 +51,7 @@ class simTaskManager:
             agentRef.currentTask = task
             agentRef.taskStatus = "retrieving"
             task.assignee = agentRef
-            task.taskStatus = "waiting"
+            task.taskStatus = "retrieving"
 
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
@@ -69,6 +69,7 @@ class simTaskManager:
             pickupPosition = dataPackage[task]["pickupPosition"]
             dropoffPosition = dataPackage[task]["dropoffPosition"]
             timeLimit = dataPackage[task]["timeLimit"]
+            taskStatus = dataPackage[task]["taskStatus"]
             if "assignee" in dataPackage[task]:
                 assignee = dataPackage[task]["assignee"]
             else:
@@ -78,7 +79,8 @@ class simTaskManager:
                 pickupPosition=pickupPosition,
                 dropoffPosition=dropoffPosition,
                 timeLimit=timeLimit,
-                assignee=assignee
+                assignee=assignee,
+                taskStatus=taskStatus
                 )
         logging.info("All task data ported to simulation state.")
 

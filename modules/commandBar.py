@@ -103,6 +103,7 @@ class fileCommands(tk.Menu):
             position = data["agentManager"][agent]["position"]
             orientation = data["agentManager"][agent]["orientation"]
             className = data["agentManager"][agent]["className"]
+            taskStatus = data["agentManager"][agent]["taskStatus"]
             try:
                 currentTask = data["agentManager"][agent]["currentTask"]
             except KeyError:
@@ -112,7 +113,8 @@ class fileCommands(tk.Menu):
                 position=position, 
                 orientation=orientation, 
                 className=className,
-                currentTask=currentTask
+                currentTask=currentTask,
+                taskStatus=taskStatus
                 )
         logging.info("Loaded new agent data to session state.")
 

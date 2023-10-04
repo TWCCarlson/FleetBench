@@ -81,6 +81,7 @@ class taskManager:
     def assignAgentToTask(self, agentRef, taskRef):
         # Assign the agent to the task
         taskRef.assignee = agentRef
+        taskRef.taskStatus = "retrieving"
 
         # Update the task treeView to reflect the changes
         self.parent.contextView.updateTaskTreeView()
@@ -88,6 +89,7 @@ class taskManager:
     def unassignTask(self, taskRef):
         if taskRef.assignee is not None and taskRef.assignee.currentTask is not None:
             taskRef.assignee.currentTask = None
+            taskRef.taskStatus = None
 
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
@@ -121,7 +123,8 @@ class taskManager:
                 "pickupPosition": self.taskList[task].pickupPosition,
                 "dropoffPosition": self.taskList[task].dropoffPosition,
                 "timeLimit": self.taskList[task].timeLimit,
-                "assignee": assignee
+                "assignee": assignee,
+                "taskStatus": self.taskList[task].taskStatus
             }
             dataPackage[self.taskList[task].numID] = taskData
             logging.debug(f"Packaged taskData: {taskData}")
@@ -186,6 +189,7 @@ class taskClass:
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
         self.assignee = kwargs.get("assignee", None)
+        self.taskStatus = kwargs.get("taskStatus", None)
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:

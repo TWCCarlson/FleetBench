@@ -100,6 +100,8 @@ class simProcessor:
         self.agentActionConfig = algorithmDict[self.algorithmSelection][1]
         self.agentActionConfig["agentCollisionsValue"] = self.agentCollisionBehavior
         
+        # State history control
+        self.stateHistoryManager = simProcessStateHandler(self)
 
         # Profiling
         # self.stateStartTime = time.perf_counter()
@@ -198,6 +200,10 @@ class simProcessor:
         # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
         # self.loopStartTime = time.perf_counter()
 
+        targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
+        stepID = targetLabelText.get()
+        if stepID % 50 == 0:
+            self.stateHistoryManager.copyCurrentState(stepID)
 
         # Looping over every agent
         self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
@@ -258,7 +264,8 @@ class simProcessor:
 
     def incrementStepCounter(self):
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
-        targetLabelText.set(targetLabelText.get() + 1)
+        stepCompleted = targetLabelText.get()
+        targetLabelText.set(stepCompleted + 1)
 
     def selectAgent(self):
         # self.selectAgentCounter = self.selectAgentCounter + 1
@@ -344,3 +351,27 @@ class simProcessor:
         algorithmType = self.simulationSettings["algorithmType"]
         logging.debug(f"Next step started with algorithm: {algorithmSelection}")
         return algorithmSelection, algorithmType
+    
+class simProcessStateHandler:
+    """
+        Used to store information about the state of the simulation data for playback
+        - Delta table stores information about actions execute on each "step"
+        - Snapshots taken at intervals allow for restoration of the state instead of "undoing" each action
+
+        The simulator should be deterministic, so reconstruction from a saved point should always lead to the same state
+    """
+    def __init__(self, parent):
+        self.parent = parent
+
+        self.saveStateList =  {
+            
+        }
+
+    def copyCurrentState(self, stepID):
+        print(f"Triggered save before step {stepID}")
+
+        # States of interest
+        # - Agent data (positions, plans, targets, )
+        # - Pathfind progress data (in agent data)
+        # - Task data
+        # - Collected statistics
