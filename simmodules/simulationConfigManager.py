@@ -514,7 +514,7 @@ class simulationConfigManager(tk.Toplevel):
 
         # When an agent is 'available' to pick up a new task can be configured
         self.agentAvailabilityTriggerDict = {
-            "On Dropoff": "droppedOff", 
+            "On Dropoff": "completed", 
             # "On Pickup": "onpickup", 
             # "On Assignment": "onassignment", 
             # "On Rest": "onrest",

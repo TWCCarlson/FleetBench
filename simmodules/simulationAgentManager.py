@@ -10,6 +10,8 @@ from numpy import inf
 from numpy import sqrt
 import time
 
+import copy
+
 class simAgentManager:
     def __init__(self, parent):
         self.parent = parent
@@ -96,6 +98,69 @@ class simAgentManager:
                 )
         logging.info("All agents ported from main session state into simulation state.")
 
+    def loadSavedSimState(self, stateAgentData):
+        for agentNumID in stateAgentData:
+            # ID = stateAgentData[agent]["ID"]
+            position = stateAgentData[agentNumID]["position"]
+            currentNode = stateAgentData[agentNumID]["currentNode"]
+            orientation = stateAgentData[agentNumID]["orientation"]
+            className = stateAgentData[agentNumID]["className"]
+            currentTask = stateAgentData[agentNumID]["currentTask"]
+            taskStatus = stateAgentData[agentNumID]["taskStatus"]
+            pathfinderData = stateAgentData[agentNumID]["pathfinder"]
+            
+            self.agentList[agentNumID].position = position
+            self.agentList[agentNumID].currentNode = currentNode
+            self.agentList[agentNumID].orientation = orientation
+            self.agentList[agentNumID].className = className
+            self.agentList[agentNumID].currentTask = currentTask
+            self.agentList[agentNumID].taskStatus = taskStatus
+            if pathfinderData is not None:
+                self.agentList[agentNumID].pathfinder.__load__(pathfinderData)
+            else:
+                self.agentList[agentNumID].pathfinder = None
+    
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+
+        # Update agent locations in the map data
+        self.parent.simGraphData.updateAgentLocations(self.agentList)
+
+    def packageAgentData(self):
+        """
+            Package reconstruction data for replicating the current state of the agent manager
+            This means the data needed to create each agent needs to be available to each call to createNewAgent
+                - Agent Name
+                - Agent position
+                - Agent orientation
+                - Agent Class
+                - Agent's taskStatus
+                - Agent's currentTask
+        """
+        dataPackage = {}
+
+        # Pull all agent data
+        for agentNumID in self.agentList:
+            # Pull pathfinder state
+            if self.agentList[agentNumID].pathfinder is not None:
+                pathfinderData = self.agentList[agentNumID].pathfinder.__copy__()
+            else:
+                pathfinderData = None
+
+            # Group the data
+            agentData = {
+                "ID": self.agentList[agentNumID].ID,
+                "position": self.agentList[agentNumID].position,
+                "currentNode": self.agentList[agentNumID].currentNode,
+                "orientation": self.agentList[agentNumID].orientation,
+                "className": self.agentList[agentNumID].className,
+                "currentTask": self.agentList[agentNumID].currentTask,
+                "taskStatus": self.agentList[agentNumID].taskStatus,
+                "pathfinder": pathfinderData
+            }
+            dataPackage[self.agentList[agentNumID].numID] = agentData
+        return dataPackage
+
 class simAgentClass:
     """
         Agent class
@@ -141,10 +206,10 @@ class simAgentClass:
                 self.taskStatus = "pickedUp"
                 self.currentTask.taskStatus = "pickedUp"
             elif action == "dropoff":
-                self.taskStatus = "droppedOff"
-                self.currentTask.taskStatus = "droppedOff"
+                self.taskStatus = "completed"
+                self.currentTask.taskStatus = "completed"
+                self.currentTask.assignee = None
                 self.currentTask = None
-                self.taskStatus = "droppedOff"
 
     def returnTargetNode(self):
         # Called to determine the target node for pathfinding, dependant on task status

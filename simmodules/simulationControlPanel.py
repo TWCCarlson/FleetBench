@@ -47,7 +47,7 @@ class simControlPanel(tk.Frame):
         self.revertRapidlyButton = tk.Button(self, text="⏪")
 
         # Declare step backward until event occurred button
-        self.revertToLastEventButton = tk.Button(self, text="⏮")
+        self.revertToLastEventButton = tk.Button(self, text="⏮", command=self.simulationRevertToPreviousState)
 
         # Declare step backward once button
         self.revertOneStepButton = tk.Button(self, text="⭰")
@@ -118,6 +118,15 @@ class simControlPanel(tk.Frame):
         logging.debug("User advanced the simulation forward by one step.")
         self.simulationProcess.simProcessor.doNextStep = False
         self.simulationProcess.simProcessor.simulationStateMachineNextStep()
+
+    def simulationRevertToPreviousState(self):
+        logging.debug("User reverted the simulation back to the nearest previously saved state.")
+        # Get the current step
+        stepID= self.parent.simStepView.simStepCountTextValue.get()
+        # Find the nearest saved state from the past
+        targetStepID = self.simulationProcess.simProcessor.stateHistoryManager.findNearestPreviousState(stepID)
+        # Load that state
+        self.simulationProcess.simProcessor.stateHistoryManager.loadSavedState(targetStepID)
 
     def disableOtherPlaybackControls(self, buttonInUse):
         # Iterate over all buttons in the frame, disabling those that are not the one being used

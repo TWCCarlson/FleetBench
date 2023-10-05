@@ -21,11 +21,20 @@ class simProcessor:
                 "stateRenderDuration": 0
             },
             "resetIterables": {
-                "nextState": "taskGeneration",
+                "nextState": "selectAgent",
                 "exec": self.resetIterables,
                 "stateLabel": "Preparing Next Step",
                 "renderStateBool": simulationSettings["renderResetIterablesStep"],
                 "stateRenderDuration": simulationSettings["durationResetIterablesStep"]
+            },
+            "taskAssignment": {
+                "nextState": "selectAgent",
+                "exec": self.taskAssignment,
+                "stateLabel": "Assigning Available Tasks",
+                "renderStateBool": True,
+                "stateRenderDuration": 1
+                # "renderStateBool": simulationSettings["renderTaskAssignmentStep"],
+                # "stateRenderDuration": simulationSettings["durationTaskAssignmentStep"]
             },
             "taskGeneration": {
                 "nextState": "selectAgent",
@@ -208,6 +217,19 @@ class simProcessor:
         # Looping over every agent
         self.agentGenerator = (agent for agent in self.simAgentManagerRef.agentList)
 
+    def taskAssignment(self):
+        # Look at tasks already in the tasklist, assigning those which need completing to agents
+        for taskID, task in self.simTaskManagerRef.taskList.items():
+            # print("===")
+            # print(f"{taskID}: {task}")
+            if task.assignee is None and task.taskStatus != "completed":
+                print(f"task {taskID} needs assigning")
+                self.simTaskManagerRef.assignAgentToTask(taskID, self.currentAgent)
+                self.requestedStateID = "agentAction"
+                return
+        # If there are no unassigned tasks, one needs to be generated
+        self.requestedStateID = "taskGeneration"
+
     def taskGeneration(self):
         # self.taskGenerationCounter = self.taskGenerationCounter + 1
         # print(f"     Call count: {self.taskGenerationCounter}")
@@ -217,7 +239,7 @@ class simProcessor:
             # Check if there are agents needing work
             for agentID, agent in self.simAgentManagerRef.agentList.items():
                 if agent.taskStatus == self.simulationSettings["taskGenerationAsAvailableTrigger"]:
-                    # If agents share the triggering status, create a task and assign it
+                    # If agents share the triggering status, create a task for the agent
                     newTaskID = self.generateTask()
                     
                     # Assign the task to the agent, and the agent to the task
@@ -292,7 +314,8 @@ class simProcessor:
     def executeAgentAction(self):
         # If the agent has a task, move it toward completing the task
         if self.currentAgent.currentTask == None:
-            # If not, do nothing
+            # If not, do nothing, find it a task to complete
+            self.requestedStateID = "taskAssignment"
             return
         # If so, identify the target node
         agentTargetNode = self.currentAgent.returnTargetNode()
@@ -363,15 +386,47 @@ class simProcessStateHandler:
     def __init__(self, parent):
         self.parent = parent
 
-        self.saveStateList =  {
-            
-        }
+        self.saveStateList =  {}
 
     def copyCurrentState(self, stepID):
         print(f"Triggered save before step {stepID}")
+        # Make a new entry in the state table
+        self.saveStateList[stepID] = {}
+        # Get the agent data
+        agentData = self.parent.simAgentManagerRef.packageAgentData()
+        self.saveStateList[stepID]["agentData"] = agentData
+        # pp.pprint(self.saveStateList[stepID]["agentData"])
+        taskData = self.parent.simTaskManagerRef.packageTaskData()
+        self.saveStateList[stepID]["taskData"] = taskData
+        # pp.pprint(self.saveStateList[stepID]["taskData"])
 
-        # States of interest
-        # - Agent data (positions, plans, targets, )
-        # - Pathfind progress data (in agent data)
-        # - Task data
-        # - Collected statistics
+    def loadSavedState(self, stateID):
+        stateData = self.saveStateList[stateID]
+        self.parent.simCanvasRef.requestRender("agent", "clear", {})
+        self.parent.simCanvasRef.requestRender("highlight", "clear", {})
+        self.parent.simCanvasRef.handleRenderQueue()
+        targetLabelText = self.parent.parent.parent.simulationWindow.simStepView.simStepCountTextValue
+        targetLabelText.set(stateID)
+        self.parent.simAgentManagerRef.loadSavedSimState(stateData["agentData"])
+        self.parent.simTaskManagerRef.loadSavedSimState(stateData["taskData"])
+        self.parent.simCanvasRef.renderAgents()
+
+    def findNearestPreviousState(self, currentStep):
+        savedStateIDList = list(self.saveStateList.keys())
+        savedStateIDList.reverse()
+
+        for stateID in savedStateIDList:
+            # print(f"Current step ({currentStep}) is closest to previous saved step ({stateID})?")
+            if currentStep-stateID in range(1, 51):
+                return stateID
+            
+    def findNearestFutureState(self, currentStep):
+        savedStateIDList = list(self.saveStateList.keys())
+        savedStateIDList.reverse()
+
+        for stateID in savedStateIDList:
+            print(f"Current step ({currentStep}) is closest to future saved step ({stateID})?")
+            if stateID - currentStep in range(1, 51):
+                return stateID
+        
+        

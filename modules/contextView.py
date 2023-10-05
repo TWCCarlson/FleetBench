@@ -322,7 +322,10 @@ class contextView(tk.Frame):
             taskName = taskData.name
             taskPickupPosition = taskData.pickupNode
             taskDropoffPosition = taskData.dropoffNode
-            taskAssignee = taskData.assignee.ID
+            if taskData.assignee is not None:
+                taskAssignee = taskData.assignee.ID
+            else:
+                taskAssignee = None
             taskTimeLimit = taskData.timeLimit
             self.taskTreeView.insert(parent="",
                 index='end',

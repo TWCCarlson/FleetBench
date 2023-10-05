@@ -5,6 +5,7 @@ from numpy import inf
 from numpy import sqrt
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
+import copy
 
 class aStarPathfinder:
     """
@@ -36,7 +37,7 @@ class aStarPathfinder:
             def heuristic(u, v):
                 # Dijkstra's always underestimates, making it admissible, but does nothing to speed up pathfinding
                 return 0
-            self.heuristic = heuristic
+            self.heuristicFunc = heuristic
         elif self.heuristic == "Manhattan":
             def heuristic(u, v):
                 # Manhattan/taxicab distance is the absolute value of the difference 
@@ -44,7 +45,7 @@ class aStarPathfinder:
                 vPos = self.mapGraphRef.nodes[v]['pos']
                 heuristicDistance = abs(uPos['X']-vPos['X']) + abs(uPos['Y']-vPos['Y'])
                 return heuristicDistance
-            self.heuristic = heuristic
+            self.heuristicFunc = heuristic
         elif self.heuristic == "Euclidean":
             def heuristic(u, v):
                 # Euclidean/rectilinear/pythagoras distance is line length between two points
@@ -52,7 +53,7 @@ class aStarPathfinder:
                 vPos = self.mapGraphRef.nodes[v]['pos']
                 heuristicDistance = sqrt((uPos['X']-vPos['X'])**2 + (uPos['Y']-vPos['Y'])**2)
                 return heuristicDistance
-            self.heuristic = heuristic
+            self.heuristicFunc = heuristic
         elif self.heuristic == "Approx. Euclidean":
             def heuristic(u, v):
                 # An approximation of euclidean distance
@@ -64,7 +65,7 @@ class aStarPathfinder:
                 a = min(delta_1, delta_2)
                 heuristicDistance = b + 0.428 * a * a / b
                 return heuristicDistance
-            self.heuristic = heuristic
+            self.heuristicFunc = heuristic
         
         # All edges in the graph should have a weight of "1"
         # Therefore there is no need to calculate the weights, as neighborliness is assured by .items()
@@ -100,6 +101,39 @@ class aStarPathfinder:
         self.mapCanvas.requestRender("text", "clear", {})
         self.mapCanvas.handleRenderQueue()
 
+    def __copy__(self):
+        # Used to export data about the pathfinder's current state for reinit
+        pathfinderData = {
+            "sourceNode": self.sourceNode,
+            "targetNode": self.targetNode,
+            "heuristic": self.heuristic,
+            "heuristicCoefficient": self.heuristicCoefficient,
+            "collisionBehavior": self.collisionBehavior,
+            "weight": self.weight,
+            "gScore": copy.deepcopy(self.gScore),
+            "fScore": copy.deepcopy(self.fScore),
+            "cameFrom": copy.deepcopy(self.cameFrom),
+            "counter": next(self.counter),
+            "searchOps": next(self.searchOps),
+            "plannedPath": copy.deepcopy(self.plannedPath)
+        }
+        return pathfinderData
+    
+    def __load__(self, pathfinderData):
+        # All fields required for this to work properly
+        self.sourceNode = pathfinderData["sourceNode"]
+        self.targetNode = pathfinderData["targetNode"]
+        self.heuristic = pathfinderData["heuristic"]
+        self.heuristicCoefficient = pathfinderData["heuristicCoefficient"]
+        self.collisionBehavior = pathfinderData["collisionBehavior"]
+        self.weight = copy.deepcopy(pathfinderData["weight"])
+        self.gScore = copy.deepcopy(pathfinderData["gScore"])
+        self.fScore = copy.deepcopy(pathfinderData["fScore"])
+        self.cameFrom = pathfinderData["cameFrom"]
+        self.counter = count(start=pathfinderData["counter"]-1, step=1)
+        self.searchOps = count(start=pathfinderData["searchOps"]-1, step=1)
+        self.plannedPath = copy.deepcopy(pathfinderData["plannedPath"])
+
     def searchStep(self):
         # Seek the shortest path between the targetNode and agent's currentNode
         # Account for obstacles (other agents)
@@ -130,7 +164,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore       
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristic(currentNode, self.targetNode) * self.heuristicCoefficient
+                    node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
@@ -183,7 +217,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.heuristic(currentNode, self.targetNode) * self.heuristicCoefficient
+                    hScore = self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it

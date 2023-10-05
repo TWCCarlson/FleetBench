@@ -71,6 +71,7 @@ fully decouple the canvas by passing it by reference to any and all functions wh
 highlights need a way of being hidden instead of deleted and remade (keep a reserve?)
 render requests should be made tag-safe (agentobjects dont accidentally get deleted by highlight delete requests)
 loading a second session needs to clear all values from the first
+un-distribute the task state management
 
 Informational Classes are then:
     mapData

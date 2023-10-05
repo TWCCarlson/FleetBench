@@ -44,14 +44,18 @@ class simTaskManager:
         return self.dictLength
     
     def assignAgentToTask(self, taskID, agentRef):
-            # Fetch task object
-            task = self.taskList[taskID]
+        # Fetch task object
+        task = self.taskList[taskID]
 
-            # Set assignments
-            agentRef.currentTask = task
-            agentRef.taskStatus = "retrieving"
-            task.assignee = agentRef
-            task.taskStatus = "retrieving"
+        # Set assignments
+        agentRef.currentTask = task
+        agentRef.taskStatus = "retrieving"
+        task.assignee = agentRef
+        task.taskStatus = "retrieving"
+
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
@@ -83,6 +87,61 @@ class simTaskManager:
                 taskStatus=taskStatus
                 )
         logging.info("All task data ported to simulation state.")
+
+    def loadSavedSimState(self, stateTaskData):
+        for taskNumID in self.taskList:
+            if taskNumID in stateTaskData:
+                pickupPosition = stateTaskData[taskNumID]["pickupPosition"]
+                pickupNode = stateTaskData[taskNumID]["pickupNode"]
+                dropoffPosition = stateTaskData[taskNumID]["dropoffPosition"]
+                dropoffNode = stateTaskData[taskNumID]["dropoffNode"]
+                timeLimit = stateTaskData[taskNumID]["timeLimit"]
+                assignee = stateTaskData[taskNumID]["assignee"]
+                taskStatus = stateTaskData[taskNumID]["taskStatus"]
+
+                self.taskList[taskNumID].pickupPosition = pickupPosition
+                self.taskList[taskNumID].pickupNode = pickupNode
+                self.taskList[taskNumID].dropoffPosition = dropoffPosition
+                self.taskList[taskNumID].dropoffNode = dropoffNode
+                self.taskList[taskNumID].timeLimit = timeLimit
+                self.taskList[taskNumID].assignee = assignee
+                self.taskList[taskNumID].taskStatus = taskStatus
+            else:
+                # These tasks didn't exist at the time
+                # To preserve the playback order, need to just reset them to fresh generation
+                self.taskList[taskNumID].assignee = None
+                self.taskList[taskNumID].taskStatus = "unassigned"
+        
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
+    def packageTaskData(self):
+        """
+            Package reconstruction data for replicating the current state of the task manager
+            This means the data needed to create each task needs to be available to each call to createNewTask
+                - Task Name
+                - Pickup Node
+                - Dropoff Node
+                - Time Limit
+                - Status
+                - Assignee
+        """
+        dataPackage = {}
+
+        # Pull task data
+        for task in self.taskList:
+            taskData = {
+                "name": self.taskList[task].name,
+                "pickupPosition": self.taskList[task].pickupPosition,
+                "pickupNode": self.taskList[task].pickupNode,
+                "dropoffPosition": self.taskList[task].dropoffPosition,
+                "dropoffNode": self.taskList[task].dropoffNode,
+                "timeLimit": self.taskList[task].timeLimit,
+                "assignee": self.taskList[task].assignee,
+                "taskStatus": self.taskList[task].taskStatus
+            }
+            dataPackage[self.taskList[task].numID] = taskData
+        return dataPackage
 
 class simTaskClass:
     """
