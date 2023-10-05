@@ -125,6 +125,7 @@ class fileCommands(tk.Menu):
             pickupPosition = data["taskManager"][task]["pickupPosition"]
             dropoffPosition = data["taskManager"][task]["dropoffPosition"]
             timeLimit = data["taskManager"][task]["timeLimit"]
+            taskStatus = data["taskManager"][task]["taskStatus"]
             try:
                 assignee = data["taskManager"][task]["assignee"]
             except KeyError:
@@ -135,6 +136,7 @@ class fileCommands(tk.Menu):
                 dropoffPosition=dropoffPosition,
                 timeLimit=timeLimit,
                 assignee=assignee,
+                taskStatus=taskStatus,
                 loadOp=True
                 )
         logging.info("Loaded new task data to session state.")

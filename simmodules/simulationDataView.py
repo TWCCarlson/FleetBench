@@ -216,6 +216,7 @@ class simDataView(tk.Frame):
         # Render the treeView
         self.simTaskListFrame.columnconfigure(0, weight=1)
         self.taskTreeView.grid(row=0, column=0, sticky="news")
+        self.configureTaskBackgroundColors()
         logging.debug(f"Rendered Simulation treeView with columns: {columnList}")
 
         # Event bindings
@@ -233,6 +234,13 @@ class simDataView(tk.Frame):
         logging.debug("Built right click context-sensitive menu in the Simulation taskTreeView.")
 
         logging.info("Simulation agentTreeView finished rendering.")
+
+    def configureTaskBackgroundColors(self):
+        self.taskTreeView.tag_configure("unassigned", background="white")
+        self.taskTreeView.tag_configure("retrieving", background="pink")
+        self.taskTreeView.tag_configure("pickedUp", background="yellow")
+        self.taskTreeView.tag_configure("completed", background="light green")
+        self.taskTreeView.tag_configure("expired", background="red")
 
     def initTaskTreeScrolling(self):
         logging.debug("Building scrolling capability in the Simulation taskTreeView.")
@@ -282,12 +290,14 @@ class simDataView(tk.Frame):
             else:
                 taskAssignee = None
             taskTimeLimit = taskData.timeLimit
+            taskStatus = taskData.taskStatus
+            print(f"{task}: {taskStatus}")
             self.taskTreeView.insert(parent="",
                 index='end',
                 iid=taskNumID,
                 text=f"{str(taskNumID)}",
                 values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
-                tags=["task", taskNumID, taskName]
+                tags=["task", taskNumID, taskName, taskStatus]
             )
             logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
 

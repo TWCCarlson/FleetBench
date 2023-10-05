@@ -118,6 +118,7 @@ class taskManager:
             else:
                 assignee = None
 
+            print(f"{self.taskList[task].numID}: status {self.taskList[task].taskStatus}")
             taskData = {
                 "name": self.taskList[task].name,
                 "pickupPosition": self.taskList[task].pickupPosition,

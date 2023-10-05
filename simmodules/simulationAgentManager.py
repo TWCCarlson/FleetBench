@@ -212,6 +212,9 @@ class simAgentClass:
                 self.currentTask.assignee = None
                 self.currentTask = None
 
+        self.parent.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+        self.parent.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
     def returnTargetNode(self):
         # Called to determine the target node for pathfinding, dependant on task status
         taskStatusMapping = {
