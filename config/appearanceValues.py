@@ -106,7 +106,7 @@ class appearanceValues():
 
         # Simulation Main Canvas Style
         self.simulationMainViewWidth = 0.8 * screen_width
-        self.simulationMainViewHeight = screen_height - self.simulationInfoBoxHeight - window_unusable
+        self.simulationMainViewHeight = screen_height - self.simulationInfoBoxHeight - window_unusable + 20
         self.simCanvasBackgroundColor = "white"
         self.simCanvasDefaultWidth = 2000
         self.simCanvasDefaultHeight = 2000
