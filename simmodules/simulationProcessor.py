@@ -406,10 +406,13 @@ class simProcessStateHandler:
         self.parent.simCanvasRef.requestRender("highlight", "clear", {})
         self.parent.simCanvasRef.handleRenderQueue()
         targetLabelText = self.parent.parent.parent.simulationWindow.simStepView.simStepCountTextValue
-        targetLabelText.set(stateID)
+        targetLabelText.set(stateID)    
         self.parent.simAgentManagerRef.loadSavedSimState(stateData["agentData"])
         self.parent.simTaskManagerRef.loadSavedSimState(stateData["taskData"])
         self.parent.simCanvasRef.renderAgents()
+
+        # After loading, reset the statemachine's state to be the start of a step
+        self.parent.simulationStateID = "resetIterables"
 
     def findNearestPreviousState(self, currentStep):
         savedStateIDList = list(self.saveStateList.keys())

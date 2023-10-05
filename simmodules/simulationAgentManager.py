@@ -99,6 +99,7 @@ class simAgentManager:
         logging.info("All agents ported from main session state into simulation state.")
 
     def loadSavedSimState(self, stateAgentData):
+        print("LOAD:")
         for agentNumID in stateAgentData:
             # ID = stateAgentData[agent]["ID"]
             position = stateAgentData[agentNumID]["position"]
@@ -115,10 +116,12 @@ class simAgentManager:
             self.agentList[agentNumID].className = className
             self.agentList[agentNumID].currentTask = currentTask
             self.agentList[agentNumID].taskStatus = taskStatus
+            print(self.agentList[agentNumID].pathfinder)
             if pathfinderData is not None:
                 self.agentList[agentNumID].pathfinder.__load__(pathfinderData)
             else:
                 self.agentList[agentNumID].pathfinder = None
+                pass
     
         # Update the treeView
         self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
@@ -140,11 +143,15 @@ class simAgentManager:
         dataPackage = {}
 
         # Pull all agent data
+        print("PACKAGE:")
         for agentNumID in self.agentList:
             # Pull pathfinder state
+            
+            print(self.agentList[agentNumID].pathfinder)
             if self.agentList[agentNumID].pathfinder is not None:
                 pathfinderData = self.agentList[agentNumID].pathfinder.__copy__()
             else:
+                print("?")
                 pathfinderData = None
 
             # Group the data
