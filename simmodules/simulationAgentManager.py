@@ -294,3 +294,4 @@ class simAgentClass:
 
         # Update the mapgraph with the new location
         self.parent.parent.simGraphData.updateAgentLocations(self.parent.agentList)
+        self.parent.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
