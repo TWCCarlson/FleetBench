@@ -121,8 +121,6 @@ class App(tk.Tk):
         self.mainloop()
 
     def simulationConfiguration(self):
-        print(self.winfo_height())
-
         self.simulationConfigWindow = simulationConfigManager(self)
         logging.info("Configuration class 'simulationConfigManager' instantiated.")
 

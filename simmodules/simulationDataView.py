@@ -173,8 +173,6 @@ class simDataView(tk.Frame):
         self.agentTreeView.selection_set(selectedRow)
 
         if selectedRow in self.agentTreeView.tag_has("agent"):
-            # Clear existing highlights
-            self.parent.simMainView.simCanvas.clearHighlight()
             rowData = self.agentTreeView.item(selectedRow) 
             # Hightlight the selected agent
             agentID = rowData["tags"][1]
@@ -182,6 +180,10 @@ class simDataView(tk.Frame):
             agentRef.highlightAgent(multi=False)
             if agentRef.currentTask:
                 agentRef.currentTask.highlightTask(multi=False)
+            else:
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+            self.parent.simMainView.simCanvas.handleRenderQueue()
             # Update agentManager's currentAgent prop
             self.parent.parent.simulationProcess.simAgentManager.currentAgent = agentRef
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
@@ -201,8 +203,8 @@ class simDataView(tk.Frame):
         self.taskTreeView = ttk.Treeview(self.simTaskListFrame, selectmode='browse')
 
         # Style the treeView
+        columnList = {'Name': 50, 'Pickup': 25, 'Dropoff': 25, 'Assignee': 40, 'Time Limit': 40}
         self.taskTreeView["height"] = 20
-        columnList = {'Name': 60, 'Pickup': 60, 'Dropoff': 60, 'Time Limit': 60}
         self.taskTreeView["columns"] = list(columnList.keys())
         self.taskTreeView.heading('#0', text='A')
         self.taskTreeView.column('#0', width=35, stretch=0)
@@ -275,12 +277,16 @@ class simDataView(tk.Frame):
             taskName = taskData.name
             taskPickupPosition = taskData.pickupNode
             taskDropoffPosition = taskData.dropoffNode
+            if taskData.assignee is not None:
+                taskAssignee = taskData.assignee.ID
+            else:
+                taskAssignee = None
             taskTimeLimit = taskData.timeLimit
             self.taskTreeView.insert(parent="",
                 index='end',
                 iid=taskNumID,
-                text=f"T{str(taskNumID)}",
-                values=[taskName, taskPickupPosition, taskDropoffPosition, taskTimeLimit],
+                text=f"{str(taskNumID)}",
+                values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
                 tags=["task", taskNumID, taskName]
             )
             logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
@@ -301,15 +307,16 @@ class simDataView(tk.Frame):
         self.taskTreeView.selection_set(selectedRow)
 
         if selectedRow in self.taskTreeView.tag_has("task"):
-            # Clear existing highlights
-            self.parent.simMainView.simCanvas.clearHighlight()
             rowData = self.taskTreeView.item(selectedRow) 
             # Hightlight the selected task
             taskID = rowData["tags"][1]
             taskRef = self.parent.parent.simulationProcess.simTaskManager.taskList.get(taskID)
             taskRef.highlightTask(multi=False)
-            if taskRef.assignee:
+            if taskRef.assignee is not None:
                 taskRef.assignee.highlightAgent(multi=False)
+            else:
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+            self.parent.simMainView.simCanvas.handleRenderQueue()
             # Update taskManager's currenttask prop
             self.parent.parent.simulationProcess.simTaskManager.currenttask = taskRef
             logging.debug(f"User clicked on task '{taskID}' in taskTreeView.")

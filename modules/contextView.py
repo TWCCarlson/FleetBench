@@ -221,6 +221,9 @@ class contextView(tk.Frame):
             agentRef.highlightAgent(multi=False)
             if agentRef.currentTask:
                 agentRef.currentTask.highlightTask(multi=False)
+            else:
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
             self.parent.mainView.mainCanvas.handleRenderQueue()
 
             # Update agentManager's currentAgent prop

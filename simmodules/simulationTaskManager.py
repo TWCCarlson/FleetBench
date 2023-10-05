@@ -38,9 +38,6 @@ class simTaskManager:
         self.taskList[self.dictLength] = self.latestTask
         logging.info("Task added to 'simTaskManager' task list.")
 
-        # Update the treeView
-        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
-
         return self.dictLength
     
     def assignAgentToTask(self, taskID, agentRef):
@@ -63,6 +60,9 @@ class simTaskManager:
         for task in self.taskList:
             if not self.taskList[task].assignee == None:
                 self.taskList[task].assignee = self.parent.simAgentManager.agentList[self.taskList[task].assignee]
+
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
     def retrieveInitialSimState(self):
         # Extract the data from the session edit window data
