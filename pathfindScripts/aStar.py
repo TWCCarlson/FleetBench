@@ -106,13 +106,13 @@ class aStarPathfinder:
         pathfinderData = {
             "sourceNode": self.sourceNode,
             "targetNode": self.targetNode,
-            "heuristic": self.heuristic,
-            "heuristicCoefficient": self.heuristicCoefficient,
-            "collisionBehavior": self.collisionBehavior,
-            "weight": self.weight,
-            "gScore": copy.deepcopy(self.gScore),
-            "fScore": copy.deepcopy(self.fScore),
-            "cameFrom": copy.deepcopy(self.cameFrom),
+            # "heuristic": self.heuristic,
+            # "heuristicCoefficient": self.heuristicCoefficient,
+            # "collisionBehavior": self.collisionBehavior,
+            # "weight": self.weight,
+            # "gScore": copy.deepcopy(self.gScore),
+            # "fScore": copy.deepcopy(self.fScore),
+            # "cameFrom": copy.deepcopy(self.cameFrom),
             "counter": next(self.counter),
             "searchOps": next(self.searchOps),
             "plannedPath": copy.deepcopy(self.plannedPath)
@@ -123,13 +123,13 @@ class aStarPathfinder:
         # All fields required for this to work properly
         self.sourceNode = pathfinderData["sourceNode"]
         self.targetNode = pathfinderData["targetNode"]
-        self.heuristic = pathfinderData["heuristic"]
-        self.heuristicCoefficient = pathfinderData["heuristicCoefficient"]
-        self.collisionBehavior = pathfinderData["collisionBehavior"]
-        self.weight = copy.deepcopy(pathfinderData["weight"])
-        self.gScore = copy.deepcopy(pathfinderData["gScore"])
-        self.fScore = copy.deepcopy(pathfinderData["fScore"])
-        self.cameFrom = pathfinderData["cameFrom"]
+        # self.heuristic = pathfinderData["heuristic"]
+        # self.heuristicCoefficient = pathfinderData["heuristicCoefficient"]
+        # self.collisionBehavior = pathfinderData["collisionBehavior"]
+        # self.weight = copy.deepcopy(pathfinderData["weight"])
+        # self.gScore = copy.deepcopy(pathfinderData["gScore"])
+        # self.fScore = copy.deepcopy(pathfinderData["fScore"])
+        # self.cameFrom = pathfinderData["cameFrom"]
         self.counter = count(start=pathfinderData["counter"]-1, step=1)
         self.searchOps = count(start=pathfinderData["searchOps"]-1, step=1)
         self.plannedPath = copy.deepcopy(pathfinderData["plannedPath"])

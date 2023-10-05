@@ -121,12 +121,25 @@ class simControlPanel(tk.Frame):
 
     def simulationRevertToPreviousState(self):
         logging.debug("User reverted the simulation back to the nearest previously saved state.")
+        self.disableAllPlaybackControls()
         # Get the current step
         stepID= self.parent.simStepView.simStepCountTextValue.get()
         # Find the nearest saved state from the past
         targetStepID = self.simulationProcess.simProcessor.stateHistoryManager.findNearestPreviousState(stepID)
         # Load that state
         self.simulationProcess.simProcessor.stateHistoryManager.loadSavedState(targetStepID)
+        # Re-enable buttons
+        self.enableAllPlaybackControls()
+
+    def disableAllPlaybackControls(self):
+        for widget in self.winfo_children():
+            if widget.winfo_class() == "Button":
+                widget.config(state=tk.DISABLED)
+
+    def enableAllPlaybackControls(self):
+        for widget in self.winfo_children():
+            if widget.winfo_class() == "Button":
+                widget.config(state=tk.NORMAL)
 
     def disableOtherPlaybackControls(self, buttonInUse):
         # Iterate over all buttons in the frame, disabling those that are not the one being used

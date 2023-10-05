@@ -122,6 +122,7 @@ class simProcessor:
         # self.renderGraphStateCounter = 0
         # self.incrementStepCounterCounter = 0
         # self.currentState = None
+        
 
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
@@ -143,7 +144,7 @@ class simProcessor:
         # self.stateEndTime = time.perf_counter()
         # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
         # self.stateStartTime = time.perf_counter()
-        # self.currentState = stateID
+        self.currentState = stateID
 
         # Update step display label
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStatusTextValue
@@ -151,7 +152,6 @@ class simProcessor:
 
         # Take actions
         self.simulationStateMachineMap[stateID]["exec"]()
-
         # Trigger the next state machine update
         self.previousStateID = stateID
         if self.requestedStateID == None:
@@ -208,10 +208,10 @@ class simProcessor:
         # print("====== NEW LOOP =======")
         # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
         # self.loopStartTime = time.perf_counter()
-
+        self.currentAgent = self.simAgentManagerRef.agentList[0]
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         stepID = targetLabelText.get()
-        if stepID % 50 == 0:
+        if stepID % 1 == 0:
             self.stateHistoryManager.copyCurrentState(stepID)
 
         # Looping over every agent
@@ -331,7 +331,7 @@ class simProcessor:
                 agentTargetNode = self.currentAgent.returnTargetNode()
 
         # If the agent needs to move toward its target, ensure it has a pathfinder
-        if self.currentAgent.pathfinder is None:
+        if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1:
             self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
 
         # If a path has already been planned, follow it
@@ -343,7 +343,7 @@ class simProcessor:
                 # If, after moving, the target is interactable, do so
                 if self.currentAgent.currentNode == agentTargetNode and self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "No cost for pickup/dropoff":
                     self.currentAgent.taskInteraction(agentTargetNode)
-                    self.currentAgent.pathfinder = None
+                    # self.currentAgent.pathfinder = None
             else:
                 # Node is blocked, have to replan
                 self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
@@ -401,18 +401,19 @@ class simProcessStateHandler:
         # pp.pprint(self.saveStateList[stepID]["taskData"])
 
     def loadSavedState(self, stateID):
-        stateData = self.saveStateList[stateID]
-        self.parent.simCanvasRef.requestRender("agent", "clear", {})
-        self.parent.simCanvasRef.requestRender("highlight", "clear", {})
-        self.parent.simCanvasRef.handleRenderQueue()
-        targetLabelText = self.parent.parent.parent.simulationWindow.simStepView.simStepCountTextValue
-        targetLabelText.set(stateID)    
-        self.parent.simAgentManagerRef.loadSavedSimState(stateData["agentData"])
-        self.parent.simTaskManagerRef.loadSavedSimState(stateData["taskData"])
-        self.parent.simCanvasRef.renderAgents()
+        if stateID in self.saveStateList:
+            stateData = self.saveStateList[stateID]
+            self.parent.simCanvasRef.requestRender("agent", "clear", {})
+            self.parent.simCanvasRef.requestRender("highlight", "clear", {})
+            self.parent.simCanvasRef.handleRenderQueue()
+            targetLabelText = self.parent.parent.parent.simulationWindow.simStepView.simStepCountTextValue
+            targetLabelText.set(stateID)    
+            self.parent.simAgentManagerRef.loadSavedSimState(stateData["agentData"])
+            self.parent.simTaskManagerRef.loadSavedSimState(stateData["taskData"])
+            self.parent.simCanvasRef.renderAgents()
 
-        # After loading, reset the statemachine's state to be the start of a step
-        self.parent.simulationStateID = "resetIterables"
+            # After loading, reset the statemachine's state to be the start of a step
+            self.parent.simulationStateID = "resetIterables"
 
     def findNearestPreviousState(self, currentStep):
         savedStateIDList = list(self.saveStateList.keys())
