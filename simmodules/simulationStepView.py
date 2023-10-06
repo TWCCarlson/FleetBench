@@ -6,25 +6,24 @@ class simStepView(tk.Frame):
     """
         Displays the current step in the simulation process, some data
     """
-    def __init__(self, parent):
+    def __init__(self, parent, targetFrame):
         logging.debug("Simulation step display view UI element initializing . . .")
         self.parent = parent
+        self.targetFrame = targetFrame
 
         # Fetch frame style configuration
         self.appearanceValues = self.parent.parent.parent.appearance
-        self.frameWidth = self.appearanceValues.simulationControlBoxWidth
         frameBorderWidth = self.appearanceValues.frameBorderWidth
         frameRelief = self.appearanceValues.frameRelief
         logging.debug("Fetched styling information.")
 
         # Declare frame
-        tk.Frame.__init__(self, parent,
-            width=self.frameWidth,
+        tk.Frame.__init__(self, targetFrame,
             borderwidth=frameBorderWidth,
             relief=frameRelief)
         logging.debug("Simulation Data View Containing Frame constructed.")
 
-        self.grid(row=1, column=1, sticky=tk.N+tk.W+tk.E)
+        self.grid(row=1, column=0, sticky=tk.W+tk.E)
         self.columnconfigure(0, weight=1)
 
         self.createStatusLabel()

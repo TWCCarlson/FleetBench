@@ -10,9 +10,10 @@ class simControlPanel(tk.Frame):
         - Advance X steps
         - Advance X task completions
     """
-    def __init__(self, parent):
+    def __init__(self, parent, targetFrame):
         logging.debug("Simulation Control Panel UI Class initializing . . .")
         self.parent = parent
+        self.targetFrame = targetFrame
 
         # Fetch style
         self.appearanceValues = self.parent.parent.parent.appearance
@@ -22,17 +23,15 @@ class simControlPanel(tk.Frame):
         frameRelief = self.appearanceValues.frameRelief
 
         # Declare frame
-        tk.Frame.__init__(self, parent,
-            height=frameHeight,
-            width=frameWidth,
+        tk.Frame.__init__(self, targetFrame,
             borderwidth=frameBorderWidth,
             relief=frameRelief                  
         )
         logging.debug("Simulation Control Panel Containing Frame constructed.")
 
         # Render Frame
-        self.grid_propagate(False)
-        self.grid(row=0, column=1, sticky=tk.N)
+        # self.grid_propagate(False)
+        self.grid(row=0, column=0, sticky=tk.W+tk.E)
 
     def buildReferences(self):
         # Build references to other parts of the simulation
@@ -40,6 +39,9 @@ class simControlPanel(tk.Frame):
 
         # Build the rest of the UI with the needed references
         self.buildSimulationControlUI()
+        self.sep1 = ttk.Separator(self, orient=tk.HORIZONTAL)
+        self.sep1.grid(row=1, column=0, columnspan=self.grid_size()[0], pady=4, sticky="ew")
+        self.buildStateSelectorUI()
 
     def buildSimulationControlUI(self):
         logging.debug("Simulation Control Panel UI elements building . . .")
@@ -123,13 +125,42 @@ class simControlPanel(tk.Frame):
         logging.debug("User reverted the simulation back to the nearest previously saved state.")
         self.disableAllPlaybackControls()
         # Get the current step
-        stepID= self.parent.simStepView.simStepCountTextValue.get()
+        stepID = self.parent.simStepView.simStepCountTextValue.get()
         # Find the nearest saved state from the past
         targetStepID = self.simulationProcess.simProcessor.stateHistoryManager.findNearestPreviousState(stepID)
         # Load that state
         self.simulationProcess.simProcessor.stateHistoryManager.loadSavedState(targetStepID)
         # Re-enable buttons
         self.enableAllPlaybackControls()
+
+    def simulationGotoSpecificState(self, stateID):
+        self.disableAllPlaybackControls()
+        # Load that state
+        self.simulationProcess.simProcessor.stateHistoryManager.loadSavedState(stateID)
+        # Re-enable buttons
+        self.enableAllPlaybackControls()
+
+    def buildStateSelectorUI(self):
+        # Build a containing frame to use a fresh grid
+        self.stateSelectorFrame = tk.Frame(self)
+        self.stateSelectorFrame.grid(row=2, column=0, columnspan=self.grid_size()[0], sticky=tk.E+tk.W)
+
+        # Label
+        self.stateSelectorLabel = tk.Label(self.stateSelectorFrame, text="Select Saved State:")
+        self.stateSelectorLabel.grid(row=2, column=1)
+
+        # Option menu with entry available
+        self.stateSelectorValue = tk.IntVar(None)
+        self.stateSelectorMenu = ttk.Combobox(self.stateSelectorFrame, width=10, textvariable=self.stateSelectorValue)
+        self.stateSelectorMenu.grid(row=2, column=2)
+
+        # Action button which calls for a specific state to be loaded
+        self.stateSelectorButton = tk.Button(self.stateSelectorFrame, text="Move to State", 
+                command=lambda selectedState = self.stateSelectorValue, stateOptions = self.stateSelectorMenu: self.simulationGotoSpecificState(selectedState.get()) if str(selectedState.get()) in stateOptions["value"] else print(stateOptions["value"]))
+        self.stateSelectorButton.grid(row=2, column=3)
+    
+    def updateStateSelectionChoices(self, choices):
+        self.stateSelectorMenu["value"] = choices
 
     def disableAllPlaybackControls(self):
         for widget in self.winfo_children():

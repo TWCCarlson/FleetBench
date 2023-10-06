@@ -7,9 +7,10 @@ class simInfoBox(tk.Frame):
         Contains layer toggles
         Contains text responsive to highlights in the canvas
     """
-    def __init__(self, parent):
+    def __init__(self, parent, targetFrame):
         logging.debug("Simulation Info Box UI Class initializing . . .")
         self.parent = parent
+        self.targetFrame = targetFrame
 
         # Fetch frame style configuration
         self.appearanceValues = self.parent.parent.parent.appearance
@@ -20,7 +21,7 @@ class simInfoBox(tk.Frame):
         logging.debug("Fetched styling information.")
 
         # Declare frame
-        tk.Frame.__init__(self, parent,
+        tk.Frame.__init__(self, targetFrame,
             height=frameHeight,
             width=frameWidth,
             borderwidth=frameBorderWidth,

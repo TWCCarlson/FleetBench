@@ -78,7 +78,6 @@ class simTaskManager:
                 assignee = dataPackage[task]["assignee"]
             else:
                 assignee = None   
-            print(f"S{task}: status {taskStatus}")
             self.createNewTask(
                 taskName=taskName,
                 pickupPosition=pickupPosition,

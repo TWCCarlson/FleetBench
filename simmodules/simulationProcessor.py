@@ -322,7 +322,6 @@ class simProcessor:
 
         # If the agent is at its target node
         if self.currentAgent.currentNode == agentTargetNode:
-            self.currentAgent.pathfinder = None
             self.currentAgent.taskInteraction(agentTargetNode)
             if self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step":
                 return
@@ -389,7 +388,7 @@ class simProcessStateHandler:
         self.saveStateList =  {}
 
     def copyCurrentState(self, stepID):
-        print(f"Triggered save before step {stepID}")
+        # print(f"Triggered save before step {stepID}")
         # Make a new entry in the state table
         self.saveStateList[stepID] = {}
         # Get the agent data
@@ -399,8 +398,11 @@ class simProcessStateHandler:
         taskData = self.parent.simTaskManagerRef.packageTaskData()
         self.saveStateList[stepID]["taskData"] = taskData
         # pp.pprint(self.saveStateList[stepID]["taskData"])
+        self.savedStateIDList = list(self.saveStateList.keys())
+        self.parent.parent.parent.simulationWindow.simControlPanel.updateStateSelectionChoices(self.savedStateIDList)
 
     def loadSavedState(self, stateID):
+        # print(f"attempt to load state '{stateID}' from {list(self.saveStateList.keys())}")
         if stateID in self.saveStateList:
             stateData = self.saveStateList[stateID]
             self.parent.simCanvasRef.requestRender("agent", "clear", {})

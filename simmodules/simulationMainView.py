@@ -13,9 +13,10 @@ class simMainView(tk.Frame):
         The primary viewfield of the warehouse
         Drawn using tk.Canvas to display robot, task, and map information
     """
-    def __init__(self, parent):
+    def __init__(self, parent, targetFrame):
         logging.debug("Simulation Main View UI Element initializing . . .")
         self.parent = parent
+        self.targetFrame = targetFrame
 
         # Fetch styling configuration
         self.appearanceValues = self.parent.parent.parent.appearance
@@ -26,7 +27,7 @@ class simMainView(tk.Frame):
         logging.debug("Style information retrieved.")
 
         # Declare the mainView frame
-        tk.Frame.__init__(self, parent,
+        tk.Frame.__init__(self, targetFrame,
             height=frameHeight,
             width=frameWidth,
             borderwidth=frameBorderWidth,

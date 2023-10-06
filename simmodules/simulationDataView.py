@@ -7,9 +7,10 @@ class simDataView(tk.Frame):
     """
         The containing frame for the simulation data readout view
     """
-    def __init__(self, parent):
+    def __init__(self, parent, targetFrame):
         logging.debug("Simulation Data View UI Class initializing . . .")
         self.parent = parent
+        self.targetFrame = targetFrame
 
         # Fetch frame style configuration
         self.appearanceValues = self.parent.parent.parent.appearance
@@ -20,15 +21,13 @@ class simDataView(tk.Frame):
         logging.debug("Fetched styling information.")
 
         # Declare frame
-        tk.Frame.__init__(self, parent,
-            height=frameHeight,
-            width=frameWidth,
+        tk.Frame.__init__(self, targetFrame,
             borderwidth=frameBorderWidth,
             relief=frameRelief)
         logging.debug("Simulation Data View Containing Frame constructed.")
 
         # Render frame
-        self.grid(row=2, column=1, sticky="ew")
+        self.grid(row=2, column=0, sticky="ew")
         self.columnconfigure(0, weight=1)
 
         self.createTreeViewNotebook()
@@ -291,7 +290,6 @@ class simDataView(tk.Frame):
                 taskAssignee = None
             taskTimeLimit = taskData.timeLimit
             taskStatus = taskData.taskStatus
-            print(f"{task}: {taskStatus}")
             self.taskTreeView.insert(parent="",
                 index='end',
                 iid=taskNumID,
