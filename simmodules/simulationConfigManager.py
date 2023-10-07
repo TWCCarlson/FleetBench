@@ -107,7 +107,8 @@ class simulationConfigManager(tk.Toplevel):
     def buildPathfindingAlgorithmPage(self):
         # Using types to separate multi-agent and single-agent pathfinding algorithms
         self.algorithmOptionTypeDict = {
-            "Single-agent A*": "sapf"
+            "Single-agent A*": "sapf",
+            "Multi-Agent A* (LRA*)": "mapf"
         }
 
         ### Algorithm Selection
@@ -116,6 +117,10 @@ class simulationConfigManager(tk.Toplevel):
         ### A* SAPF Suboptions
         self.SAPFAstarHeuristic = tk.StringVar()
         self.SAPFAstarHeuristicCoefficient = tk.IntVar()
+
+        ### LRA* MAPF Suboptions
+        self.MAPFLRAstarHeuristic = tk.StringVar()
+        self.MAPFLRAstarHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -629,20 +634,26 @@ class simulationConfigManager(tk.Toplevel):
         self.renderPlaybackValue = tk.BooleanVar()
         
         # Render duration vars instantiated here for organization and reference
-        self.renderResetIterables = tk.BooleanVar()
-        self.renderResetIterablesTime = tk.IntVar()
-        self.renderTaskGen = tk.BooleanVar()
-        self.renderTaskGenTime = tk.IntVar()
-        self.renderSelectAgent = tk.BooleanVar()
-        self.renderSelectAgentTime = tk.IntVar()
-        self.renderAgentAction = tk.BooleanVar()
-        self.renderAgentActionTime = tk.IntVar()
-        self.renderGraphUpdate = tk.BooleanVar()
-        self.renderGraphUpdateTime = tk.IntVar()
-        self.renderStepCounterUpdate = tk.BooleanVar()
-        self.renderStepCounterUpdateTime = tk.IntVar()
+        self.renderNewSimStep = tk.BooleanVar()
+        self.renderNewSimStepTime = tk.IntVar()
+        self.renderAgentSelect = tk.BooleanVar()
+        self.renderAgentSelectTime = tk.IntVar()
+        self.renderTaskAssignment = tk.BooleanVar()
+        self.renderTaskAssignmentTime = tk.IntVar()
+        self.renderAgentActionSelection = tk.BooleanVar()
+        self.renderAgentActionSelectionTime = tk.IntVar()
+        self.renderTaskInteraction = tk.BooleanVar()
+        self.renderTaskInteractionTime = tk.IntVar()
+        self.renderAgentPlanMove = tk.BooleanVar()
+        self.renderAgentPlanMoveTime = tk.IntVar()
+        self.renderAgentMovement = tk.BooleanVar()
+        self.renderAgentMovementTime = tk.IntVar()
         self.renderAgentPathfind = tk.BooleanVar()
         self.renderAgentPathfindTime = tk.IntVar()
+        self.renderCheckAgentQueue = tk.BooleanVar()
+        self.renderCheckAgentQueueTime = tk.IntVar()
+        self.renderEndSimStep = tk.BooleanVar()
+        self.renderEndSimStepTime = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -725,9 +736,14 @@ class simulationConfigManager(tk.Toplevel):
         ### Algorithm Options
         dataPackage["algorithmSelection"] = self.algorithmChoice.get()
         dataPackage["algorithmType"] = self.algorithmOptionTypeDict[self.algorithmChoice.get()]
+        # A*
         dataPackage["aStarPathfinderConfig"] = {}
         dataPackage["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"] = self.SAPFAstarHeuristic.get()
         dataPackage["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristicCoefficient"] = self.SAPFAstarHeuristicCoefficient.get()
+        # LRA*
+        dataPackage["LRAstarPathfinderConfig"] = {}
+        dataPackage["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristic"] = self.MAPFLRAstarHeuristic.get()
+        dataPackage["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"] = self.MAPFLRAstarHeuristicCoefficient.get()
         
         # Agent Configuration Options
         ### Collisions
@@ -780,20 +796,26 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["renderSimulationPlayback"] = self.renderPlaybackValue.get()
         
         # Render duration vars instantiated here for organization and reference
-        dataPackage["renderResetIterablesStep"] = self.renderResetIterables.get()
-        dataPackage["durationResetIterablesStep"] = self.renderResetIterablesTime.get()
-        dataPackage["renderTaskGenerationStep"] = self.renderTaskGen.get()
-        dataPackage["durationTaskGenerationStep"] = self.renderTaskGenTime.get()
-        dataPackage["renderAgentSelectionStep"] = self.renderSelectAgent.get()
-        dataPackage["durationAgentSelectionStep"] = self.renderSelectAgentTime.get()
-        dataPackage["renderAgentActionStep"] = self.renderAgentAction.get()
-        dataPackage["durationAgentActionStep"] = self.renderAgentActionTime.get()
-        dataPackage["renderGraphUpdateStep"] = self.renderGraphUpdate.get()
-        dataPackage["durationGraphUpdateStep"] = self.renderGraphUpdateTime.get()
-        dataPackage["renderSimStepCounterUpdate"] = self.renderStepCounterUpdate.get()
-        dataPackage["durationSimStepCounterUpdate"] = self.renderStepCounterUpdateTime.get()
-        dataPackage["renderAgentPathfindStep"] = self.renderAgentPathfind.get()
-        dataPackage["durationAgentPathfindStep"] = self.renderAgentPathfindTime.get()
+        dataPackage["renderNewSimStep"] = self.renderNewSimStep.get()
+        dataPackage["renderNewSimStepTime"] = self.renderNewSimStepTime.get()
+        dataPackage["renderAgentSelect"] = self.renderAgentSelect.get()
+        dataPackage["renderAgentSelectTime"] = self.renderAgentSelectTime.get()
+        dataPackage["renderTaskAssignment"] = self.renderTaskAssignment.get()
+        dataPackage["renderTaskAssignmentTime"] = self.renderTaskAssignmentTime.get()
+        dataPackage["renderAgentActionSelection"] = self.renderAgentActionSelection.get()
+        dataPackage["renderAgentActionSelectionTime"] = self.renderAgentActionSelectionTime.get()
+        dataPackage["renderTaskInteraction"] = self.renderTaskInteraction.get()
+        dataPackage["renderTaskInteractionTime"] = self.renderTaskInteractionTime.get()
+        dataPackage["renderAgentPlanMove"] = self.renderAgentPlanMove.get()
+        dataPackage["renderAgentPlanMoveTime"] = self.renderAgentPlanMoveTime.get()
+        dataPackage["renderAgentMovement"] = self.renderAgentMovement.get()
+        dataPackage["renderAgentMovementTime"] = self.renderAgentMovementTime.get()
+        dataPackage["renderAgentPathfind"] = self.renderAgentPathfind.get()
+        dataPackage["renderAgentPathfindTime"] = self.renderAgentPathfindTime.get()
+        dataPackage["renderCheckAgentQueue"] = self.renderCheckAgentQueue.get()
+        dataPackage["renderCheckAgentQueueTime"] = self.renderCheckAgentQueueTime.get()
+        dataPackage["renderEndSimStep"] = self.renderEndSimStep.get()
+        dataPackage["renderEndSimStepTime"] = self.renderEndSimStepTime.get()
 
         return dataPackage
     

@@ -152,7 +152,7 @@ class agentClass:
         self.orientation = kwargs.get("orientation")
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
-        self.taskStatus = kwargs.get("taskStatus")
+        self.taskStatus = kwargs.get("taskStatus", "unassigned")
 
         # Add the agent to the position list for reference in tileHover
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]

@@ -25,6 +25,27 @@
                     "optionValue": self.SAPFAstarHeuristicCoefficient,
                     "elementData": (1, 50, 1)
                 }
+            ],
+            "Multi-Agent A* (LRA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFLRAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFLRAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
             ]
         }
     }

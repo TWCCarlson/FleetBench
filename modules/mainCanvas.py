@@ -159,7 +159,7 @@ class mainCanvas(tk.Canvas):
         while len(self.renderQueue) != 0:
             (action, data) = self.renderQueue.pop(0)
             action(data)
-        self.sortCanvasLayers()
+        # self.sortCanvasLayers()
 
     def moveAgentObject(self, renderData):
         # Get tag, source, target nodes
@@ -719,6 +719,7 @@ class mainCanvas(tk.Canvas):
             "node",
             "agent",
             "canvasLine",
+            "text",
             "infoTile",
         ]
         if targetLayer is None:

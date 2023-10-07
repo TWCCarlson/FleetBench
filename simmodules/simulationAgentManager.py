@@ -46,7 +46,7 @@ class simAgentManager:
         # If there is a need for an automatically generated name
         if ID == "ag":
             ID = str(self.dictLength)
-            logging.debug(f"Reques does not contain an ID. Agent was automatically assigned ID '{ID}'") 
+            logging.debug(f"Request does not contain an ID. Agent was automatically assigned ID '{ID}'") 
         
         # Create a new agent and add it to the manager's list
         self.latestAgent = simAgentClass(self, **kwargs, ID=ID, numID=self.dictLength)
@@ -207,7 +207,7 @@ class simAgentClass:
                 self.taskStatus = "pickedUp"
                 self.currentTask.taskStatus = "pickedUp"
             elif action == "dropoff":
-                self.taskStatus = "completed"
+                self.taskStatus = "unassigned"
                 self.currentTask.taskStatus = "completed"
                 self.currentTask.assignee = None
                 self.currentTask = None
@@ -283,8 +283,8 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
-        self.mainViewRef.simCanvas.handleRenderQueue()
+        # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
+        # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):
             self.currentNode = targetNode    # String
             self.position = eval(targetNode) # Tuple

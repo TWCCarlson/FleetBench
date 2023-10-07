@@ -8,10 +8,10 @@
         "elementData": {
             "subOpt1": [
                 {
-                    "labelText": "Render Loop Prep Step",
+                    "labelText": "Render New Sim Prep Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderResetIterables,
+                    "optionValue": self.renderNewSimStep,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -19,7 +19,7 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderResetIterablesTime,
+                                "optionValue": self.renderNewSimStepTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             },
@@ -27,10 +27,10 @@
                     }
                 },
                 {
-                    "labelText": "Render Task Generation Step",
+                    "labelText": "Render Agent Select Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderTaskGen,
+                    "optionValue": self.renderAgentSelect,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -38,7 +38,7 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderTaskGenTime,
+                                "optionValue": self.renderAgentSelectTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             }
@@ -46,10 +46,10 @@
                     }
                 },
                 {
-                    "labelText": "Render Agent Selection Step",
+                    "labelText": "Render Task Assignment Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderSelectAgent,
+                    "optionValue": self.renderTaskAssignment,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -57,7 +57,7 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderSelectAgentTime,
+                                "optionValue": self.renderTaskAssignmentTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             }
@@ -65,10 +65,10 @@
                     }
                 },
                 {
-                    "labelText": "Render Agent Action Step",
+                    "labelText": "Render Agent Action Selection Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderAgentAction,
+                    "optionValue": self.renderAgentActionSelection,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -76,7 +76,64 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderAgentActionTime,
+                                "optionValue": self.renderAgentActionSelectionTime,
+                                "gridLoc": "auto",
+                                "elementData": SPINBOX_DEFAULT_RANGE
+                            }
+                        ]
+                    }
+                },
+                {
+                    "labelText": "Render Task Interaction Step",
+                    "elementType": "checkButton",
+                    "elementDefault": False,
+                    "optionValue": self.renderTaskInteraction,
+                    "gridLoc": "auto",
+                    "elementData": {
+                        "subOpt1": [
+                            {
+                                "labelText": "Display Time (ms):",
+                                "elementType": "numericSpinbox",
+                                "elementDefault": 300,
+                                "optionValue": self.renderTaskInteractionTime,
+                                "gridLoc": "auto",
+                                "elementData": SPINBOX_DEFAULT_RANGE
+                            }
+                        ]
+                    }
+                },
+                {
+                    "labelText": "Render Agent Plan Move Step",
+                    "elementType": "checkButton",
+                    "elementDefault": False,
+                    "optionValue": self.renderAgentPlanMove,
+                    "gridLoc": "auto",
+                    "elementData": {
+                        "subOpt1": [
+                            {
+                                "labelText": "Display Time (ms):",
+                                "elementType": "numericSpinbox",
+                                "elementDefault": 300,
+                                "optionValue": self.renderAgentPlanMoveTime,
+                                "gridLoc": "auto",
+                                "elementData": SPINBOX_DEFAULT_RANGE
+                            }
+                        ]
+                    }
+                },
+                {
+                    "labelText": "Render Agent Movement Step",
+                    "elementType": "checkButton",
+                    "elementDefault": False,
+                    "optionValue": self.renderAgentMovement,
+                    "gridLoc": "auto",
+                    "elementData": {
+                        "subOpt1": [
+                            {
+                                "labelText": "Display Time (ms):",
+                                "elementType": "numericSpinbox",
+                                "elementDefault": 300,
+                                "optionValue": self.renderAgentMovementTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             }
@@ -103,10 +160,10 @@
                     }
                 },
                 {
-                    "labelText": "Render Graph Update Step",
+                    "labelText": "Render Check Agent Queue Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderGraphUpdate,
+                    "optionValue": self.renderCheckAgentQueue,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -114,7 +171,7 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderGraphUpdateTime,
+                                "optionValue": self.renderCheckAgentQueueTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             }
@@ -122,10 +179,10 @@
                     }
                 },
                 {
-                    "labelText": "Render Step Counter Step",
+                    "labelText": "Render End of Sim. Step",
                     "elementType": "checkButton",
                     "elementDefault": False,
-                    "optionValue": self.renderStepCounterUpdate,
+                    "optionValue": self.renderEndSimStep,
                     "gridLoc": "auto",
                     "elementData": {
                         "subOpt1": [
@@ -133,7 +190,7 @@
                                 "labelText": "Display Time (ms):",
                                 "elementType": "numericSpinbox",
                                 "elementDefault": 300,
-                                "optionValue": self.renderStepCounterUpdateTime,
+                                "optionValue": self.renderEndSimStepTime,
                                 "gridLoc": "auto",
                                 "elementData": SPINBOX_DEFAULT_RANGE
                             }
