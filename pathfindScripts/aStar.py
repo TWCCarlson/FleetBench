@@ -173,6 +173,7 @@ class aStarPathfinder:
 
             return False
         else:
+            return "wait"
             raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
@@ -234,4 +235,5 @@ class aStarPathfinder:
             self.mapCanvas.handleRenderQueue()
             return False
         else:
+            return "wait"
             raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")

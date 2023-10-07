@@ -9,7 +9,7 @@ class appearanceValues():
         """
         self.openNodeColor = "black"
         self.openNodeSizeRatio = 0.1
-        self.chargeNodeColor = "sandy brown"
+        self.chargeNodeColor = "pink"
         self.chargeNodeSizeRatio = 0.28
         self.depositNodeColor = "light green"
         self.depositNodeSizeRatio = 0.28

@@ -56,7 +56,7 @@ class simProcessor:
             },
             "agentPathfind": {
                 "exec": self.agentPathfind,
-                "stateLabel": "Agent Planning Path",
+                "stateLabel": "Agent Finding Path",
                 "renderStateBool": simulationSettings["renderAgentPathfind"],
                 "stateRenderDuration": simulationSettings["renderAgentPathfindTime"]
             },
@@ -154,9 +154,9 @@ class simProcessor:
                 - Update statistics
         """
         # Profiling
-        # self.stateEndTime = time.perf_counter()
-        # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
-        # self.stateStartTime = time.perf_counter()
+        self.stateEndTime = time.perf_counter()
+        print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
+        self.stateStartTime = time.perf_counter()
         # Track the new current state
         self.currentState = stateID
         
@@ -269,7 +269,7 @@ class simProcessor:
         # Assign a new task if the task status is "unassigned"
         # Or generate a new task if there are not, and generation on demand is enabled
         # Or if there are no tasks, and generation is disabled end the agent's turn
-        print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
+        # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
         if self.currentAgent.taskStatus == "unassigned":
             # Agent needs a task
             # print(f"Agent {self.currentAgent.ID} needs a new task.")
@@ -380,7 +380,8 @@ class simProcessor:
         else:
             # print(f"Agent {self.currentAgent.ID} was unable to move from {self.currentAgent.currentNode}->{nextNodeInPath}, replanning")
             # The planned move is invalid, and a replanning is necessary
-            self.requestedStateID = "agentPathfind"
+            self.currentAgent.pathfinder = None
+            self.requestedStateID = "agentPlanMove"
             return
 
         # If the agent move reached its target, check if it can interact
@@ -403,21 +404,27 @@ class simProcessor:
         # For speed, only use the rendered version of the pathfinder if the frame is being rendered
         # print(f"Agent {self.currentAgent.ID} searching for path...")
         if self.simulationStateMachineMap["agentPathfind"]["renderStateBool"]:
-            self.currentAgent.pathfinder.searchStepRender()
+            pathStatus = self.currentAgent.pathfinder.searchStepRender()
         else:
-            self.currentAgent.pathfinder.searchStep()
+            pathStatus = self.currentAgent.pathfinder.searchStep()
 
-        if not self.currentAgent.pathfinder.plannedPath:
+        if pathStatus == False:
             # print(f"\t...did not finish on this iteration.")
             self.requestedStateID = "agentPathfind"
             return
-        else:
+        elif pathStatus == True:
             # print(f"\t...path was found.")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
             self.simCanvasRef.requestRender("highlight", "clear", {})
             self.simCanvasRef.requestRender("text", "clear", {})
             self.requestedStateID = "agentMove"
             return
+        elif pathStatus == "wait":
+            print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
+            self.simCanvasRef.requestRender("highlight", "clear", {})
+            self.simCanvasRef.requestRender("text", "clear", {})
+            self.currentAgent.pathfinder = None
+            self.requestedStateID = "checkAgentQueue"
 
     def checkAgentQueue(self):
         # Check the current queue
@@ -504,6 +511,8 @@ class simProcessStateHandler:
             stateData = self.saveStateList[stateID]
             self.parent.simCanvasRef.requestRender("agent", "clear", {})
             self.parent.simCanvasRef.requestRender("highlight", "clear", {})
+            self.parent.simCanvasRef.requestRender("canvasLine", "clear", {})
+            self.parent.simCanvasRef.requestRender("text", "clear", {})
             self.parent.simCanvasRef.handleRenderQueue()
             targetLabelText = self.parent.parent.parent.simulationWindow.simStepView.simStepCountTextValue
             targetLabelText.set(stateID)    
