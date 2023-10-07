@@ -72,6 +72,7 @@ highlights need a way of being hidden instead of deleted and remade (keep a rese
 render requests should be made tag-safe (agentobjects dont accidentally get deleted by highlight delete requests)
 loading a second session needs to clear all values from the first
 un-distribute the task state management
+agent numID assignment needs rework
 
 Informational Classes are then:
     mapData

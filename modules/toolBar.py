@@ -421,7 +421,7 @@ class toolBar(tk.Frame):
         targetNode = (xPos, yPos)
         agentOrientation = self.agentOrientation.get()
         if len(self.agentNameValue.get()) == 0 and self.autogenerateNameValue:
-            ID=len(self.parent.agentManager.agentList) # Let agentManager generate a name, works because minimum manual name length is 3 characters
+            ID="ag" # Let agentManager generate a name, works because minimum manual name length is 3 characters
         else:
             ID=self.agentNameValue.get()
         
@@ -478,6 +478,7 @@ class toolBar(tk.Frame):
 
         # Display the currently managed agent
         agentName = self.mainView.mainCanvas.currentClickedAgent.get()
+        print(type(list(self.parent.agentManager.agentDict.keys())[1]))
         agentRef = self.parent.agentManager.agentDict[agentName]
         self.managedAgentObjectReference = agentRef
         self.managedAgentLabel = tk.Label(self.agentManageFrame, text=f"Managing Agent '{agentRef.numID}:{agentRef.ID}' at {agentRef.position}", anchor=tk.CENTER)
