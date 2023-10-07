@@ -19,14 +19,14 @@ class aStarPathfinder:
             raise nx.NodeNotFound(msg)
         
         # Heuristic coefficient is limited, has to be greater than 1
-        if config["algorithmSAPFAStarHeuristicCoefficient"] < 1:
-            config["algorithmSAPFAStarHeuristicCoefficient"] = 1
+        if config["heuristicCoefficient"] < 1:
+            config["heuristicCoefficient"] = 1
 
         # If a pathfind operation can be attempted, save the inputs
         self.sourceNode = sourceNode
         self.targetNode = targetNode
-        self.heuristic = config["algorithmSAPFAStarHeuristic"]
-        self.heuristicCoefficient = config["algorithmSAPFAStarHeuristicCoefficient"]
+        self.heuristic = config["heuristic"]
+        self.heuristicCoefficient = config["heuristicCoefficient"]
         self.collisionBehavior = config["agentCollisionsValue"]
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas

@@ -107,14 +107,20 @@ class simProcessor:
 
         # Map options to pathfinders
         algorithmDict = {
-            "Single-agent A*": (aStarPathfinder, simulationSettings["aStarPathfinderConfig"]),
-            "Multi-Agent A* (LRA*)": (aStarPathfinder, simulationSettings["LRAstarPathfinderConfig"])
+            "Single-agent A*": aStarPathfinder,
+            "Multi-Agent A* (LRA*)": aStarPathfinder
+        }
+        algorithmConfigDict = {
+            "Single-agent A*": {"heuristic": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"],
+                                "heuristicCoefficient": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristicCoefficient"]},
+            "Multi-Agent A* (LRA*)": {"heuristic": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristic"],
+                                      "heuristicCoefficient": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"]}
         }
 
         # Call option's pathfinder class
         self.agentCollisionBehavior = self.simulationSettings["agentCollisionsValue"]
-        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection][0]
-        self.agentActionConfig = algorithmDict[self.algorithmSelection][1]
+        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection]
+        self.agentActionConfig = algorithmConfigDict[self.algorithmSelection]
         self.agentActionConfig["agentCollisionsValue"] = self.agentCollisionBehavior
         
         # State history control
@@ -151,7 +157,8 @@ class simProcessor:
         # self.stateEndTime = time.perf_counter()
         # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
         # self.stateStartTime = time.perf_counter()
-        # self.currentState = stateID
+        # Track the new current state
+        self.currentState = stateID
         
         # Update step display label
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStatusTextValue
@@ -212,10 +219,10 @@ class simProcessor:
             
     def newSimStep(self):
         # Profiling
-        # self.loopEndTime = time.perf_counter()
-        # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
-        # print("====== NEW LOOP =======")
-        # self.loopStartTime = time.perf_counter()
+        self.loopEndTime = time.perf_counter()
+        print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
+        print("====== NEW LOOP =======")
+        self.loopStartTime = time.perf_counter()
         # Certain objects need to be reset on new steps
         # These objects cause loopbacks in the FSM
         # Prepare for a new step
@@ -262,6 +269,7 @@ class simProcessor:
         # Assign a new task if the task status is "unassigned"
         # Or generate a new task if there are not, and generation on demand is enabled
         # Or if there are no tasks, and generation is disabled end the agent's turn
+        print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
         if self.currentAgent.taskStatus == "unassigned":
             # Agent needs a task
             # print(f"Agent {self.currentAgent.ID} needs a new task.")
@@ -417,6 +425,10 @@ class simProcessor:
             # If the queue is empty, then the step should end
             self.requestedStateID = "endSimStep"
             return
+        else:
+            # Otherwise, pull a new agent out of it to take actions
+            self.requestedStateID = "selectAgent"
+            return
 
     def simulationError(self):
         # print(f"Simulation reached an error.")
@@ -500,7 +512,7 @@ class simProcessStateHandler:
             self.parent.simCanvasRef.renderAgents()
 
             # After loading, reset the statemachine's state to be the start of a step
-            self.parent.simulationStateID = "resetIterables"
+            self.parent.simulationStateID = "newSimStep"
 
     def findNearestPreviousState(self, currentStep):
         savedStateIDList = list(self.saveStateList.keys())
