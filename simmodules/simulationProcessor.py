@@ -348,7 +348,7 @@ class simProcessor:
 
         # The agent needs to move toward its target, ensure it has a pathfinder
         agentTargetNode = self.currentAgent.returnTargetNode()
-        if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1:
+        if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1 or self.currentAgent.pathfinder.invalid == True:
             # print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
             self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
         
@@ -380,7 +380,7 @@ class simProcessor:
         else:
             # print(f"Agent {self.currentAgent.ID} was unable to move from {self.currentAgent.currentNode}->{nextNodeInPath}, replanning")
             # The planned move is invalid, and a replanning is necessary
-            self.currentAgent.pathfinder = None
+            self.currentAgent.pathfinder.__reset__()
             self.requestedStateID = "agentPlanMove"
             return
 
@@ -423,7 +423,7 @@ class simProcessor:
             print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
             self.simCanvasRef.requestRender("highlight", "clear", {})
             self.simCanvasRef.requestRender("text", "clear", {})
-            self.currentAgent.pathfinder = None
+            self.currentAgent.pathfinder.__reset__()
             self.requestedStateID = "checkAgentQueue"
 
     def checkAgentQueue(self):

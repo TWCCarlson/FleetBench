@@ -30,6 +30,7 @@ class aStarPathfinder:
         self.collisionBehavior = config["agentCollisionsValue"]
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
+        self.invalid = False
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -87,7 +88,7 @@ class aStarPathfinder:
         # Initialize the starting node into the queue, alongside its appropriate maps
         heappush(self.openSet, (0, next(self.counter), sourceNode))
         self.gScore[sourceNode] = 0
-        self.fScore[sourceNode] = heuristic(sourceNode, targetNode)
+        self.fScore[sourceNode] = self.heuristicFunc(sourceNode, targetNode)
 
         # Data used for tracking pathfinder performance
         self.searchOps = count()
@@ -133,6 +134,31 @@ class aStarPathfinder:
         self.counter = count(start=pathfinderData["counter"]-1, step=1)
         self.searchOps = count(start=pathfinderData["searchOps"]-1, step=1)
         self.plannedPath = copy.deepcopy(pathfinderData["plannedPath"])
+
+    def __reset__(self):
+        # Reset the pathfinder to its default state, effectively restarting the search
+        self.gScore = {} # gScore is the distance from source to current node
+        self.fScore = {} # fScore is the distance from source to target through current node
+        self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
+
+        # The openset, populated with the first node
+        # The heap queue pulls the smallest item from the heap
+        # The first element in the format is the fScore, minimizing this is an objective
+        # The second element is a counter, used to break ties in the fScore
+        self.counter = count()
+        self.openSet = []
+        heappush(self.openSet, (0, next(self.counter), self.sourceNode))
+        self.gScore[self.sourceNode] = 0
+        self.fScore[self.sourceNode] = self.heuristicFunc(self.sourceNode, self.targetNode)
+
+        # Data used for tracking pathfinder performance
+        self.searchOps = count()
+
+        # Stored ideal path, which agent should follow unless not possible
+        self.plannedPath = []
+
+        # Further, flag this pathfinder as invalid
+        self.invalid = True
 
     def searchStep(self):
         # Seek the shortest path between the targetNode and agent's currentNode
