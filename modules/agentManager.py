@@ -53,16 +53,15 @@ class agentManager:
         self.parent.mapData.updateAgentLocations(self.agentList)
         return dictLength
 
-    def deleteAgent(self, agentName=None, agentID=None):
+    def deleteAgent(self, agentID):
         """
             Irrevocably delete an agent from the list. This results in data loss and should only be used to remove agents that shouldn't have been made in the first place.
         """
         logging.info("Received request to delete agent.")
         # If the internal ID of the agent is supplied, it can be deleted from the dict directly
-        if agentID: targetAgent = agentID
-        # If the human-readable name of the agent is supplied, the attribute needs to be searched for in the dict
-        if agentName: targetAgent = [agentID for agentID in list(self.agentList) if self.agentList[agentID].ID == agentName][0]
+        targetAgent = eval(agentID)
         targetAgentName = self.agentList[targetAgent].ID
+        # If the human-readable name of the agent is supplied, the attribute needs to be searched for in the dict
         logging.debug(f"Agent requested for deletion: '{targetAgentName}:{targetAgent}'")
 
         # First, verify the user actually wants to do this
@@ -78,7 +77,9 @@ class agentManager:
         # Redraw the agent treeview and the main canvas
         self.parent.contextView.updateAgentTreeView()
         self.parent.mapData.updateAgentLocations(self.agentList)
-        self.parent.mainView.mainCanvas.renderGraphState()
+        self.parent.mainView.mainCanvas.requestRender("agent", "delete", {"agentNumID": targetAgent})
+        self.parent.mainView.mainCanvas.requestRender("highlight", "clear", {})
+        self.parent.mainView.mainCanvas.handleRenderQueue()
         logging.debug(f"Agent '{targetAgentName}:{targetAgent}' successfully deleted.")
 
     def assignTaskToAgent(self, taskRef, agentRef):
