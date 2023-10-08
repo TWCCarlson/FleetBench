@@ -180,8 +180,8 @@ class simDataView(tk.Frame):
             if agentRef.currentTask:
                 agentRef.currentTask.highlightTask(multi=False)
             else:
-                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
-                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
             self.parent.simMainView.simCanvas.handleRenderQueue()
             # Update agentManager's currentAgent prop
             self.parent.parent.simulationProcess.simAgentManager.currentAgent = agentRef
@@ -323,7 +323,7 @@ class simDataView(tk.Frame):
             if taskRef.assignee is not None:
                 taskRef.assignee.highlightAgent(multi=False)
             else:
-                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+                self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightType": "agentHighlight"})
             self.parent.simMainView.simCanvas.handleRenderQueue()
             # Update taskManager's currenttask prop
             self.parent.parent.simulationProcess.simTaskManager.currenttask = taskRef

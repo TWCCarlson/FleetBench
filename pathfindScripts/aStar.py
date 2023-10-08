@@ -98,8 +98,8 @@ class aStarPathfinder:
 
         # Clear the current pathfinding markers
         self.mapCanvas.requestRender("highlight", "clear", {})
-        self.mapCanvas.requestRender("canvasLine", "clear", {})
-        self.mapCanvas.requestRender("text", "clear", {})
+        # self.mapCanvas.requestRender("canvasLine", "clear", {})
+        # self.mapCanvas.requestRender("text", "clear", {})
         self.mapCanvas.handleRenderQueue()
 
     def __copy__(self):
@@ -212,7 +212,7 @@ class aStarPathfinder:
         if self.openSet:
             _, __, currentNode = heappop(self.openSet)
             # Indicate tile is explored
-            self.mapCanvas.requestRender("highlight", "delete", {"highlightTag": "openSet"})
+            self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
             if currentNode == self.targetNode:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
@@ -235,7 +235,7 @@ class aStarPathfinder:
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
                     continue
 
-                self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "pathfindHighlight", "multi": True, "color": "yellow", "highlightTags": ["openSet"]})
+                self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "openSet", "multi": True, "color": "yellow", "highlightTags": ["openSet"]})
                 est_gScore = self.gScore[currentNode] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
                 if est_gScore < self.gScore.get(neighborNode, inf):

@@ -121,14 +121,14 @@ class mainCanvas(tk.Canvas):
         self.renderEdges()
         self.renderDanglingEdges()
         self.renderAgents()
-        self.buildHighlightManager()
+        # self.buildHighlightManager()
         self.generateInfoTiles()
         self.sortCanvasLayers()
         self.setAllLayersVisible()
         self.traceLayerVisibility()
 
         # self.requestRender("agent", "clear", {})
-        self.requestRender("agent", "delete", {"agentNumID": 1})
+        # self.requestRender("agent", "delete", {"agentNumID": 1})
         self.handleRenderQueue()
 
     def buildRenderManager(self):
@@ -143,8 +143,30 @@ class mainCanvas(tk.Canvas):
         self.agentObjectStates = []
 
         # Highlight object lists
-        self.highlightObjects = []
-        self.highlightObjectStates = []
+        self.highlightImages = {
+            "agentHighlight": [],
+            "pickupHighlight": [],
+            "depositHighlight": [],
+            "pathfindHighlight": [],
+            "miscHighlight": [],
+            "openSet": []
+        }
+        self.highlightObjects = {
+            "agentHighlight": [],
+            "pickupHighlight": [],
+            "depositHighlight": [],
+            "pathfindHighlight": [],
+            "miscHighlight": [],
+            "openSet": []
+        }
+        self.highlightObjectStates = {
+            "agentHighlight": [],
+            "pickupHighlight": [],
+            "depositHighlight": [],
+            "pathfindHighlight": [],
+            "miscHighlight": [],
+            "openSet": []
+        }
 
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
@@ -301,14 +323,9 @@ class mainCanvas(tk.Canvas):
             self.itemconfigure(obj, tags=tags)
 
     def clearAgentObjects(self, renderData):
-        # objs = self.find_withtag("agent")
         self.itemconfigure("agent", state=tk.HIDDEN)
         for i, agentState in enumerate(self.agentObjectStates):
             self.agentObjectStates[i] = False
-        # self.delete("agent")
-        # regen = renderData.get("regenerate", False)
-        # if regen:
-        #     self.renderAgents()
 
     def moveHighlightObject(self, renderData):
         newPos = renderData["position"]
@@ -321,7 +338,14 @@ class mainCanvas(tk.Canvas):
         self.moveto(obj, newCanvasPosX, newCanvasPosY)
 
     def deleteHighlightObject(self, renderData):
-        self.delete(renderData["highlightTag"])
+        highlightType = renderData["highlightType"]
+        objs = self.find_withtag(highlightType)
+        for obj in objs:
+            # Hide the highlight
+            self.itemconfigure(obj, state=tk.HIDDEN)
+            # Mark the object as free, need to find it in the list first
+            index = self.highlightObjects[highlightType].index(obj)
+            self.highlightObjectStates[highlightType][index] = False
 
     def newHighlightObject(self, renderData):
         nodeID = renderData["targetNodeID"] #req'd
@@ -330,10 +354,40 @@ class mainCanvas(tk.Canvas):
         color = renderData.get("color", None) #optional
         alpha = renderData.get("alpha", None) #optional
         highlightTags = renderData.get("highlightTags", None) #optional
-        self.requestHighlight(nodeID, highlightType, multi, color=color, alpha=alpha, highlightTags=highlightTags)
+
+        # If multi highlighting is not called for, clear out other highlights of same type
+        if not multi:
+            self.deleteHighlightObject({"highlightType": highlightType})
+        # Check if there is an available highlight object
+        try:
+            objectIndex = self.highlightObjectStates[highlightType].index(False)
+            # If an object is found...
+            highlightObject = self.highlightObjects[highlightType][objectIndex]
+            self.shiftHighlightObject(highlightObject, nodeID, highlightType, color, alpha, highlightTags)
+            # Mark the object as being in use
+            self.highlightObjectStates[highlightType][objectIndex] = True
+        except ValueError:
+            # If there are no free highlight objects, create a new one
+            self.requestHighlight(nodeID, highlightType, multi, color=color, alpha=alpha, highlightTags=highlightTags)
+
+    def shiftHighlightObject(self, object, newPos, highlightType, color, alpha, highlightTags):
+        # Move the highlight to its new position
+        newTileX, newTileY = self.nodeToCanvasTile(newPos)
+        newPosX = newTileX - 0.5 * self.canvasTileSize
+        newPosY = newTileY - 0.5 * self.canvasTileSize
+
+        # 
+        self.itemconfigure(object, state=tk.NORMAL)
+        self.moveto(object, newPosX, newPosY)
 
     def clearHighlightObjects(self, renderData):
-        self.delete("highlight")
+        self.itemconfigure("highlight", state=tk.HIDDEN)
+        # If there are highlights that could be cleared
+        for highlightType, list in self.highlightObjectStates.items():
+            if list:
+                for i, obj in enumerate(list):
+                    self.highlightObjectStates[highlightType][i] = False
+                    # self.highlightImages[i] = None
 
     def newCanvasLineObject(self, renderData):
         nodePath = renderData["nodePath"] #req'd
@@ -724,31 +778,17 @@ class mainCanvas(tk.Canvas):
         if "agent" in nodeData:
             agentName = nodeData["agent"].ID
             agentNumID = nodeData["agent"].numID
-            self.requestHighlight(tileNode, "agentHighlight", multi=False, highlightTags=["agent" + str(agentNumID) + "Highlight"])
-            self.sortCanvasLayers(targetLayer="agentHighlight", layerMotion="lower")
-            self.currentClickedAgent.set(agentName)
-
-    def buildHighlightManager(self):
-        # Establishes the format of the highlight manager
-        # Holds references to the highlight images to prevent tk garbage collection if multiple highlights are needed
-        self.highlightManager = {
-            "agentHighlight": [],
-            "depositHighlight": [],
-            "pickupHighlight": [],
-            "pathfindHighlight": []
-        }
-        logging.info(f"Canvas '{self.ID}' built highlightManager")
+            nodeData["agent"].highlightAgent(multi=False)
+            if nodeData["agent"].currentTask:
+                nodeData["agent"].currentTask.highlightTask(multi=False)
+            else:
+                self.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+                self.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
+            self.handleRenderQueue()
+            self.currentClickedAgent.set(agentNumID)
 
     def requestHighlight(self, nodeID, highlightType, multi, color=None, alpha=None, highlightTags=None):
         # If the requested highlight isn't a multiple highlight, remove highlights of same type
-        if highlightType not in self.highlightManager:
-            # Restrict highlights to the dict key types
-            return
-        if not multi:
-            # Highlight manager will be a dict where key is string "Type" and values are lists of highlights
-            # Clear the highlight object list
-            self.highlightManager[highlightType] = []
-
         # Parse args
         nodeGraphPosX, nodeGraphPosY = self.nodeToCanvasTile(nodeID)
 
@@ -768,6 +808,7 @@ class mainCanvas(tk.Canvas):
             fill = highlightColorDict[highlightType]
         else:
             fill = self.convertColorToRGBA(color, alpha)
+            # fill = color
         
         tags = ["highlight", highlightType]
         if highlightTags is not None:
@@ -775,7 +816,10 @@ class mainCanvas(tk.Canvas):
 
         # Create the highlight
         highlightRef, highlightID = self.createHighlight(nodeGraphPosX, nodeGraphPosY, alpha, fill, tags)
-        self.highlightManager[highlightType].append(highlightRef) # prevent garbage collection
+        index = len(self.highlightObjects[highlightType])
+        self.highlightObjects[highlightType].insert(index, highlightID)
+        self.highlightObjectStates[highlightType].insert(index, True)
+        self.highlightImages[highlightType].insert(index, highlightRef)
         self.tag_lower(highlightType)
         logging.info(f"Handled highlight request for node '{nodeID}' of type '{highlightType}'_multi:{multi} on Canvas '{self.ID}'")
 
@@ -789,17 +833,6 @@ class mainCanvas(tk.Canvas):
         tkImage = ImageTk.PhotoImage(image) # If this is not saved by reference in memory, it gets garbage collected
         tileImageID = self.create_image(graphPosX, graphPosY, image=tkImage, tags=tags)
         return tkImage, tileImageID
-    
-    def clearHightlight(self, highlightType=None):
-        # Garbage collection will remove all highlights if the references are deleted
-        if highlightType is not None:
-            self.highlightManager[highlightType] = []
-            logging.debug(f"Removed all highlights of type '{highlightType}' from Canvas '{self.ID}'")
-        else:
-            # Remove all highlights
-            for highlightType in self.highlightManager.keys():
-                self.highlightManager[highlightType] = []
-            logging.debug(f"Removed all highlights from Canvas '{self.ID}'")
 
     """
         LAYER CONTROLS

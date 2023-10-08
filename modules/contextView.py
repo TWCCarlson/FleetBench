@@ -193,10 +193,9 @@ class contextView(tk.Frame):
         self.agentTreeView.unbind('<Button-3>', self.agentRClickBindFunc)
 
     def updateCurrentAgent(self):
-        agentName = self.parent.mainView.mainCanvas.currentClickedAgent.get()
-        if agentName.isnumeric():
-            agentName = int(agentName)
-        self.currentAgent = self.parent.agentManager.agentDict[agentName]
+        agentID = self.parent.mainView.mainCanvas.currentClickedAgent.get()
+        self.currentAgent = self.parent.agentManager.agentList[int(agentID)]
+        self.validateMovementButtonStates()
 
     def setCurrentAgent(self, agentName):
         self.parent.mainView.mainCanvas.currentClickedAgent.set(agentName)
@@ -222,8 +221,9 @@ class contextView(tk.Frame):
             if agentRef.currentTask:
                 agentRef.currentTask.highlightTask(multi=False)
             else:
-                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
-                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
+                pass
             self.parent.mainView.mainCanvas.handleRenderQueue()
 
             # Update agentManager's currentAgent prop
@@ -232,7 +232,7 @@ class contextView(tk.Frame):
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
 
             # Trigger movement button state validation
-            self.setCurrentAgent(agentRef.ID) # Update context view's tracked agent for movement
+            self.setCurrentAgent(agentRef.numID) # Update context view's tracked agent for movement
             self.validateMovementButtonStates()
 
     def handleAgentRClick(self, event):
@@ -356,7 +356,7 @@ class contextView(tk.Frame):
 
         if selectedRow in self.taskTreeView.tag_has("task"):
             # Clear existing task highlights
-            self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "taskHighlight"})
+            self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "taskHighlight"})
 
             # Get task data for highlighting
             rowData = self.taskTreeView.item(selectedRow)
@@ -367,7 +367,7 @@ class contextView(tk.Frame):
             if taskRef.assignee:
                 taskRef.assignee.highlightAgent(multi=False)
             else:
-                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+                self.parent.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "agentHighlight"})
             self.parent.mainView.mainCanvas.handleRenderQueue()
 
             # Update taskManager's currentTask prop
@@ -415,7 +415,7 @@ class contextView(tk.Frame):
 
         # Event binding to check movement button validity upon agent selection
         agentSelectVar = self.parent.mainView.mainCanvas.currentClickedAgent
-        agentSelectVar.trace_add("write", lambda *args: self.validateMovementButtonStates())
+        # agentSelectVar.trace_add("write", lambda *args: self.validateMovementButtonStates())
 
         ## Movement buttons
         # These should probably not be hotkeyed — its an extra state to manage without much benefit. 

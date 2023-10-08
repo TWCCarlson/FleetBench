@@ -49,9 +49,9 @@ class toolBar(tk.Frame):
 
     def clearManagementHighlights(self):
         # Remove any residual highlights
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "agentHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
         self.mainView.mainCanvas.handleRenderQueue()
 
     def initUI(self):
@@ -269,7 +269,7 @@ class toolBar(tk.Frame):
         if not xPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": highlightType})
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": highlightType})
             self.mainView.mainCanvas.handleRenderQueue()
             logging.debug(f"Variable xPos='{xPos}' is not numeric. Highlight impossible.")
             return
@@ -277,7 +277,7 @@ class toolBar(tk.Frame):
         if not yPos.isnumeric():
             # Else it is invalid
             self.validAgentCreationNode = False
-            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": highlightType})
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": highlightType})
             self.mainView.mainCanvas.handleRenderQueue()
             logging.debug(f"Variable yPos='{yPos}' is not numeric. Highlight impossible.")
             return
@@ -407,7 +407,7 @@ class toolBar(tk.Frame):
 
     def cancelAgentCreation(self):
         logging.debug("Cancelling agent creation . . .")
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "agentHighlight"})
         self.mainView.mainCanvas.handleRenderQueue()
         self.agentCreationPrompt()
 
@@ -434,7 +434,7 @@ class toolBar(tk.Frame):
             className=self.agentClass.get(),
             )
         # Remove previous highlights
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "agentHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "agentHighlight"})
         self.mainView.mainCanvas.requestRender("agent", "new", {"position": targetNode, "agentNumID": agentNumID, "orientation": agentOrientation})
         self.mainView.mainCanvas.handleRenderQueue()
         # Close agent generator
@@ -788,8 +788,8 @@ class toolBar(tk.Frame):
 
     def cancelTaskCreation(self):
         logging.debug("Cancelling task generation . . .")
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
-        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+        self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
         self.mainView.mainCanvas.handleRenderQueue()
         self.taskCreationPrompt()
 
@@ -974,8 +974,8 @@ class toolBar(tk.Frame):
                 timeLimit = timeLimit
             )
             # Remove previous highlights
-            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "pickupHighlight"})
-            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightTag": "depositHighlight"})
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
+            self.mainView.mainCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
             self.mainView.mainCanvas.handleRenderQueue()
             # Close the task generator
             self.taskCreationPrompt()
