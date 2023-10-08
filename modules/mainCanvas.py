@@ -6,6 +6,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from functools import partial
 import math
+import time
 
 class mainCanvas(tk.Canvas):
     def __init__(self, parent, appearanceValues, ID, gridLoc=None, bg=None, width=None, height=None, tileSize=None, gridlineColor=None, **kwargs):
@@ -24,6 +25,14 @@ class mainCanvas(tk.Canvas):
         self.agentVisibility = tk.BooleanVar()
         self.agentOrientationVisibility = tk.BooleanVar()
 
+        # Global compass
+        self.directionMap = {
+            "N": (0, -1),
+            "E": (1, 0),
+            "W": (-1, 0),
+            "S": (0, 1)
+        }
+
         # Style settings
         if bg is None:
             bg = self.appearanceValues.canvasBackgroundColor
@@ -38,7 +47,7 @@ class mainCanvas(tk.Canvas):
         self.setCanvasStyle(bg, width, height, tileSize, gridlineColor)
 
         # Build render queue storage
-        self.renderQueue = []
+        self.buildRenderManager()
 
         # Graph should always be rendered into its frame
         self.renderCanvas()
@@ -118,6 +127,25 @@ class mainCanvas(tk.Canvas):
         self.setAllLayersVisible()
         self.traceLayerVisibility()
 
+        # self.requestRender("agent", "clear", {})
+        self.requestRender("agent", "delete", {"agentNumID": 1})
+        self.handleRenderQueue()
+
+    def buildRenderManager(self):
+        # The instruction stack, iterated through on .handleRenderQueue() calls
+        self.renderQueue = []
+
+        ### Using lists to be greedy with object usage
+        # Not doing this results in extreme memory leaks
+
+        # Agent object lists
+        self.agentObjects = []
+        self.agentObjectStates = []
+
+        # Highlight object lists
+        self.highlightObjects = []
+        self.highlightObjectStates = []
+
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
         acceptedRenderTypes = {
@@ -159,9 +187,10 @@ class mainCanvas(tk.Canvas):
         while len(self.renderQueue) != 0:
             (action, data) = self.renderQueue.pop(0)
             action(data)
-        # self.sortCanvasLayers()
+        self.sortCanvasLayers()
 
     def moveAgentObject(self, renderData):
+        # LEGACY, still working
         # Get tag, source, target nodes
         agentNumID = renderData["agentNumID"]
         sourceNodeID = renderData["sourceNodeID"]
@@ -176,20 +205,29 @@ class mainCanvas(tk.Canvas):
 
     def rotateAgentObject(self, renderData):
         agentNumID = renderData["agentNumID"]
-        newOrientation = renderData["orientation"]
+        agentOrientation = renderData["orientation"]
         agentPosition = renderData["position"]
         # Remove the current orientation mark
         objs = self.find_withtag("agent" + str(agentNumID))
+        # Move the orientation mark to new position
+        newTileCoords = self.nodeToCanvasTile(agentPosition)
         for obj in objs:
             tags = self.gettags(obj)
             if "agentOrientation" in tags:
-                self.delete(obj)
-        # Create the new orientation mark
-        nodeGraphPosX, nodeGraphPosY = self.nodeToCanvasTile(agentPosition)
-        self.createAgentOrientation(nodeGraphPosX, nodeGraphPosY, newOrientation, agentNumID)
+                indicatorAdjustment = self.directionMap[agentOrientation]
+                # Move the orientation indicator
+                x1 = newTileCoords[0]
+                y1 = newTileCoords[1]
+                x2 = newTileCoords[0] + indicatorAdjustment[0] * self.canvasTileSize * self.appearanceValues.agentSizeRatio
+                y2 = newTileCoords[1] + indicatorAdjustment[1] * self.canvasTileSize * self.appearanceValues.agentSizeRatio
+                self.coords(obj, x1, y1, x2, y2)
 
     def deleteAgentObject(self, renderData):
-        self.delete("agent" + str(renderData["agentNumID"]))
+        agentNumID = renderData["agentNumID"]
+        # Hide the objects
+        self.itemconfigure("agent" + str(agentNumID), state=tk.HIDDEN)
+        # Mark the objects as free
+        self.agentObjectStates[agentNumID] = False
 
     def newAgentObject(self, renderData):
         # Create a new agent, exposing style options
@@ -197,13 +235,80 @@ class mainCanvas(tk.Canvas):
         agentNumID = renderData["agentNumID"] # req'd
         agentColor = renderData.get("color", None) #optional
         agentOrientation = renderData.get("orientation", None) #optional
-        self.createAgent(agentPos, agentNumID, agentColor=agentColor, agentOrientation=agentOrientation)
+
+        # Check if there is an available agent object
+        try:
+            objectIndex = self.agentObjectStates.index(False)
+            # If an object is found...
+            agentObjects = self.agentObjects[objectIndex]
+            self.shiftAgentObjects(agentObjects, agentPos, agentNumID, agentColor, agentOrientation)     
+            # Mark these objects as being in use
+            self.agentObjectStates[objectIndex] = True
+        except ValueError:
+            # If there's no entry in the list, then a new agent needs to be generated
+            self.createAgent(agentPos, agentNumID, agentColor=agentColor, agentOrientation=agentOrientation)
+
+    def shiftAgentObjects(self, objectTuple, newPos, agentNumID, agentColor=None, agentOrientation=None):
+        body = objectTuple[0]
+        orient = objectTuple[1]
+        window = objectTuple[2]
+
+        # New tile coordinate is invariant
+        newTileCoords = self.nodeToCanvasTile(newPos)
     
+        # Adjust the agent orientation, which is a line
+        # Point transform dict
+        self.itemconfigure(orient, state=tk.NORMAL)
+        indicatorAdjustment = self.directionMap[agentOrientation]
+        # Move the orientation indicator
+        x1 = newTileCoords[0]
+        y1 = newTileCoords[1]
+        x2 = newTileCoords[0] + indicatorAdjustment[0] * self.canvasTileSize * self.appearanceValues.agentSizeRatio
+        y2 = newTileCoords[1] + indicatorAdjustment[1] * self.canvasTileSize * self.appearanceValues.agentSizeRatio
+        self.coords(orient, x1, y1, x2, y2)
+
+        # Update agent window color
+        nodeTypeColorMap = {
+            "edge": self.appearanceValues.openNodeColor,
+            "charge": self.appearanceValues.chargeNodeColor,
+            "deposit": self.appearanceValues.depositNodeColor,
+            "pickup": self.appearanceValues.pickupNodeColor,
+            "rest": self.appearanceValues.restNodeColor
+        }
+        # Get the agent's node type->color
+        fill = nodeTypeColorMap[self.graphRef.nodes[str(newPos)]["type"]]
+        self.itemconfigure(window, fill=fill)
+
+        # If the new object needs a specific color, apply it
+        if agentColor is not None:
+            self.itemconfigure(body, fill=agentColor)
+
+        # Remaining shifting and tag update operations
+        for obj in (body, window):
+            # Reveal it
+            self.itemconfigure(obj, state=tk.NORMAL)
+            # Move the object to its new location
+            oldCoords = self.bbox(obj)
+            tileCoords = (oldCoords[0] % self.canvasTileSize, oldCoords[1] % self.canvasTileSize)
+            deltaCoords = (newTileCoords[0]-oldCoords[0]+tileCoords[0]-0.5*self.canvasTileSize,
+                            newTileCoords[1]-oldCoords[1]+tileCoords[1]-0.5*self.canvasTileSize)
+            self.move(obj, *deltaCoords)
+        
+        for obj in objectTuple:
+            # Reassign the tags to point to the new agent ID
+            tags = list(self.gettags(obj))
+            tags[0] = "agent"+str(agentNumID)
+            self.itemconfigure(obj, tags=tags)
+
     def clearAgentObjects(self, renderData):
-        self.delete("agent")
-        regen = renderData.get("regenerate", False)
-        if regen:
-            self.renderAgents()
+        # objs = self.find_withtag("agent")
+        self.itemconfigure("agent", state=tk.HIDDEN)
+        for i, agentState in enumerate(self.agentObjectStates):
+            self.agentObjectStates[i] = False
+        # self.delete("agent")
+        # regen = renderData.get("regenerate", False)
+        # if regen:
+        #     self.renderAgents()
 
     def moveHighlightObject(self, renderData):
         newPos = renderData["position"]
@@ -445,25 +550,17 @@ class mainCanvas(tk.Canvas):
             width = self.appearanceValues.danglingEdgeWidth
             tags = ["danglingEdge"]
 
-            # Map the direction of an edge to the resulting translation in the canvas
-            edgeDirectionMap = {
-                "N": (0, -1),
-                "E": (1, 0),
-                "W": (-1, 0),
-                "S": (0, 1)
-            }
-
             # For potential edge directions in the node data
             for edgeDir, exists in nodeEdges.items():
                 if exists:
                     # If there is an edge, calculate its intended target
-                    targetNodeX = nodePosX+edgeDirectionMap[edgeDir][0]
-                    targetNodeY = nodePosY+edgeDirectionMap[edgeDir][1]
+                    targetNodeX = nodePosX+self.directionMap[edgeDir][0]
+                    targetNodeY = nodePosY+self.directionMap[edgeDir][1]
                     targetNodeID = str((targetNodeX, targetNodeY))
                     if targetNodeID not in self.graphRef.neighbors(nodeName):
                         # If it isn't a connected edge, then draw it
-                        targetGraphPosX = nodeGraphPosX + 0.5*self.canvasTileSize*edgeDirectionMap[edgeDir][0]
-                        targetGraphPosY = nodeGraphPosY + 0.5*self.canvasTileSize*edgeDirectionMap[edgeDir][1]
+                        targetGraphPosX = nodeGraphPosX + 0.5*self.canvasTileSize*self.directionMap[edgeDir][0]
+                        targetGraphPosY = nodeGraphPosY + 0.5*self.canvasTileSize*self.directionMap[edgeDir][1]
                         self.create_line(
                             nodeGraphPosX,
                             nodeGraphPosY,
@@ -484,10 +581,7 @@ class mainCanvas(tk.Canvas):
             nodeGraphPosX, nodeGraphPosY = self.nodeToCanvasTile(agent.position)
             agentOrientation = agent.orientation
             agentID = agent.numID
-            # Create the 3 components making up an "agent" in the canvas representation
-            self.createAgentBody(nodeGraphPosX, nodeGraphPosY, agentID)
-            self.createAgentOrientation(nodeGraphPosX, nodeGraphPosY, agentOrientation, agentID)
-            self.createAgentTileWindow(nodeGraphPosX, nodeGraphPosY, agent.position, agentID)
+            self.createAgent(agent.position, agentID, agentOrientation=agentOrientation)
         logging.info(f"Rendered all agents onto Canvas '{self.ID}'")
 
     def createAgent(self, agentPosition, agentID, agentColor=None, agentOrientation=None):
@@ -497,9 +591,14 @@ class mainCanvas(tk.Canvas):
         agentID = agentID
 
         # Create the 3 components making up an "agent" in the canvas representation
-        self.createAgentBody(nodeGraphPosX, nodeGraphPosY, agentID, fillColor=agentColor)
-        self.createAgentOrientation(nodeGraphPosX, nodeGraphPosY, agentOrientation, agentID)
-        self.createAgentTileWindow(nodeGraphPosX, nodeGraphPosY, agentPosition, agentID)
+        bodyID = self.createAgentBody(nodeGraphPosX, nodeGraphPosY, agentID, fillColor=agentColor)
+        orientationID = self.createAgentOrientation(nodeGraphPosX, nodeGraphPosY, agentOrientation, agentID)
+        windowID = self.createAgentTileWindow(nodeGraphPosX, nodeGraphPosY, agentPosition, agentID)
+
+        # Store the collection of objects
+        index = len(self.agentObjects)
+        self.agentObjects.insert(index, (bodyID, orientationID, windowID))
+        self.agentObjectStates.insert(index, True)
 
     def createAgentBody(self, nodeGraphPosX, nodeGraphPosY, agentID, fillColor=None):
         # Body is a diamond, accept optional fillColor args
@@ -519,13 +618,14 @@ class mainCanvas(tk.Canvas):
         ]
 
         # Create agent polygon
-        self.create_polygon(
+        objID = self.create_polygon(
             *pointList,
             outline= outline,
             width= width,
             fill= fillColor,
             tags= tags
         )
+        return objID
 
     def createAgentOrientation(self, nodeGraphPosX, nodeGraphPosY, agentOrientation, agentID):
         # Orientation is a line extending beyond the window size to the edge of the body
@@ -534,20 +634,14 @@ class mainCanvas(tk.Canvas):
         tags = ["agent" + str(agentID), "agent", "agentOrientation"]
         outline = self.appearanceValues.agentBorderColor
 
-        # Point transform dict
-        directionMap = {
-            "N": (0, -1),
-            "E": (1, 0),
-            "W": (-1, 0),
-            "S": (0, 1)
-        }
+        # Point transform
         if agentOrientation is not None:
-            indicatorAdjustment = directionMap[agentOrientation]
+            indicatorAdjustment = self.directionMap[agentOrientation]
         else:
-            indicatorAdjustment = directionMap["N"]
+            indicatorAdjustment = self.directionMap["N"]
 
         # Draw the indicator
-        self.create_line(
+        objID = self.create_line(
             nodeGraphPosX,
             nodeGraphPosY,
             nodeGraphPosX + indicatorAdjustment[0] * self.canvasTileSize * agentSizeRatio,
@@ -556,6 +650,7 @@ class mainCanvas(tk.Canvas):
             width=width,
             tags=tags
         )
+        return objID
 
     def createAgentTileWindow(self, nodeGraphPosX, nodeGraphPosY, agentPosition, agentID):
         # Window is a circle of same color as the tile beneath
@@ -574,7 +669,7 @@ class mainCanvas(tk.Canvas):
         fill = nodeTypeColorMap[self.graphRef.nodes[str(agentPosition)]["type"]]
 
         # Create the "window" circle
-        self.create_oval(
+        objID = self.create_oval(
             nodeGraphPosX - agentWindowSizeRatio * self.canvasTileSize,
             nodeGraphPosY - agentWindowSizeRatio * self.canvasTileSize,
             nodeGraphPosX + agentWindowSizeRatio * self.canvasTileSize,
@@ -583,7 +678,7 @@ class mainCanvas(tk.Canvas):
             width=width,
             tags=tags
         )
-
+        return objID
 
     """
         INFORMATION HOVER TILES
