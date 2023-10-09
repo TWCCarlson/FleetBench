@@ -97,10 +97,13 @@ class aStarPathfinder:
         self.plannedPath = []
 
         # Clear the current pathfinding markers
-        self.mapCanvas.requestRender("highlight", "clear", {})
+        # self.mapCanvas.requestRender("highlight", "clear", {})
         # self.mapCanvas.requestRender("canvasLine", "clear", {})
         # self.mapCanvas.requestRender("text", "clear", {})
-        self.mapCanvas.handleRenderQueue()
+        # self.mapCanvas.handleRenderQueue()
+
+        # Mark the target
+        self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
@@ -208,7 +211,6 @@ class aStarPathfinder:
         # Account for obstacles (other agents)
         # Recursively work through the queue 
         # Highlight the target node
-        self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "blue"})
         if self.openSet:
             _, __, currentNode = heappop(self.openSet)
             # Indicate tile is explored
@@ -225,7 +227,7 @@ class aStarPathfinder:
                 path.reverse()
                 self.plannedPath = path
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
-                self.mapCanvas.handleRenderQueue()
+                # self.mapCanvas.handleRenderQueue()
                 return True
 
             for neighborNode in self.mapGraphRef.neighbors(currentNode):
@@ -257,6 +259,7 @@ class aStarPathfinder:
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" g{est_gScore}", "textType": "pathfind", "anchor": "nw"})
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{round(hScore)} ", "textType": "pathfind", "anchor": "ne"})
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{round(node_fScore)} ", "textType": "pathfind", "anchor": "se"})
+                    self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "pathfindHighlight", "multi": True})
 
             self.mapCanvas.handleRenderQueue()
             return False

@@ -136,6 +136,7 @@ class simProcessor:
         self.renderGraphStateCounter = 0
         self.incrementStepCounterCounter = 0
         self.currentState = "newSimStep"
+        self.persistRenders = False
         
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
@@ -154,9 +155,9 @@ class simProcessor:
                 - Update statistics
         """
         # Profiling
-        self.stateEndTime = time.perf_counter()
-        print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
-        self.stateStartTime = time.perf_counter()
+        # self.stateEndTime = time.perf_counter()
+        # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
+        # self.stateStartTime = time.perf_counter()
         # Track the new current state
         self.currentState = stateID
         
@@ -183,6 +184,11 @@ class simProcessor:
         if self.simulationStateMachineMap[self.currentState]["renderStateBool"]:
             # Handle the render queue for this step
             self.simCanvasRef.handleRenderQueue()
+            if not self.persistRenders:
+                self.simCanvasRef.requestRender("highlight", "clear", {})
+                self.simCanvasRef.requestRender("canvasLine", "clear", {})
+                self.simCanvasRef.requestRender("text", "clear", {})
+            self.persistRenders = False
         else:
             self.simCanvasRef.renderQueue = []
 
@@ -224,11 +230,12 @@ class simProcessor:
                 lambda stateID=stateID: self.simulateStep(stateID))
             
     def newSimStep(self):
+        self.persistRenders = False
         # Profiling
-        self.loopEndTime = time.perf_counter()
-        print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
-        print("====== NEW LOOP =======")
-        self.loopStartTime = time.perf_counter()
+        # self.loopEndTime = time.perf_counter()
+        # print(f"Total loop time: {self.loopEndTime - self.loopStartTime}")
+        # print("====== NEW LOOP =======")
+        # self.loopStartTime = time.perf_counter()
         # Certain objects need to be reset on new steps
         # These objects cause loopbacks in the FSM
         # Prepare for a new step
@@ -246,6 +253,7 @@ class simProcessor:
         return
 
     def selectAgent(self):
+        self.persistRenders = True
         # Select an agent, keeping in mind there may be a queue of agents
         # Building the new agent queue 
         if self.algorithmType == "sapf":
@@ -271,6 +279,7 @@ class simProcessor:
         return
 
     def taskAssignment(self):
+        self.persistRenders = True
         # Assign tasks if agent needs a task
         # Assign a new task if the task status is "unassigned"
         # Or generate a new task if there are not, and generation on demand is enabled
@@ -309,6 +318,7 @@ class simProcessor:
             return
 
     def selectAction(self):
+        self.persistRenders = True
         # Agent needs to determine its action for this step
         # If the agent has already acted, then its "turn" is over
         if self.currentAgentActionTaken == True:
@@ -334,6 +344,7 @@ class simProcessor:
             return
         
     def taskInteraction(self):
+        self.persistRenders = False
         # Agent should be able to interact with the task
         # print(f"Agent {self.currentAgent.ID} interacting at {self.currentAgent.currentNode}")
         self.currentAgent.taskInteraction(self.currentAgent.currentNode)
@@ -350,8 +361,8 @@ class simProcessor:
             return
 
     def agentPlanMove(self):
+        self.persistRenders = True
         # Determine whether the agent can move or needs to find a path first
-
         # The agent needs to move toward its target, ensure it has a pathfinder
         agentTargetNode = self.currentAgent.returnTargetNode()
         if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1 or self.currentAgent.pathfinder.invalid == True:
@@ -372,6 +383,7 @@ class simProcessor:
             return
          
     def agentMove(self):
+        self.persistRenders = False
         # Agent is able to move, get the target node for the movement
         nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
         if self.currentAgent.validateCandidateMove(nextNodeInPath, self.agentCollisionBehavior):
@@ -380,7 +392,6 @@ class simProcessor:
             self.simCanvasRef.requestRender("agent", "move", {"agentNumID": self.currentAgent.numID, 
                 "sourceNodeID": self.currentAgent.currentNode, "targetNodeID": nextNodeInPath})
             self.currentAgent.executeMove(nextNodeInPath)
-            self.simCanvasRef.requestRender("canvasLine", "clear", {})
             # Moving is always action consumptive
             self.currentAgentActionTaken = True
         else:
@@ -407,33 +418,35 @@ class simProcessor:
             return
             
     def agentPathfind(self):
+        self.persistRenders = True
         # For speed, only use the rendered version of the pathfinder if the frame is being rendered
-        print(f"Agent {self.currentAgent.ID} searching for path...")
+        # print(f"Agent {self.currentAgent.ID} searching for path...")
         if self.simulationStateMachineMap["agentPathfind"]["renderStateBool"]:
             pathStatus = self.currentAgent.pathfinder.searchStepRender()
         else:
             pathStatus = self.currentAgent.pathfinder.searchStep()
 
         if pathStatus == False:
-            print(f"\t...did not finish on this iteration.")
+            # print(f"\t...did not finish on this iteration.")
             self.requestedStateID = "agentPathfind"
             return
         elif pathStatus == True:
-            print(f"\t...path was found.")
+            # print(f"\t...path was found.")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
-            self.simCanvasRef.requestRender("highlight", "clear", {})
-            self.simCanvasRef.requestRender("text", "clear", {})
-            self.simCanvasRef.handleRenderQueue()
+            # self.simCanvasRef.requestRender("highlight", "clear", {})
+            # self.simCanvasRef.requestRender("text", "clear", {})
+            # self.simCanvasRef.handleRenderQueue()
             self.requestedStateID = "agentMove"
             return
         elif pathStatus == "wait":
-            print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
-            self.simCanvasRef.requestRender("highlight", "clear", {})
-            self.simCanvasRef.requestRender("text", "clear", {})
+            # print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
+            # self.simCanvasRef.requestRender("highlight", "clear", {})
+            # self.simCanvasRef.requestRender("text", "clear", {})
             self.currentAgent.pathfinder.__reset__()
             self.requestedStateID = "checkAgentQueue"
 
     def checkAgentQueue(self):
+        self.persistRenders = False
         # Check the current queue
         if not self.agentQueue:
             # If the queue is empty, then the step should end
@@ -449,11 +462,13 @@ class simProcessor:
         raise Exception("Simulation reached an error state")
     
     def endSimStep(self):
+        self.persistRenders = False
         # print(f"All agents have acted.")
         # if the simulation hasnt reached its "objective", do another step
         self.requestedStateID = "newSimStep"
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         stepCompleted = targetLabelText.get()
+        # print(f"Steps completed: {stepCompleted}")
         targetLabelText.set(stepCompleted + 1)
 
     def endSimulation(self):
