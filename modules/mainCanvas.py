@@ -168,6 +168,10 @@ class mainCanvas(tk.Canvas):
             "openSet": []
         }
 
+        # CanvasLine objects
+        self.canvasLineObjects = []
+        self.canvasLineObjectStates = []
+
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
         acceptedRenderTypes = {
@@ -187,7 +191,6 @@ class mainCanvas(tk.Canvas):
             "canvasLine": {
                 "new": self.newCanvasLineObject,
                 "delete": self.deleteCanvasLineObject,
-                "extend": self.extendCanvasLineObject,
                 "clear": self.clearCanvasLineObjects
             },
             "text": {
@@ -394,36 +397,48 @@ class mainCanvas(tk.Canvas):
         lineType = renderData["lineType"] #req'd
         color = renderData.get("color", None) #optional
         width = renderData.get("width", None) #optional
-        self.renderDirectionArrow(nodePath, lineType, color=color, width=width)
+        # Check if there is an available canvasLine object
+        try:
+            objectIndex = self.canvasLineObjectStates.index(False)
+            # If an object is found...
+            canvasLineObject = self.canvasLineObjects[objectIndex]
+            self.shiftCanvasLineObjects(canvasLineObject, nodePath, lineType, color, width)
+            # Mark the object as being in use
+            self.canvasLineObjectStates[objectIndex] = True
+        except ValueError:
+            self.renderDirectionArrow(nodePath, lineType, color=color, width=width)
+
+    def shiftCanvasLineObjects(self, obj, nodePath, lineType, color, width):
+        newNodePath = []
+        if isinstance(nodePath[0], str):
+            reqNodePath = list(eval(node) for node in nodePath)
+            for coord in reqNodePath:
+                x = coord[0] * self.canvasTileSize + 0.5 * self.canvasTileSize
+                y = coord[1] * self.canvasTileSize + 0.5 * self.canvasTileSize
+                newNodePath.append(x)
+                newNodePath.append(y)
+        else:
+            newNodePath = list(nodePath)
+        
+        self.coords(obj, *newNodePath)
+        self.itemconfigure(obj, state=tk.NORMAL)
 
     def deleteCanvasLineObject(self, renderData):
         if isinstance(renderData["oldNodePath"][0], str):
             oldNodePath = tuple(eval(node) for node in renderData["oldNodePath"])
         else:
             oldNodePath = tuple(renderData["oldNodePath"])
+        # Determine the object ID
         obj = self.find_withtag(oldNodePath)
-        self.delete(obj)
-
-    def extendCanvasLineObject(self, renderData):
-        # The node path was saved as a tag, so it is searchable
-        if isinstance(renderData["oldNodePath"][0], str):
-            oldNodePath = tuple(eval(node) for node in renderData["oldNodePath"])
-        else:
-            oldNodePath = tuple(renderData["oldNodePath"])
-        obj = self.find_withtag(oldNodePath)
-        tags = list(self.gettags(obj))
-        if tags:
-            extensionPath = renderData["pathExtension"]
-            fill = self.itemcget(obj, "fill")
-            width = self.itemcget(obj, "width")
-            lineType = tags.pop(1)
-            newPath = oldNodePath + tuple(eval(node) for node in extensionPath)
-            self.delete(obj)
-            self.renderDirectionArrow(newPath, lineType, color=fill, width=width)
+        # Find it in the list of objects
+        index = self.canvasLineObjects.index(obj)
+        self.canvasLineObjectStates[index] = False
 
     def clearCanvasLineObjects(self, *args):
         # Possible this should be expanded into a general arrows method with variable tag acceptance
-        self.delete("canvasLine")
+        self.itemconfigure("canvasLine", state=tk.HIDDEN)
+        for i, canvasLineState in enumerate(self.canvasLineObjects):
+            self.canvasLineObjectStates[i] = False
 
     def newTextObject(self, renderData):
         nodeID = renderData["position"]
@@ -967,6 +982,8 @@ class mainCanvas(tk.Canvas):
         # Generate tags
         tags = ["canvasLine", lineType, tagPath]
 
-
         # Render the line
-        self.create_line(convertedNodePath, fill=color, arrow=tk.LAST, width=width, tags=tags)
+        objID = self.create_line(convertedNodePath, fill=color, arrow=tk.LAST, width=width, tags=tags)
+        index = len(self.canvasLineObjects)
+        self.canvasLineObjects.insert(index, objID)
+        self.canvasLineObjectStates.insert(index, True)

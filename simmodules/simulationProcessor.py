@@ -179,6 +179,13 @@ class simProcessor:
         # Save the next state's ID for state machine's memory
         self.simulationStateID = nextStateID
 
+        # Render the state
+        if self.simulationStateMachineMap[self.currentState]["renderStateBool"]:
+            # Handle the render queue for this step
+            self.simCanvasRef.handleRenderQueue()
+        else:
+            self.simCanvasRef.renderQueue = []
+
         # Call the next state
         if self.doNextStep:
             self.simulationStateMachineNextStep(nextStateID)
@@ -199,8 +206,7 @@ class simProcessor:
 
         # Check if the state needs to be rendered
         if self.simulationStateMachineMap[self.currentState]["renderStateBool"]:
-            # Handle the render queue for this step
-            self.simCanvasRef.handleRenderQueue()
+            
             # If so, get the render duration
             frameDelay = self.simulationStateMachineMap[self.currentState]["stateRenderDuration"]
             if frameDelay == "":
@@ -214,7 +220,7 @@ class simProcessor:
             # Empty the render queue
             self.simCanvasRef.renderQueue = []
             # Use after so that the UI doesn't lock up while doing this
-            self.simulationUpdateTimer = self.parent.parent.parent.after(1, 
+            self.simulationUpdateTimer = self.parent.parent.parent.after(0, 
                 lambda stateID=stateID: self.simulateStep(stateID))
             
     def newSimStep(self):
@@ -354,7 +360,7 @@ class simProcessor:
         
         # If the agent has a planned path, then it can move along it
         if self.currentAgent.pathfinder.plannedPath:
-            # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
+            print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
                     "lineType": "pathfind"})
             self.requestedStateID = "agentMove"

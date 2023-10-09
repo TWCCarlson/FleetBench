@@ -117,7 +117,8 @@ class App(tk.Tk):
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/oneagent_onetask_assigned")
         self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/sapf_with_blockers")
 
-        
+        # self.after()
+
         self.mainloop()
 
     def simulationConfiguration(self):
