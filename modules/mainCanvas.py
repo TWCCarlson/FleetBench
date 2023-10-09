@@ -172,6 +172,30 @@ class mainCanvas(tk.Canvas):
         self.canvasLineObjects = []
         self.canvasLineObjectStates = []
 
+        # Text objects
+        self.textObjects = {
+            tk.N: [],
+            tk.E: [],
+            tk.W: [],
+            tk.S: [],
+            tk.NW: [],
+            tk.NE: [],
+            tk.SW: [],
+            tk.SE: [],
+            tk.CENTER: []
+        }
+        self.textObjectStates = {
+            tk.N: [],
+            tk.E: [],
+            tk.W: [],
+            tk.S: [],
+            tk.NW: [],
+            tk.NE: [],
+            tk.SW: [],
+            tk.SE: [],
+            tk.CENTER: []
+        }
+
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
         acceptedRenderTypes = {
@@ -379,7 +403,7 @@ class mainCanvas(tk.Canvas):
         newPosX = newTileX - 0.5 * self.canvasTileSize
         newPosY = newTileY - 0.5 * self.canvasTileSize
 
-        # 
+        # Reveal the object and move it
         self.itemconfigure(object, state=tk.NORMAL)
         self.moveto(object, newPosX, newPosY)
 
@@ -409,6 +433,7 @@ class mainCanvas(tk.Canvas):
             self.renderDirectionArrow(nodePath, lineType, color=color, width=width)
 
     def shiftCanvasLineObjects(self, obj, nodePath, lineType, color, width):
+        # Process the nodepath into individual values
         newNodePath = []
         if isinstance(nodePath[0], str):
             reqNodePath = list(eval(node) for node in nodePath)
@@ -419,9 +444,21 @@ class mainCanvas(tk.Canvas):
                 newNodePath.append(y)
         else:
             newNodePath = list(nodePath)
+
+        # Style
+        if color is None:
+            color = self.appearanceValues.canvasArrowDefaultColor
+        if width is None:
+            width = self.appearanceValues.canvasArrowDefaultWidth
+
+        # Generate tags
+        tags = ["canvasLine", lineType, newNodePath]
+
+        # Apply changes
+        self.itemconfigure(obj, state=tk.NORMAL, fill=color, width=width, tags=tags)
         
+        # Move the canvas line to its new location
         self.coords(obj, *newNodePath)
-        self.itemconfigure(obj, state=tk.NORMAL)
 
     def deleteCanvasLineObject(self, renderData):
         if isinstance(renderData["oldNodePath"][0], str):
@@ -447,14 +484,63 @@ class mainCanvas(tk.Canvas):
         anchor = renderData.get("anchor", None)
         textColor = renderData.get("textColor", None)
         textFont = renderData.get("textFont", None)
-        self.renderTileText(nodeID, text, textType, anchor, textColor, textFont)
+        # Check if there is an available text object of the type
+        try:
+            objectIndex = self.textObjectStates[anchor].index(False)
+            # If an available text object is found
+            textObject = self.textObjects[anchor][objectIndex]
+            self.shiftTextObject(textObject, nodeID, text, textType, anchor, textColor, textFont)
+            # Mark the object as being in use
+            self.textObjectStates[anchor][objectIndex] = True
+        except ValueError:
+            # If there are no free text objects, create a new one
+            self.renderTileText(nodeID, text, textType, anchor, textColor, textFont)
+
+    def shiftTextObject(self, object, newPos, text, textType, anchor, textColor, textFont):
+        # Define the new text position
+        nodePosX, nodePosY = self.nodeToCanvasTile(newPos)
+        anchorTextShiftMap = {
+            tk.N: (0, -1),
+            tk.E: (1, 0),
+            tk.W: (-1, 0),
+            tk.S: (0, 1),
+            tk.CENTER: (0, 0),
+            tk.NW: (-1, -1),
+            tk.NE: (1, -1),
+            tk.SW: (-1, 1),
+            tk.SE: (1, 1),
+        }
+        newPosX = nodePosX + anchorTextShiftMap[anchor][0] * 0.5 * self.canvasTileSize
+        newPosY = nodePosY + anchorTextShiftMap[anchor][1] * 0.5 * self.canvasTileSize
+
+        # Define the color
+        if textColor is None:
+            textColor = self.appearanceValues.defaultTextColor
+
+        # Fontspec
+        if textFont is None:
+            textFont = tkFont.Font(weight="bold", size=self.appearanceValues.highlightTextSize)
+
+        # Tags
+        tags = ["text", textType + "Text", textType, anchor + "Text"]
+        
+        # Apply new changes
+        self.itemconfigure(object, state=tk.NORMAL, fill=textColor, text=text, font=textFont, tags=tags)
+
+        # Move the text to its new location
+        self.coords(object, newPosX, newPosY)
 
     def deleteTextObject(self, renderData):
+        # Deprecated
+        # obj = self.find_withtag(renderData["textType"])
         self.delete(renderData["textType"])
 
     def clearTextObjects(self, *args):
-        # Currently there is nothing unique about each piece of text, so all are cleared
-        self.delete("text")
+        self.itemconfigure("text", state=tk.HIDDEN)
+        for textAnchor, list in self.textObjectStates.items():
+            if list:
+                for i, obj in enumerate(list):
+                    self.textObjectStates[textAnchor][i] = False
 
     def clearCanvasObjects(self, *args):
         self.delete("all")
@@ -463,10 +549,6 @@ class mainCanvas(tk.Canvas):
         self.drawGridlines()
         self.renderGraphState()
 
-    def processRenderRequests(self):
-        # Iterates through the list of rendering operations
-        pass
-        
     """
         HELPER FUNCTIONS
     """
@@ -956,11 +1038,16 @@ class mainCanvas(tk.Canvas):
         if textFont is None:
             textFont = tkFont.Font(weight="bold", size=self.appearanceValues.highlightTextSize)
         # Tags
-        tags = ["text", textType + "Text", textType]
+        tags = ["text", textType + "Text", textType, anchor + "Text"]
 
         nodeTextPosX = nodeCanvasPosX + anchorTextShiftMap[anchor][0] * 0.5 * self.canvasTileSize
         nodeTextPosY = nodeCanvasPosY + anchorTextShiftMap[anchor][1] * 0.5 * self.canvasTileSize
-        self.create_text(nodeTextPosX, nodeTextPosY, text=text, anchor=anchor, fill=textColor, font=textFont, tags=tags)
+        objID = self.create_text(nodeTextPosX, nodeTextPosY, text=text, anchor=anchor, fill=textColor, font=textFont, tags=tags)
+
+        # Store the object and list as in use
+        index = len(self.textObjects)
+        self.textObjects[anchor].insert(index, objID)
+        self.textObjectStates[anchor].insert(index, True)
 
     def renderDirectionArrow(self, nodePath, lineType, color=None, width=None):
         # NodePath is a list of nodes visited by the arrow, in order of visitation

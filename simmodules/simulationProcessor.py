@@ -360,7 +360,7 @@ class simProcessor:
         
         # If the agent has a planned path, then it can move along it
         if self.currentAgent.pathfinder.plannedPath:
-            print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
+            # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
                     "lineType": "pathfind"})
             self.requestedStateID = "agentMove"
@@ -408,21 +408,22 @@ class simProcessor:
             
     def agentPathfind(self):
         # For speed, only use the rendered version of the pathfinder if the frame is being rendered
-        # print(f"Agent {self.currentAgent.ID} searching for path...")
+        print(f"Agent {self.currentAgent.ID} searching for path...")
         if self.simulationStateMachineMap["agentPathfind"]["renderStateBool"]:
             pathStatus = self.currentAgent.pathfinder.searchStepRender()
         else:
             pathStatus = self.currentAgent.pathfinder.searchStep()
 
         if pathStatus == False:
-            # print(f"\t...did not finish on this iteration.")
+            print(f"\t...did not finish on this iteration.")
             self.requestedStateID = "agentPathfind"
             return
         elif pathStatus == True:
-            # print(f"\t...path was found.")
+            print(f"\t...path was found.")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
             self.simCanvasRef.requestRender("highlight", "clear", {})
             self.simCanvasRef.requestRender("text", "clear", {})
+            self.simCanvasRef.handleRenderQueue()
             self.requestedStateID = "agentMove"
             return
         elif pathStatus == "wait":
