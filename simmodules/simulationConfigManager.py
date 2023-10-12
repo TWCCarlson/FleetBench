@@ -108,7 +108,8 @@ class simulationConfigManager(tk.Toplevel):
         # Using types to separate multi-agent and single-agent pathfinding algorithms
         self.algorithmOptionTypeDict = {
             "Single-agent A*": "sapf",
-            "Multi-Agent A* (LRA*)": "mapf"
+            "Multi-Agent A* (LRA*)": "mapf",
+            "Multi-Agent Cooperative A* (CA*)": "mapf"
         }
 
         ### Algorithm Selection
@@ -121,6 +122,10 @@ class simulationConfigManager(tk.Toplevel):
         ### LRA* MAPF Suboptions
         self.MAPFLRAstarHeuristic = tk.StringVar()
         self.MAPFLRAstarHeuristicCoefficient = tk.IntVar()
+
+        ### CA* MAPF Suboptions
+        self.MAPFCAstarHeuristic = tk.StringVar()
+        self.MAPFCAstarHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -744,6 +749,10 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["LRAstarPathfinderConfig"] = {}
         dataPackage["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristic"] = self.MAPFLRAstarHeuristic.get()
         dataPackage["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"] = self.MAPFLRAstarHeuristicCoefficient.get()
+        # CA*
+        dataPackage["CAstarPathfinderConfig"] = {}
+        dataPackage["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristic"] = self.MAPFCAstarHeuristic.get()
+        dataPackage["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"] = self.MAPFCAstarHeuristicCoefficient.get()
         
         # Agent Configuration Options
         ### Collisions

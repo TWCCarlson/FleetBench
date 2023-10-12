@@ -137,8 +137,12 @@ class mapDataClass:
         logging.info("New mapData successfully ingested to new mapGraph.")
 
         self.pushDataToCanvas()
+        self.parent.agentManager.pushDataToCanvas()
+        self.parent.mainView.mainCanvas.delete("all")
+        self.parent.mainView.mainCanvas.renderGraphState()
 
     def pushDataToCanvas(self):
+        print("pushing to canvas")
         self.mainView.mainCanvas.ingestGraphData(self.mapGraph)
 
     def updateAgentLocations(self, agentList, ):

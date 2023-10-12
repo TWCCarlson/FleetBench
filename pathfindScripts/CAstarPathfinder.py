@@ -7,12 +7,12 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import copy
 
-class aStarPathfinder:
+class CAstarPathfinder:
     """
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager=None):
+    def __init__(self, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
@@ -31,6 +31,7 @@ class aStarPathfinder:
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
         self.invalid = False
+        self.pathManager = pathManager
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -86,9 +87,9 @@ class aStarPathfinder:
 
         # Set the start of the heap up
         # Initialize the starting node into the queue, alongside its appropriate maps
-        heappush(self.openSet, (0, next(self.counter), sourceNode))
-        self.gScore[sourceNode] = 0
-        self.fScore[sourceNode] = self.heuristicFunc(sourceNode, targetNode)
+        heappush(self.openSet, (0, next(self.counter), sourceNode, 0))
+        self.gScore[(sourceNode, 0)] = 0
+        self.fScore[(sourceNode, 0)] = self.heuristicFunc(sourceNode, targetNode)
 
         # Data used for tracking pathfinder performance
         self.searchOps = count()
@@ -102,7 +103,7 @@ class aStarPathfinder:
         # self.mapCanvas.requestRender("text", "clear", {})
         # self.mapCanvas.handleRenderQueue()
 
-        # Highlight the target node
+        # Mark the target
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
     def __copy__(self):
@@ -148,11 +149,13 @@ class aStarPathfinder:
         # The heap queue pulls the smallest item from the heap
         # The first element in the format is the fScore, minimizing this is an objective
         # The second element is a counter, used to break ties in the fScore
+        # Third element is the node ID
+        # Last element is the time depth of the search, incremented on each neighbor exploration
         self.counter = count()
         self.openSet = []
-        heappush(self.openSet, (0, next(self.counter), self.sourceNode))
-        self.gScore[self.sourceNode] = 0
-        self.fScore[self.sourceNode] = self.heuristicFunc(self.sourceNode, self.targetNode)
+        heappush(self.openSet, (0, next(self.counter), self.sourceNode, 0))
+        self.gScore[(self.sourceNode, 0)] = 0
+        self.fScore[(self.sourceNode, 0)] = self.heuristicFunc(self.sourceNode, self.targetNode)
 
         # Data used for tracking pathfinder performance
         self.searchOps = count()
@@ -199,7 +202,6 @@ class aStarPathfinder:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
                     # Update the fScore of the neighbor node
                     self.fScore[neighborNode] = node_fScore
-
             return False
         else:
             return "wait"
@@ -210,58 +212,69 @@ class aStarPathfinder:
         # Seek the shortest path between the targetNode and agent's currentNode
         # Account for obstacles (other agents)
         # Recursively work through the queue 
+        # Highlight the target node
         if self.openSet:
-            _, __, currentNode = heappop(self.openSet)
+            _, __, currentNode, timeDepth = heappop(self.openSet)
             # Indicate tile is explored
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
             if currentNode == self.targetNode:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
-                parentNode = self.cameFrom.get(currentNode, None)
-                while parentNode is not None:
-                    path.append(parentNode)
-                    parentNode = self.cameFrom.get(parentNode, None)
+                parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
+                while parentNodeTime is not None:
+                    path.append(parentNodeTime[0])
+                    parentNodeTime = self.cameFrom.get((parentNodeTime), None)
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
+                print(path)
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
+                self.pathManager.handlePathPlanRequest(path)
                 # self.mapCanvas.handleRenderQueue()
                 return True
-
-            for neighborNode in self.mapGraphRef.neighbors(currentNode):
-                # Indicate neighbors of currently explored tile
-                if "agent" in self.mapGraphRef.nodes(data=True)[neighborNode] and self.collisionBehavior == "Respected":
-                    # If there's an agent in the neighbor, mark it but do not evaluate as it is not traversible
+            
+            # Neighbor nodes needs to be augmented with the same node, but one time step removed
+            neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
+            print("!!! NEW NODE SET !!!")
+            for neighborNode in neighborNodes:
+                # Cooperative A* uses a reservation table to determine neighbor eligibility
+                # "Temporal adjacency"; True indicates eligibility
+                print("==========================================")
+                print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                    # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
                     continue
 
                 self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "openSet", "multi": True, "color": "yellow", "highlightTags": ["openSet"]})
-                est_gScore = self.gScore[currentNode] + self.weight
+                est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
-                if est_gScore < self.gScore.get(neighborNode, inf):
+                if est_gScore < self.gScore.get((neighborNode, timeDepth+1), inf):
                     # Then a new best path has been found to reach the neighbor node
-                    self.cameFrom[neighborNode] = currentNode
+                    self.cameFrom[(neighborNode, timeDepth+1)] = (currentNode, timeDepth)
                     # Record its new gScore
-                    self.gScore[neighborNode] = est_gScore
+                    self.gScore[(neighborNode, timeDepth+1)] = est_gScore
                     # Calculate nodes estimated distance from the goal
                     hScore = self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
-                        heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
+                        heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
                     # Update the fScore of the neighbor node
-                    self.fScore[neighborNode] = node_fScore
+                    self.fScore[(neighborNode, timeDepth+1)] = node_fScore
                     
                     # Display tile scores
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" g{est_gScore}", "textType": "pathfind", "anchor": "nw"})
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"h{round(hScore)} ", "textType": "pathfind", "anchor": "ne"})
                     self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f"f{round(node_fScore)} ", "textType": "pathfind", "anchor": "se"})
+                    self.mapCanvas.requestRender("text", "new", {"position": neighborNode, "text": f" T{timeDepth+1}", "textType": "pathfind", "anchor": "sw"})
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "pathfindHighlight", "multi": True})
 
             self.mapCanvas.handleRenderQueue()
             return False
         else:
-            return "wait"
+            pp.pprint(self.openSet)
+            # return "wait"
             raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")

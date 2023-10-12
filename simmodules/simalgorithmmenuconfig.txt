@@ -46,7 +46,28 @@
                     "optionValue": self.MAPFLRAstarHeuristicCoefficient,
                     "elementData": (1, 50, 1)
                 }
-            ]
+            ],
+            "Multi-Agent Cooperative A* (CA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
         }
     }
 ]

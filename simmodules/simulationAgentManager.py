@@ -251,38 +251,13 @@ class simAgentClass:
             logging.debug(f"{count}: {path}")
         
         return cutoffKPathsList
-
-    def validateCandidateMove(self, targetNode, respectCollisions):
-        """
-            Used to check whether an agent can move to a target node
-            - There must be an edge between current node and target node
-            - There cannot be an agent in the target node, if the config specifies no agent overlap
-        """
-        currentNode = self.currentNode
-        if isinstance(targetNode, str):
-            targetNode = targetNode
-        elif isinstance(targetNode, tuple):
-            targetNode = f"({targetNode[0]}, {targetNode[1]})"
-        
-        logging.debug(f"Checking if currentNode '{currentNode}' and targetNode '{targetNode}' share an edge . . .")
-        if not self.mapGraphRef.has_edge(currentNode, targetNode):
-            logging.debug("Edge does not exist.")
-            return False
-        logging.debug("Edge exists.")
-
-        logging.debug(f"Checking if targetNode '{targetNode}' is occupied by an agent . . .")
-        if 'agent' in self.mapGraphRef.nodes(data=True)[targetNode] and respectCollisions == "Respected":
-            logging.debug(f"TargetNode '{targetNode}' contains an agent. Cannot move here.")
-            return False
-        logging.debug("Node has space to be moved into.")
-        
-        return True
     
     def executeMove(self, targetNode):
         """
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        print(f"Moving agent '{self.ID}' to node '{targetNode}'")
         # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
         # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):

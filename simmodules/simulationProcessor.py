@@ -3,7 +3,12 @@ import logging
 import time
 import random
 from pathfindScripts.aStar import aStarPathfinder
+from pathfindScripts.CAstarPathfinder import CAstarPathfinder
+from pathfindManagerScripts.CAstarReserver import CAstarReserver
+from pathfindMoverScripts.CAstarMover import CAstarMover
+from pathfindMoverScripts.defaultMover import defaultAgentMover
 pp = pprint.PrettyPrinter(indent=4)
+from copy import deepcopy
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -107,21 +112,39 @@ class simProcessor:
 
         # Map options to pathfinders
         algorithmDict = {
-            "Single-agent A*": aStarPathfinder,
-            "Multi-Agent A* (LRA*)": aStarPathfinder
+            "Single-agent A*": (aStarPathfinder, None, None),
+            "Multi-Agent A* (LRA*)": (aStarPathfinder, None, None),
+            "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover)
         }
         algorithmConfigDict = {
             "Single-agent A*": {"heuristic": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"],
                                 "heuristicCoefficient": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristicCoefficient"]},
             "Multi-Agent A* (LRA*)": {"heuristic": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristic"],
-                                      "heuristicCoefficient": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"]}
+                                      "heuristicCoefficient": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"]},
+            "Multi-Agent Cooperative A* (CA*)": {"heuristic": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristic"],
+                                                 "heuristicCoefficient": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"]}
         }
 
         # Call option's pathfinder class
         self.agentCollisionBehavior = self.simulationSettings["agentCollisionsValue"]
-        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection]
+        self.agentActionAlgorithm = algorithmDict[self.algorithmSelection][0]
         self.agentActionConfig = algorithmConfigDict[self.algorithmSelection]
         self.agentActionConfig["agentCollisionsValue"] = self.agentCollisionBehavior
+
+        # Call option's shared information manager
+        infoShareManager = algorithmDict[self.algorithmSelection][1]
+        if infoShareManager is not None:
+            self.infoShareManager = infoShareManager(self.simGraph)
+        else:
+            self.infoShareManager = None
+
+        # Call option's agent movement manager
+        agentMovementManager = algorithmDict[self.algorithmSelection][2]
+        if agentMovementManager is not None:
+            self.agentMovementManager = agentMovementManager(self.simCanvasRef, self.simGraph, self.infoShareManager)
+        else:
+            self.agentMovementManager = defaultAgentMover(self.simGraph)
+
         
         # State history control
         self.stateHistoryManager = simProcessStateHandler(self)
@@ -140,6 +163,10 @@ class simProcessor:
         
     def simulationStopTicking(self):
         self.parent.parent.parent.after_cancel(self.simulationUpdateTimer)
+
+    def setInitialMapState(self):
+        if self.infoShareManager is not None:
+            self.infoShareManager.build()
 
     def simulateStep(self, stateID):
         """
@@ -191,6 +218,11 @@ class simProcessor:
             self.persistRenders = False
         else:
             self.simCanvasRef.renderQueue = []
+            self.simCanvasRef.requestRender("highlight", "clear", {})
+            self.simCanvasRef.requestRender("canvasLine", "clear", {})
+            self.simCanvasRef.requestRender("text", "clear", {})
+            self.simCanvasRef.handleRenderQueue()
+            self.persistRenders = False
 
         # Call the next state
         if self.doNextStep:
@@ -367,7 +399,7 @@ class simProcessor:
         agentTargetNode = self.currentAgent.returnTargetNode()
         if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1 or self.currentAgent.pathfinder.invalid == True:
             # print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig)
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager)
         
         # If the agent has a planned path, then it can move along it
         if self.currentAgent.pathfinder.plannedPath:
@@ -386,7 +418,7 @@ class simProcessor:
         self.persistRenders = False
         # Agent is able to move, get the target node for the movement
         nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
-        if self.currentAgent.validateCandidateMove(nextNodeInPath, self.agentCollisionBehavior):
+        if self.agentMovementManager.validateAgentMove(self.currentAgent, nextNodeInPath, self.agentCollisionBehavior):
             # print(f"Agent {self.currentAgent.ID} moved from {self.currentAgent.currentNode}->{nextNodeInPath}")
             # If the node is a valid, unobstructed move, move there
             self.simCanvasRef.requestRender("agent", "move", {"agentNumID": self.currentAgent.numID, 
@@ -467,9 +499,13 @@ class simProcessor:
         # if the simulation hasnt reached its "objective", do another step
         self.requestedStateID = "newSimStep"
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
-        stepCompleted = targetLabelText.get()
+        self.stepCompleted = targetLabelText.get()
         # print(f"Steps completed: {stepCompleted}")
-        targetLabelText.set(stepCompleted + 1)
+        targetLabelText.set(self.stepCompleted + 1)
+        # print(stepCompleted)
+        if self.infoShareManager is not None:
+            print(self.stepCompleted+1)
+            self.infoShareManager.updateSimulationDepth(self.stepCompleted+1)
 
     def endSimulation(self):
         print(f"Simulation reached its end goal state.")

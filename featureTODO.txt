@@ -74,6 +74,11 @@ loading a second session needs to clear all values from the first
 un-distribute the task state management
 agent numID assignment needs rework
 
+dynamically generate algorithm choices from the files present in t he appropriate folder
+ - also dynamically generate their options, somehow
+
+if a map has no deposit or no pickup nodes, it will fail to generate task gen options and crash
+
 Informational Classes are then:
     mapData
     agentData
