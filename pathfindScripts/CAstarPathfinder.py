@@ -171,40 +171,45 @@ class CAstarPathfinder:
         # Account for obstacles (other agents)
         # Recursively work through the queue 
         if self.openSet:
-            _, __, currentNode = heappop(self.openSet)
+            _, __, currentNode, timeDepth = heappop(self.openSet)
             if currentNode == self.targetNode:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
-                parentNode = self.cameFrom.get(currentNode, None)
-                while parentNode is not None:
-                    path.append(parentNode)
-                    parentNode = self.cameFrom.get(parentNode, None)
+                parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
+                while parentNodeTime is not None:
+                    path.append(parentNodeTime[0])
+                    parentNodeTime = self.cameFrom.get(parentNodeTime, None)
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
+                # Update reservation table
+                self.pathManager.handlePathPlanRequest(path)
                 return True
             
-            for neighborNode in self.mapGraphRef.neighbors(currentNode):
-                if "agent" in self.mapGraphRef.nodes(data=True)[neighborNode] and self.collisionBehavior == "Respected":
-                    # If there's an agent in the neighbor, mark it but do not evaluate as it is not traversible
+            # Neighbor nodes needs to be augmented with the same node, but one time step removed
+            neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
+
+            for neighborNode in neighborNodes:
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                    # print(f"<<<Node {neighborNode} was blocked")
                     continue
-                est_gScore = self.gScore[currentNode] + self.weight
+                est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
-                if est_gScore < self.gScore.get(neighborNode, inf):
+                if est_gScore < self.gScore.get((neighborNode, timeDepth+1), inf):
                     # Then a new best path has been found to reach the neighbor node
-                    self.cameFrom[neighborNode] = currentNode
+                    self.cameFrom[(neighborNode, timeDepth+1)] = (currentNode, timeDepth)
                     # Record its new gScore
-                    self.gScore[neighborNode] = est_gScore       
+                    self.gScore[(neighborNode, timeDepth+1)] = est_gScore       
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
-                        heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
+                        heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
                     # Update the fScore of the neighbor node
-                    self.fScore[neighborNode] = node_fScore
+                    self.fScore[(neighborNode, timeDepth+1)] = node_fScore
             return False
         else:
-            return "wait"
+            # return "wait"
             raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
@@ -228,7 +233,7 @@ class CAstarPathfinder:
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
-                print(path)
+                # print(path)
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
                 self.pathManager.handlePathPlanRequest(path)
                 # self.mapCanvas.handleRenderQueue()
@@ -236,12 +241,12 @@ class CAstarPathfinder:
             
             # Neighbor nodes needs to be augmented with the same node, but one time step removed
             neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
-            print("!!! NEW NODE SET !!!")
+            # print("!!! NEW NODE SET !!!")
             for neighborNode in neighborNodes:
                 # Cooperative A* uses a reservation table to determine neighbor eligibility
                 # "Temporal adjacency"; True indicates eligibility
-                print("==========================================")
-                print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
+                # print("==========================================")
+                # print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
                 if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
