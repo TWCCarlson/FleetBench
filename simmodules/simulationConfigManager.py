@@ -109,7 +109,8 @@ class simulationConfigManager(tk.Toplevel):
         self.algorithmOptionTypeDict = {
             "Single-agent A*": "sapf",
             "Multi-Agent A* (LRA*)": "mapf",
-            "Multi-Agent Cooperative A* (CA*)": "mapf"
+            "Multi-Agent Cooperative A* (CA*)": "mapf",
+            "Hierarchical A* with RRA* (HCA*)": "mapf"
         }
 
         ### Algorithm Selection
@@ -126,6 +127,10 @@ class simulationConfigManager(tk.Toplevel):
         ### CA* MAPF Suboptions
         self.MAPFCAstarHeuristic = tk.StringVar()
         self.MAPFCAstarHeuristicCoefficient = tk.IntVar()
+
+        ### HCA* MAPF Suboptions
+        self.MAPFHCAstarHeuristic = tk.StringVar()
+        self.MAPFHCAstarHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -753,6 +758,10 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["CAstarPathfinderConfig"] = {}
         dataPackage["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristic"] = self.MAPFCAstarHeuristic.get()
         dataPackage["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"] = self.MAPFCAstarHeuristicCoefficient.get()
+        # HCA*
+        dataPackage["HCAstarPathfinderConfig"] = {}
+        dataPackage["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristic"] = self.MAPFHCAstarHeuristic.get()
+        dataPackage["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristicCoefficient"] = self.MAPFHCAstarHeuristicCoefficient.get()
         
         # Agent Configuration Options
         ### Collisions

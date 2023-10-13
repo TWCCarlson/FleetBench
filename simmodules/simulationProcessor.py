@@ -4,8 +4,11 @@ import time
 import random
 from pathfindScripts.aStar import aStarPathfinder
 from pathfindScripts.CAstarPathfinder import CAstarPathfinder
+from pathfindScripts.HCAstarPathfinder import HCAstarPathfinder
 from pathfindManagerScripts.CAstarReserver import CAstarReserver
+from pathfindManagerScripts.HCAstarReserver import HCAstarReserver
 from pathfindMoverScripts.CAstarMover import CAstarMover
+from pathfindMoverScripts.HCAstarMover import HCAstarMover
 from pathfindMoverScripts.defaultMover import defaultAgentMover
 pp = pprint.PrettyPrinter(indent=4)
 from copy import deepcopy
@@ -114,7 +117,8 @@ class simProcessor:
         algorithmDict = {
             "Single-agent A*": (aStarPathfinder, None, None),
             "Multi-Agent A* (LRA*)": (aStarPathfinder, None, None),
-            "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover)
+            "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover),
+            "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover)
         }
         algorithmConfigDict = {
             "Single-agent A*": {"heuristic": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"],
@@ -122,7 +126,9 @@ class simProcessor:
             "Multi-Agent A* (LRA*)": {"heuristic": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristic"],
                                       "heuristicCoefficient": simulationSettings["LRAstarPathfinderConfig"]["algorithmMAPFLRAstarHeuristicCoefficient"]},
             "Multi-Agent Cooperative A* (CA*)": {"heuristic": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristic"],
-                                                 "heuristicCoefficient": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"]}
+                                                 "heuristicCoefficient": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"]},
+            "Hierarchical A* with RRA* (HCA*)": {"heuristic": simulationSettings["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristic"],
+                                                 "heuristicCoefficient": simulationSettings["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristicCoefficient"]}
         }
 
         # Call option's pathfinder class

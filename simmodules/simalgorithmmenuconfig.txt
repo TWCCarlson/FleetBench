@@ -68,6 +68,27 @@
                     "elementData": (1, 50, 1)
                 }
             ],
+            "Hierarchical A* with RRA* (HCA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFHCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFHCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
         }
     }
 ]
