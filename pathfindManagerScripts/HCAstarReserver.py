@@ -174,7 +174,7 @@ class HCAstarReserver:
                 return heuristicDistance
             self.heuristicFunc = heuristic
 
-    def calculateHeuristicDistance(self, sourceNode, targetNode):
+    def calculateHeuristicDistance(self, sourceNode, targetNode, heuristicID):
         """
             Accepts the node of the agent as sourceNode
             Accepts the node of the goal node as targetNode
@@ -183,7 +183,7 @@ class HCAstarReserver:
         """
         # Check for the existence of the targetNode in the data
         if targetNode not in self.RRAdata:
-            self.initRRAstarPathfind(targetNode, "Dijkstra")
+            self.initRRAstarPathfind(targetNode, heuristicID)
             # Set the initial search conditions
             nodeRRAdata = self.RRAdata[targetNode]
             heappush(nodeRRAdata["openSet"], (0, next(nodeRRAdata["counter"]), targetNode))
@@ -207,14 +207,16 @@ class HCAstarReserver:
         # print(nodeRRA["openSet"])
         # print(type(nodeRRA["openSet"]))
         while nodeRRA["openSet"]:
-            _, __, currentNode = heappop(nodeRRA["openSet"])
+            # Read the new node in the openSet to see if it matches the goal
+            _, __, currentNode = min(nodeRRA["openSet"])
             # print(f"Currently checking node: {currentNode}")
             # print(currentNode)
             if currentNode == sourceNode:
                 heappush(nodeRRA["openSet"], (_, __, currentNode))
                 # The node has been found, and the search can end
                 return True
-            
+            # Pop the next lowest fScore node for evaluation fo neighbors
+            _, __, currentNode = heappop(nodeRRA["openSet"])
             # print(f"Node has neighbors:")
             for neighborNode in self.mapGraphRef.neighbors(currentNode):
                 # print(f"\t{neighborNode}")1
@@ -234,5 +236,6 @@ class HCAstarReserver:
                         heappush(nodeRRA["openSet"], (node_fScore, next(nodeRRA["counter"]), neighborNode))
                     # Update the fScore
                     nodeRRA["fScore"][neighborNode] = node_fScore
-                    # print(nodeRRA["openSet"])
+            # print(f"Open set: {nodeRRA['openSet']}")
+            # print(f"Closed set: {nodeRRA['gScore']}")
         raise nx.NetworkXNoPath(f"Node {targetNode} not reachable from {sourceNode}")

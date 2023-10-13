@@ -246,7 +246,7 @@ class HCAstarPathfinder:
                 # Cooperative A* uses a reservation table to determine neighbor eligibility
                 # "Temporal adjacency"; True indicates eligibility
                 # print("==========================================")
-                print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
+                # print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
                 if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
@@ -256,13 +256,13 @@ class HCAstarPathfinder:
                 est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
                 # If this estimated gScore for the neighbor is less than the currently mapped one
                 if est_gScore < self.gScore.get((neighborNode, timeDepth+1), inf):
-                    print(f"{currentNode}->{neighborNode} gScore can be improved.")
+                    # print(f"{currentNode}->{neighborNode} gScore can be improved.")
                     # Then a new best path has been found to reach the neighbor node
                     self.cameFrom[(neighborNode, timeDepth+1)] = (currentNode, timeDepth)
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode) * self.heuristicCoefficient
+                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode, self.heuristic) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it
