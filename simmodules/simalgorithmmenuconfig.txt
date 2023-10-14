@@ -89,6 +89,34 @@
                     "elementData": (1, 50, 1)
                 }
             ],
+            "Windowed HCA* (WHCA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFWHCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFWHCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                },
+                {
+                    "labelText": "Search Window Depth",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 5,
+                    "optionValue": self.MAPFWHCAstarWindowSize,
+                    "elementData": (1, 100, 1)
+                }
+            ],
         }
     }
 ]

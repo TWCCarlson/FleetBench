@@ -12,7 +12,7 @@ class CAstarPathfinder:
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager):
+    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
@@ -23,6 +23,7 @@ class CAstarPathfinder:
             config["heuristicCoefficient"] = 1
 
         # If a pathfind operation can be attempted, save the inputs
+        self.numID = numID
         self.sourceNode = sourceNode
         self.targetNode = targetNode
         self.heuristic = config["heuristic"]

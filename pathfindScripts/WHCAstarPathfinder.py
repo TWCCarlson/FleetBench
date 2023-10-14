@@ -7,7 +7,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import copy
 
-class HCAstarPathfinder:
+class WHCAstarPathfinder:
     """
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
@@ -146,6 +146,9 @@ class HCAstarPathfinder:
         self.fScore = {} # fScore is the distance from source to target through current node
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
 
+        # Release any claims on the path reservation table
+        self.pathManager.handlePathRelease(self.plannedPath)
+
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
         # The first element in the format is the fScore, minimizing this is an objective
@@ -282,6 +285,6 @@ class HCAstarPathfinder:
             self.mapCanvas.handleRenderQueue()
             return False
         else:
-            pp.pprint(self.openSet)
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            print("Failed to find a path")
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")

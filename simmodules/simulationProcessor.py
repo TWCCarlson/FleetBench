@@ -5,10 +5,13 @@ import random
 from pathfindScripts.aStar import aStarPathfinder
 from pathfindScripts.CAstarPathfinder import CAstarPathfinder
 from pathfindScripts.HCAstarPathfinder import HCAstarPathfinder
+from pathfindScripts.WHCAstarPathfinder import WHCAstarPathfinder
 from pathfindManagerScripts.CAstarReserver import CAstarReserver
 from pathfindManagerScripts.HCAstarReserver import HCAstarReserver
+from pathfindManagerScripts.WHCAstarReserver import WHCAstarReserver
 from pathfindMoverScripts.CAstarMover import CAstarMover
 from pathfindMoverScripts.HCAstarMover import HCAstarMover
+from pathfindMoverScripts.WHCAstarMover import WHCAstarMover
 from pathfindMoverScripts.defaultMover import defaultAgentMover
 pp = pprint.PrettyPrinter(indent=4)
 from copy import deepcopy
@@ -118,7 +121,8 @@ class simProcessor:
             "Single-agent A*": (aStarPathfinder, None, None),
             "Multi-Agent A* (LRA*)": (aStarPathfinder, None, None),
             "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover),
-            "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover)
+            "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover),
+            "Windowed HCA* (WHCA*)": (WHCAstarPathfinder, WHCAstarReserver, WHCAstarMover)
         }
         algorithmConfigDict = {
             "Single-agent A*": {"heuristic": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"],
@@ -128,7 +132,10 @@ class simProcessor:
             "Multi-Agent Cooperative A* (CA*)": {"heuristic": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristic"],
                                                  "heuristicCoefficient": simulationSettings["CAstarPathfinderConfig"]["algorithmMAPFCAstarHeuristicCoefficient"]},
             "Hierarchical A* with RRA* (HCA*)": {"heuristic": simulationSettings["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristic"],
-                                                 "heuristicCoefficient": simulationSettings["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristicCoefficient"]}
+                                                 "heuristicCoefficient": simulationSettings["HCAstarPathfinderConfig"]["algorithmMAPFHCAstarHeuristicCoefficient"]},
+            "Windowed HCA* (WHCA*)": {"heuristic": simulationSettings["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarHeuristic"],
+                                      "heuristicCoefficient": simulationSettings["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarHeuristicCoefficient"],
+                                      "windowSize": simulationSettings["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarWindowSize"]}
         }
 
         # Call option's pathfinder class
@@ -405,7 +412,7 @@ class simProcessor:
         agentTargetNode = self.currentAgent.returnTargetNode()
         if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1 or self.currentAgent.pathfinder.invalid == True:
             # print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager)
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager)
         
         # If the agent has a planned path, then it can move along it
         if self.currentAgent.pathfinder.plannedPath:
