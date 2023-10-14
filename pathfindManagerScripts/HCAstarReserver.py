@@ -139,7 +139,7 @@ class HCAstarReserver:
     def setHeuristic(self, heuristicID):
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
-        print(f"Setting heuristic: {heuristicID}")
+        # print(f"Setting heuristic: {heuristicID}")
         if heuristicID == "Dijkstra":
             def heuristic(u, v):
                 # Dijkstra's always underestimates, making it admissible, but does nothing to speed up pathfinding
@@ -194,12 +194,12 @@ class HCAstarReserver:
 
         # Check if the sourceNode has been checked already
         if sourceNode in self.RRAdata[targetNode]["gScore"]:
-            print(f"{sourceNode}->{targetNode} gScore is cached: {self.RRAdata[targetNode]['gScore'][sourceNode]}")
+            # print(f"{sourceNode}->{targetNode} gScore is cached: {self.RRAdata[targetNode]['gScore'][sourceNode]}")
             return self.RRAdata[targetNode]["gScore"][sourceNode]
         
         # If not, then the node needs to be searched for via RRA* until its hScore is found
         self.RRAsearch(sourceNode, targetNode)
-        print(self.RRAdata[targetNode]["gScore"][sourceNode])
+        # print(self.RRAdata[targetNode]["gScore"][sourceNode])
         return self.RRAdata[targetNode]["gScore"][sourceNode]
 
     def RRAsearch(self, sourceNode, targetNode):

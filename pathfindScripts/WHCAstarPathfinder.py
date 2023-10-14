@@ -266,7 +266,7 @@ class WHCAstarPathfinder:
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode, self.heuristic) * self.heuristicCoefficient
+                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode, self.heuristic, self.numID) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it

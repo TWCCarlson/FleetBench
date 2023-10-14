@@ -202,7 +202,8 @@ class HCAstarPathfinder:
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore       
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode, self.heuristic) * self.heuristicCoefficient
+                    node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
