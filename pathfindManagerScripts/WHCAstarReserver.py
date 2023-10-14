@@ -50,39 +50,39 @@ class WHCAstarReserver:
         # print(sourceNode)
         if targetNode == sourceNode:
             # Have to check all edges leading to this node, and the future node
-            edgeFree = True
+            edgeReserved = False
             for node in self.reservationTable[timeDepth+self.currentDepth][sourceNode]:
-                edgeFree = edgeFree and self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node)
-            nodeFree = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode)
+                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node)
+            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode)
         else:
-            edgeFree = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode)
-            nodeFree = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode)
-        if nodeFree and edgeFree:
+            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode)
+            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode)
+        if not nodeReserved and not edgeReserved:
             # print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             # Node is occupied and ineligible for use in pathfinding
             return True
-        elif not nodeFree:
+        elif nodeReserved:
             # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
             return False
-        elif not edgeFree:
+        elif edgeReserved:
             # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
             return False
         
-    def handlePathPlanRequest(self, requestedNodeList):
+    def handlePathPlanRequest(self, requestedNodeList, agentID):
         # Reserves nodes and edges for the found path, starting from currentDepth
         for depth, node in enumerate(requestedNodeList[1:]):
             # Reserve the edge at this time step
-            self.reserveEdge(depth+self.currentDepth, requestedNodeList[depth], node)
+            self.reserveEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
             # Reserve the node at the next time step
-            self.reserveNode(depth+self.currentDepth+1, node)
+            self.reserveNode(depth+self.currentDepth+1, node, agentID)
 
-    def handlePathRelease(self, requestedNodeList):
+    def handlePathRelease(self, requestedNodeList, agentID):
         # Releases nodes and edges for the provided path, starting fromcurrentDepth
         for depth, node in enumerate(requestedNodeList[1:]):
             # Release the edge at this time step
-            self.releaseEdge(depth+self.currentDepth, requestedNodeList[depth], node)
+            self.releaseEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
             # Release the node at the next time step
-            self.releaseNode(depth+self.currentDepth+1, node)
+            self.releaseNode(depth+self.currentDepth+1, node, agentID)
             print(f"Released {node}")
             pp.pprint(self.reservationTable[depth+self.currentDepth+1].nodes(data=True))
 
@@ -100,27 +100,31 @@ class WHCAstarReserver:
         self.depthCounter = count()
         self.timeTracked = next(self.depthCounter)
 
-    def reserveNode(self, timeStep, node):
-        self.reservationTable[timeStep].nodes[node]["Reserved"] = False
+    def reserveNode(self, timeStep, node, agentID):
+        self.reservationTable[timeStep].nodes[node]["Reserved"] = str(agentID)
 
-    def reserveEdge(self, timeStep, sourceNode, targetNode):
+    def reserveEdge(self, timeStep, sourceNode, targetNode, agentID):
         # If the agent's plan is to wait, then all neighboring edges need to be reserved
         if sourceNode == targetNode:
             for neighbor in self.reservationTable[timeStep][sourceNode]:
-                self.reservationTable[timeStep][sourceNode][neighbor]["Reserved"] = False
+                self.reservationTable[timeStep][sourceNode][neighbor]["Reserved"] = str(agentID)
         else:
+            self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = str(agentID)
+
+    def releaseNode(self, timeStep, node, agentID):
+        if self.reservationTable[timeStep].nodes[node]["Reserved"] == agentID:
+            self.reservationTable[timeStep].nodes[node]["Reserved"] = False
+
+    def releaseEdge(self, timeStep, sourceNode, targetNode, agentID):
+        if self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] == agentID:
             self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = False
 
-    def releaseNode(self, timeStep, node):
-        self.reservationTable[timeStep].nodes[node]["Reserved"] = True
-
-    def releaseEdge(self, timeStep, sourceNode, targetNode):
-        self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = True
-
     def getNodeState(self, timeStep, node):
+        print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
         return self.reservationTable[timeStep].nodes[node]["Reserved"]
 
     def getEdgeState(self, timeStep, sourceNode, targetNode):
+        print(f"Edge: {self.reservationTable[timeStep][sourceNode][targetNode]['Reserved']}; {bool(self.reservationTable[timeStep][sourceNode][targetNode]['Reserved'])}")
         return self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"]
 
     def expandReservationTable(self, timeDepth):
@@ -130,10 +134,10 @@ class WHCAstarReserver:
         self.timeTracked = next(self.depthCounter)
 
     def preallocNodes(self, timeDepth):
-        nx.set_node_attributes(self.reservationTable[timeDepth], True, "Reserved")
+        nx.set_node_attributes(self.reservationTable[timeDepth], False, "Reserved")
 
     def preallocEdges(self, timeDepth):
-        nx.set_edge_attributes(self.reservationTable[timeDepth], True, "Reserved")
+        nx.set_edge_attributes(self.reservationTable[timeDepth], False, "Reserved")
 
     def initRRAstarPathfind(self, endNode, heuristicID):
         # Construct a dict of requested end nodes, with their RRA data stored for quick access
