@@ -154,11 +154,10 @@ class simProcessor:
         # Call option's agent movement manager
         agentMovementManager = algorithmDict[self.algorithmSelection][2]
         if agentMovementManager is not None:
-            self.agentMovementManager = agentMovementManager(self.simCanvasRef, self.simGraph, self.infoShareManager)
+            self.agentMovementManager = agentMovementManager(self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simCanvasRef)
         else:
             self.agentMovementManager = defaultAgentMover(self.simGraph)
 
-        
         # State history control
         self.stateHistoryManager = simProcessStateHandler(self)
 
@@ -180,6 +179,12 @@ class simProcessor:
     def setInitialMapState(self):
         if self.infoShareManager is not None:
             self.infoShareManager.build()
+
+        self.agentQueue = list(self.simAgentManagerRef.agentList.keys())
+        # pp.pprint(self.simGraph.edges('(1, 0)'))
+        # pp.pprint(self.simGraph.nodes())
+        # import networkx as nx
+        # nx.Graph().edges
 
     def simulateStep(self, stateID):
         """
@@ -293,7 +298,8 @@ class simProcessor:
         # The list of agents needs to be reset for this step
         # print(f"Creating a new list of agents for step {stepID}")
 
-        self.agentQueue = list(self.simAgentManagerRef.agentList.keys())
+        # Process the agent list, shifting agents who just completed a 
+        # self.agentQueue = (agent for agent in self.simAgentManagerRef.agentList.keys())
         self.requestedStateID = "selectAgent"
         return
 
@@ -308,12 +314,13 @@ class simProcessor:
             self.agentQueue = []
         elif self.algorithmType == "mapf":
             try:
+                # newAgent = next(self.agentQueue)
                 newAgent = self.agentQueue.pop(0)
                 self.currentAgent = self.simAgentManagerRef.agentList[newAgent]
             except StopIteration:
                 # The queue is empty, so the simulation step can end
                 # print(f"Reached the end of the agent queue. Next sim step should start.")
-                self.requestedStateID = "endSimStep"
+                self.requestedStateID = "agentCollisionCheck"
                 return
         # There was an agent in the queue, so it should act
         # print(f"New agent {self.currentAgent.ID} has been selected.")
@@ -372,15 +379,17 @@ class simProcessor:
 
         # If the agent is already on its task-given target tile, it should act immediately
         if self.currentAgent.currentNode == self.currentAgent.returnTargetNode():
-            # print(f"Agent {self.currentAgent.ID} is in position to interact with task {self.currentAgent.currentTask.ID}")
+            # print(f"Agent {self.currentAgent.ID} is in position to interact with task {self.currentAgent.currentTask.name}")
             # An action is about to be taken, but it could be free
             self.requestedStateID = "taskInteraction"
             if self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "No cost for pickup/dropoff":
                 # print(f"\tInteraction was free.")
                 self.currentAgentActionTaken = False
+                self.requestedStateID = "taskInteraction"
             elif self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step":
                 # print(f"\tInteraction consumed agent's action.")
                 self.currentAgentActionTaken = True
+                self.requestedStateID = "taskInteraction"
             return
         else:
             # If the agent is not at its target tile, it should be trying to move there
@@ -398,12 +407,13 @@ class simProcessor:
         if self.currentAgentActionTaken == True:
             # print(f"Agent {self.currentAgent.ID} has no more actions available")
             self.requestedStateID = "checkAgentQueue"
-            return
-        elif self.currentAgentActionTaken == False:
+        elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is None:
             # If not, then it can also move
             # print(f"Agent {self.currentAgent.ID} is able to move.")
-            self.requestedStateID = "agentPlanMove"
-            return
+            self.requestedStateID = "taskAssignment"
+        elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is not None:
+            self.requestedStateID = "selectAction"
+        return
 
     def agentPlanMove(self):
         self.persistRenders = True
@@ -419,7 +429,9 @@ class simProcessor:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
                     "lineType": "pathfind"})
-            self.requestedStateID = "agentMove"
+            nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
+            self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
+            self.requestedStateID = "checkAgentQueue"
             return
         else:
             # If the agent does not have a complete path, it needs to find one
@@ -429,38 +441,10 @@ class simProcessor:
          
     def agentMove(self):
         self.persistRenders = False
-        # Agent is able to move, get the target node for the movement
-        nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
-        if self.agentMovementManager.validateAgentMove(self.currentAgent, nextNodeInPath, self.agentCollisionBehavior):
-            # print(f"Agent {self.currentAgent.ID} moved from {self.currentAgent.currentNode}->{nextNodeInPath}")
-            # If the node is a valid, unobstructed move, move there
-            self.simCanvasRef.requestRender("agent", "move", {"agentNumID": self.currentAgent.numID, 
-                "sourceNodeID": self.currentAgent.currentNode, "targetNodeID": nextNodeInPath})
-            self.currentAgent.executeMove(nextNodeInPath)
-            # Moving is always action consumptive
-            self.currentAgentActionTaken = True
-        else:
-            # print(f"Agent {self.currentAgent.ID} was unable to move from {self.currentAgent.currentNode}->{nextNodeInPath}, replanning")
-            # The planned move is invalid, and a replanning is necessary
-            self.currentAgent.pathfinder.__reset__()
-            self.requestedStateID = "agentPlanMove"
-            return
-
-        # If the agent move reached its target, check if it can interact
-        if self.currentAgent.currentNode == self.currentAgent.returnTargetNode():
-            # print(f"Agent {self.currentAgent.ID} reached its target ...")
-            if self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "No cost for pickup/dropoff":
-                # print(f"...and can interact.")
-                self.requestedStateID = "taskInteraction"
-                return
-            elif self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step":
-                # print(f"...but can't interact.")
-                self.requestedStateID = "checkAgentQueue"
-                return
-        else:
-            # print(f"Agent {self.currentAgent.ID} did not reach its target.")
-            self.requestedStateID = "checkAgentQueue"
-            return
+        # Asks the movement manager to verify there are no collisions on this step of the simulation
+        if self.agentCollisionBehavior == "Respected":
+            self.agentMovementManager.checkAgentCollisions()
+        self.requestedStateID = "endSimStep"
             
     def agentPathfind(self):
         self.persistRenders = True
@@ -481,21 +465,23 @@ class simProcessor:
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
             # self.simCanvasRef.handleRenderQueue()
-            self.requestedStateID = "agentMove"
+            self.requestedStateID = "agentPlanMove"
             return
         elif pathStatus == "wait":
             # print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
+            self.agentMovementManager.submitAgentAction(self.currentAgent, "crash")
             self.currentAgent.pathfinder.__reset__()
             self.requestedStateID = "checkAgentQueue"
+            # print(f"!!! {self.agentQueue}")
 
     def checkAgentQueue(self):
         self.persistRenders = False
         # Check the current queue
         if not self.agentQueue:
-            # If the queue is empty, then the step should end
-            self.requestedStateID = "endSimStep"
+            # If the queue is empty, then movements can resolve
+            self.requestedStateID = "agentMove"
             return
         else:
             # Otherwise, pull a new agent out of it to take actions
@@ -519,6 +505,10 @@ class simProcessor:
         if self.infoShareManager is not None:
             print(self.stepCompleted+1)
             self.infoShareManager.updateSimulationDepth(self.stepCompleted+1)
+
+        self.agentQueue = self.agentMovementManager.getCurrentPriorityOrder()
+        self.agentMovementManager.setCurrentPriorityOrder([])
+        # print(f"New agent queue: {self.agentQueue}")
 
     def endSimulation(self):
         print(f"Simulation reached its end goal state.")

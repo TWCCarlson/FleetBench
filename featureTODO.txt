@@ -78,6 +78,11 @@ dynamically generate algorithm choices from the files present in t he appropriat
  - also dynamically generate their options, somehow
 
 if a map has no deposit or no pickup nodes, it will fail to generate task gen options and crash
+agent pathfinder should accept new targets on reset, maybe
+    - at the very least, either stop resetting or stop instantiating new pathfinders
+fallthrough case for crash recovery: when an agent wants to stay where it is but cant due to reservations
+    - it would attempt to reserve the node its on for t+1
+    - it would also need to reserve edges entering the node on t+0
 
 Informational Classes are then:
     mapData

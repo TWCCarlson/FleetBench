@@ -39,7 +39,7 @@ class WHCAstarReserver:
     def purgePastData(self):
         pass
 
-    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode):
+    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode, agentID):
         # Verifies if the node is open at a specific time
         # Expands the reservation table if the request depth exceeds the table's depth
         if timeDepth + self.currentDepth >= self.timeTracked:
@@ -52,11 +52,11 @@ class WHCAstarReserver:
             # Have to check all edges leading to this node, and the future node
             edgeReserved = False
             for node in self.reservationTable[timeDepth+self.currentDepth][sourceNode]:
-                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node)
-            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode)
+                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node, agentID)
+            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode, agentID)
         else:
-            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode)
-            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode)
+            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID)
+            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID)
         if not nodeReserved and not edgeReserved:
             # print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             # Node is occupied and ineligible for use in pathfinding
@@ -83,8 +83,8 @@ class WHCAstarReserver:
             self.releaseEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
             # Release the node at the next time step
             self.releaseNode(depth+self.currentDepth+1, node, agentID)
-            print(f"Released {node}")
-            pp.pprint(self.reservationTable[depth+self.currentDepth+1].nodes(data=True))
+            # print(f"Released {node}")
+            # pp.pprint(self.reservationTable[depth+self.currentDepth+1].nodes(data=True))
 
     def createReservationTable(self):
         # Build the table for the depth
@@ -119,13 +119,29 @@ class WHCAstarReserver:
         if self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] == agentID:
             self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = False
 
-    def getNodeState(self, timeStep, node):
-        print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
-        return self.reservationTable[timeStep].nodes[node]["Reserved"]
+    def getNodeState(self, timeStep, node, agentID):
+        reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
+        # print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
+        if reserver == str(agentID):
+            # print("Node reserved by self.")
+            return False
+        elif reserver == False:
+            return False
+        else:
+            # print("Node reserved by another.")
+            return True
 
-    def getEdgeState(self, timeStep, sourceNode, targetNode):
-        print(f"Edge: {self.reservationTable[timeStep][sourceNode][targetNode]['Reserved']}; {bool(self.reservationTable[timeStep][sourceNode][targetNode]['Reserved'])}")
-        return self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"]
+    def getEdgeState(self, timeStep, sourceNode, targetNode, agentID):
+        reserver = self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"]
+        # print(f"Edge: {self.reservationTable[timeStep][sourceNode][targetNode]['Reserved']}; {bool(self.reservationTable[timeStep][sourceNode][targetNode]['Reserved'])}")
+        if reserver == str(agentID):
+            # print("Edge reserved by self.")
+            return False
+        elif reserver == False:
+            return False
+        else:
+            # print("Edge reserved by another.")
+            return True
 
     def expandReservationTable(self, timeDepth):
         self.reservationTable[timeDepth+1] = deepcopy(self.graphStructure)
@@ -207,12 +223,12 @@ class WHCAstarReserver:
 
         # Check if the sourceNode has been checked already
         if sourceNode in self.RRAdata[targetNode]["gScore"]:
-            print(f"{sourceNode}->{targetNode} gScore is cached: {self.RRAdata[targetNode]['gScore'][sourceNode]}")
+            # print(f"{sourceNode}->{targetNode} gScore is cached: {self.RRAdata[targetNode]['gScore'][sourceNode]}")
             return self.RRAdata[targetNode]["gScore"][sourceNode]
         
         # If not, then the node needs to be searched for via RRA* until its hScore is found
         self.RRAsearch(sourceNode, targetNode)
-        print(self.RRAdata[targetNode]["gScore"][sourceNode])
+        # print(self.RRAdata[targetNode]["gScore"][sourceNode])
         return self.RRAdata[targetNode]["gScore"][sourceNode]
 
     def RRAsearch(self, sourceNode, targetNode):

@@ -29,6 +29,7 @@ class WHCAstarPathfinder:
         self.heuristic = config["heuristic"]
         self.heuristicCoefficient = config["heuristicCoefficient"]
         self.collisionBehavior = config["agentCollisionsValue"]
+        self.windowSize = config["windowSize"]
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
         self.invalid = False
@@ -147,7 +148,7 @@ class WHCAstarPathfinder:
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
 
         # Release any claims on the path reservation table
-        self.pathManager.handlePathRelease(self.plannedPath)
+        self.pathManager.handlePathRelease(self.plannedPath, self.numID)
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
@@ -170,13 +171,20 @@ class WHCAstarPathfinder:
         # Further, flag this pathfinder as invalid
         self.invalid = True
 
+    def __newTarget__(self, sourceNode, targetNode, windowSize=None):
+        self.sourceNode = sourceNode
+        self.targetNode = targetNode
+        self.invalid = False
+        if windowSize is not None:
+            self.windowSize = windowSize
+
     def searchStep(self):
         # Seek the shortest path between the targetNode and agent's currentNode
         # Account for obstacles (other agents)
         # Recursively work through the queue 
         if self.openSet:
             _, __, currentNode, timeDepth = heappop(self.openSet)
-            if currentNode == self.targetNode:
+            if currentNode == self.targetNode or timeDepth == self.windowSize:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
@@ -187,14 +195,14 @@ class WHCAstarPathfinder:
                 path.reverse()
                 self.plannedPath = path
                 # Update reservation table
-                self.pathManager.handlePathPlanRequest(path)
+                self.pathManager.handlePathPlanRequest(path, self.numID)
                 return True
             
             # Neighbor nodes needs to be augmented with the same node, but one time step removed
             neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
 
             for neighborNode in neighborNodes:
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     continue
                 est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
@@ -213,8 +221,8 @@ class WHCAstarPathfinder:
                     self.fScore[(neighborNode, timeDepth+1)] = node_fScore
             return False
         else:
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
         # Render the process of searching
@@ -222,12 +230,14 @@ class WHCAstarPathfinder:
         # Account for obstacles (other agents)
         # Recursively work through the queue 
         # Highlight the target node
+        # print(f"Agent {self.numID} searching from {self.sourceNode}...")
         if self.openSet:
             _, __, currentNode, timeDepth = heappop(self.openSet)
+            # print(f"\tExplored {currentNode} at depth {timeDepth}")
             # Indicate tile is explored
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
-            if currentNode == self.targetNode:
+            if currentNode == self.targetNode or timeDepth == self.windowSize:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
@@ -247,11 +257,12 @@ class WHCAstarPathfinder:
             neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
             # print("!!! NEW NODE SET !!!")
             for neighborNode in neighborNodes:
+                # print(f"\tExplored {neighborNode} at depth {timeDepth+1}")
                 # Cooperative A* uses a reservation table to determine neighbor eligibility
                 # "Temporal adjacency"; True indicates eligibility
                 # print("==========================================")
                 # print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
                     continue
@@ -286,5 +297,7 @@ class WHCAstarPathfinder:
             return False
         else:
             print("Failed to find a path")
+            # Forcibly claim the tile for a turn
+            # self.pathManager.handlePathPlanRequest([self.sourceNode, self.sourceNode], self.numID)
             return "wait"
             # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
