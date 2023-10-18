@@ -210,8 +210,8 @@ class CAstarPathfinder:
                     self.fScore[(neighborNode, timeDepth+1)] = node_fScore
             return False
         else:
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
         # Render the process of searching
@@ -282,5 +282,5 @@ class CAstarPathfinder:
             return False
         else:
             pp.pprint(self.openSet)
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
