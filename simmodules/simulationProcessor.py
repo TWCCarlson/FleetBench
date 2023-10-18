@@ -156,7 +156,7 @@ class simProcessor:
         if agentMovementManager is not None:
             self.agentMovementManager = agentMovementManager(self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simCanvasRef)
         else:
-            self.agentMovementManager = defaultAgentMover(self.simGraph)
+            self.agentMovementManager = defaultAgentMover(self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simCanvasRef)
 
         # State history control
         self.stateHistoryManager = simProcessStateHandler(self)
@@ -443,7 +443,10 @@ class simProcessor:
         self.persistRenders = False
         # Asks the movement manager to verify there are no collisions on this step of the simulation
         if self.agentCollisionBehavior == "Respected":
-            self.agentMovementManager.checkAgentCollisions()
+            conflicts = self.agentMovementManager.checkAgentCollisions()
+            if conflicts is not None:
+                self.agentQueue = conflicts[1]
+                self.requestedStateID = "selectAgent"
         self.requestedStateID = "endSimStep"
             
     def agentPathfind(self):

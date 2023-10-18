@@ -146,6 +146,7 @@ class WHCAstarMover:
             self.agentPriorityList[priorityAgentOldPrio] = deprioAgent.numID
 
     def agentMustWait(self, agent):
+        agent = self.agentManager.agentList[agent]
         plannedPath = [agent.currentNode, agent.currentNode]
         agent.pathfinder.plannedPath = plannedPath
         self.sharedInfoManager.handlePathPlanRequest(plannedPath, agent.numID)

@@ -257,7 +257,7 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        # print(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        print(f"Moving agent '{self.ID}' to node '{targetNode}'")
         # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
         # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):
