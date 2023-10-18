@@ -3,9 +3,11 @@ import logging
 import time
 import random
 from pathfindScripts.aStar import aStarPathfinder
+from pathfindScripts.LRAstarPathfinder import LRAstarPathfinder
 from pathfindScripts.CAstarPathfinder import CAstarPathfinder
 from pathfindScripts.HCAstarPathfinder import HCAstarPathfinder
 from pathfindScripts.WHCAstarPathfinder import WHCAstarPathfinder
+from pathfindMoverScripts.LRAstarMover import LRAstarMover
 from pathfindManagerScripts.CAstarReserver import CAstarReserver
 from pathfindManagerScripts.HCAstarReserver import HCAstarReserver
 from pathfindManagerScripts.WHCAstarReserver import WHCAstarReserver
@@ -119,7 +121,7 @@ class simProcessor:
         # Map options to pathfinders
         algorithmDict = {
             "Single-agent A*": (aStarPathfinder, None, None),
-            "Multi-Agent A* (LRA*)": (aStarPathfinder, None, None),
+            "Multi-Agent A* (LRA*)": (LRAstarPathfinder, None, LRAstarMover),
             "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover),
             "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover),
             "Windowed HCA* (WHCA*)": (WHCAstarPathfinder, WHCAstarReserver, WHCAstarMover)
@@ -315,7 +317,9 @@ class simProcessor:
         elif self.algorithmType == "mapf":
             try:
                 # newAgent = next(self.agentQueue)
+                # print(f"AGENT QUEUE: {self.agentQueue}")
                 newAgent = self.agentQueue.pop(0)
+                # print(f"AGENT QUEUE AFTER POP: {self.agentQueue}")
                 self.currentAgent = self.simAgentManagerRef.agentList[newAgent]
             except StopIteration:
                 # The queue is empty, so the simulation step can end
@@ -430,8 +434,12 @@ class simProcessor:
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
                     "lineType": "pathfind"})
             nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
-            self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
-            self.requestedStateID = "checkAgentQueue"
+            validMove = self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
+            if validMove is True or validMove is None:
+                self.requestedStateID = "checkAgentQueue"
+            else:
+                print("action invalid")
+                self.requestedStateID = "agentPlanMove"
             return
         else:
             # If the agent does not have a complete path, it needs to find one
@@ -444,7 +452,7 @@ class simProcessor:
         # Asks the movement manager to verify there are no collisions on this step of the simulation
         if self.agentCollisionBehavior == "Respected":
             conflicts = self.agentMovementManager.checkAgentCollisions()
-            print(conflicts)
+            # print(conflicts)
             if conflicts is not None:
                 self.agentQueue = conflicts[1]
                 self.requestedStateID = "selectAgent"
@@ -500,11 +508,12 @@ class simProcessor:
     def endSimStep(self):
         self.persistRenders = False
         # print(f"All agents have acted.")
+        # print(f"AGENT QUEUE: {self.agentQueue}")
         # if the simulation hasnt reached its "objective", do another step
         self.requestedStateID = "newSimStep"
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         self.stepCompleted = targetLabelText.get()
-        # print(f"Steps completed: {stepCompleted}")
+        # print(f">>>>>Steps completed: {self.stepCompleted}")
         targetLabelText.set(self.stepCompleted + 1)
         # print(stepCompleted)
         if self.infoShareManager is not None:

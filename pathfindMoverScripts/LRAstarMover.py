@@ -1,7 +1,7 @@
 import networkx as nx
 from numpy import Inf
 
-class defaultAgentMover:
+class LRAstarMover:
     """
         The fallback method for handling agent collisions
     """
@@ -27,30 +27,31 @@ class defaultAgentMover:
         self.agentPriorityList = []
 
     def submitAgentAction(self, agent, desiredMove):
-        self.agentPriorityList.append(agent.numID)
+        # Immediately perform the move
+        if agent.numID not in self.agentPriorityList:
+            self.agentPriorityList.append(agent.numID)
         self.agentMotionDict[agent.numID] = desiredMove
-
-    def checkAgentCollisions(self):
-        # print("CHECKING AGENT COLLISIONS . . .")
+        # print(f"{agent.numID}:{desiredMove}")
         # print(self.agentMotionDict)
         vertexDict, edgeDict = self.comprehendAgentMotions()
         conflicts = self.checkForConflicts(vertexDict, edgeDict)
-        # print(self.agentMotionDict)
-        # print(">>>Conflict resolved, executing moves.")
-        if conflicts is not None:
-            # Reset pathfinders to force a replan
-            for agent in conflicts[1]:
-                self.agentManager.agentList[agent].pathfinder.__reset__()
-            return conflicts
+        if conflicts is None and desiredMove is not "crash":
+            if "agent" not in self.mapGraph.nodes(data=True)[desiredMove[1]]:
+                self.simCanvasRef.requestRender("agent", "move", {"agentNumID": agent.numID, 
+                    "sourceNodeID": agent.currentNode, "targetNodeID": self.agentMotionDict[agent.numID][1]})
+                agent.executeMove(self.agentMotionDict[agent.numID][1])
+                return True
+            else:
+                self.agentManager.agentList[agent.numID].pathfinder.__reset__()
+                return False
         else:
-            for agent in self.agentPriorityList:
-                currentAgent = self.agentManager.agentList[agent]
-                self.simCanvasRef.requestRender("agent", "move", {"agentNumID": currentAgent.numID, 
-                    "sourceNodeID": currentAgent.currentNode, "targetNodeID": self.agentMotionDict[agent][1]})
-                currentAgent.executeMove(self.agentMotionDict[agent][1])
+            # A different action needs to be taken
+            self.agentManager.agentList[agent.numID].pathfinder.__reset__()
+            return False
 
-        # Reset the agent motion queue
+    def checkAgentCollisions(self):
         self.agentMotionDict = {}
+        return None
 
     def comprehendAgentMotions(self):
         vertexDict = {}
