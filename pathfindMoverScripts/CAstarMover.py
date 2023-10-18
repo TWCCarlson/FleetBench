@@ -25,29 +25,23 @@ class CAstarMover:
 
     def resetCurrentPriorityOrder(self):
         self.agentPriorityList = []
-
+    
     def submitAgentAction(self, agent, desiredMove):
         self.agentPriorityList.append(agent.numID)
         self.agentMotionDict[agent.numID] = desiredMove
-
+        
     def checkAgentCollisions(self):
-        print("CHECKING AGENT COLLISIONS . . .")
-        print(self.agentMotionDict)
+        # print("CHECKING AGENT COLLISIONS . . .")
+        # print(self.agentMotionDict)
         vertexDict, edgeDict = self.comprehendAgentMotions()
-        conflicts = self.checkForConflicts(vertexDict, edgeDict)
-        print(self.agentMotionDict)
-        print(">>>Conflict resolved, executing moves.")
-        if conflicts is not None:
-            # Reset pathfinders to force a replan
-            for agent in conflicts[1]:
-                self.agentManager.agentList[agent].pathfinder.__reset__()
-            return conflicts
-        else:
-            for agent in self.agentPriorityList:
-                currentAgent = self.agentManager.agentList[agent]
-                self.simCanvasRef.requestRender("agent", "move", {"agentNumID": currentAgent.numID, 
-                    "sourceNodeID": currentAgent.currentNode, "targetNodeID": self.agentMotionDict[agent][1]})
-                currentAgent.executeMove(self.agentMotionDict[agent][1])
+        self.checkForConflicts(vertexDict, edgeDict)
+        # print(self.agentMotionDict)
+        # print(">>>Conflict resolved, executing moves.")
+        for agent in self.agentPriorityList:
+            currentAgent = self.agentManager.agentList[agent]
+            self.simCanvasRef.requestRender("agent", "move", {"agentNumID": currentAgent.numID, 
+                "sourceNodeID": currentAgent.currentNode, "targetNodeID": self.agentMotionDict[agent][1]})
+            currentAgent.executeMove(self.agentMotionDict[agent][1])
 
         # Reset the agent motion queue
         self.agentMotionDict = {}
@@ -59,9 +53,20 @@ class CAstarMover:
         for agentID, agentMove in self.agentMotionDict.items():
             # print(f"{agentID}: {agentMove}")
             if agentMove == "crash":
-                # Agent failed to find a path, so it waits in place
-                currentNode = self.agentManager.agentList[agentID].currentNode
-                agentMove = (currentNode, currentNode)
+                # Agent is completely blocked in, unable to avoid collision via reservation table
+                # Examine neighbors to find the ideal movement for the agent
+                currentAgent = self.agentManager.agentList[agentID]
+                currentNode = currentAgent.currentNode
+                neighbors = list(self.mapGraph.neighbors(currentNode)) + [currentNode]
+                targetNode = currentAgent.returnTargetNode()
+                winnerDist = Inf
+                for neighborNode in neighbors:
+                    abstractDist = currentAgent.pathfinder.heuristicFunc(currentNode, targetNode)
+                    if abstractDist < winnerDist:
+                        winner = neighborNode
+                        winnerDist = abstractDist
+                agentMove = (currentNode, winner)
+                # print(f"Agent crashed—prefers: {agentMove}")
                 self.agentMotionDict[agentID] = agentMove
                 
             # Vertex reservations are the destination node, in the next timestep
@@ -82,13 +87,87 @@ class CAstarMover:
         for edge, agents in edgeDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                print("EDGE CONFLICT")
-                # Force a replan by returning an incomplete action list
-                return ("crash", agents)
+                # print("EDGE CONFLICT")
+                self.resolveEdgeConflict(agents[0], agents[1])
+                vertexDict, edgeDict = self.comprehendAgentMotions()
+                self.checkForConflicts(vertexDict, edgeDict)
 
         for node, agents in vertexDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                print("VERTEX CONFLICT")
-                # Force a replan by returning an incomplete action list
-                return ("crash", agents)
+                # print("VERTEX CONFLICT")
+                self.resolveNodeConflict(agents)
+                vertexDict, edgeDict = self.comprehendAgentMotions()
+                self.checkForConflicts(vertexDict, edgeDict)
+
+    def resolveEdgeConflict(self, agentOne, agentTwo):
+        agentOneData = self.agentManager.agentList[agentOne]
+        agentTwoData = self.agentManager.agentList[agentTwo]
+        # Both agents need to unreserve from the table
+        agentOneData.pathfinder.__reset__()
+        agentTwoData.pathfinder.__reset__()
+        # Find the number of valid neighbor nodes there are for each agent
+        agentOneNeighbors = self.findValidNeighbors(agentOneData)
+        agentTwoNeighbors = self.findValidNeighbors(agentTwoData)
+        # print(f"Agent '{agentOne}' has: {len(agentOneNeighbors)-1} choices; agent '{agentTwo}' has: {len(agentTwoNeighbors)-1}")
+        if len(agentOneNeighbors) < len(agentTwoNeighbors):
+            self.updateConflictingEdgePlans(prioAgent=agentOneData, deprioAgent=agentTwoData)
+        elif len(agentTwoNeighbors) < len(agentOneNeighbors):
+            self.updateConflictingEdgePlans(prioAgent=agentTwoData, deprioAgent=agentOneData)
+        elif len(agentOneNeighbors) == 0 and len(agentTwoNeighbors) == 0:
+            # Both agents have nowhere to go
+            # Aside from the trivial situation where there are only two nodes and two agents in the graph,
+            # this only occurs when some other reservation is preventing either from moving.
+            # Thus, both should wait in place.
+            self.agentMustWait(agentOne)
+            self.agentMustWait(agentTwo)
+        # print(self.agentPriorityList)
+
+    def updateConflictingEdgePlans(self, prioAgent, deprioAgent):
+        # Priority agent sets its desired path
+        plannedPath = list(self.agentMotionDict[prioAgent.numID])
+        prioAgent.pathfinder.plannedPath = plannedPath
+        self.sharedInfoManager.handlePathPlanRequest(plannedPath, prioAgent.numID)
+
+        # Deprio agent needs a new plan, selecting an immediate (free) neighbor
+        deprioAgentNeighbors = self.findValidNeighbors(deprioAgent)
+        choice = deprioAgentNeighbors[0]
+        plannedPath = [deprioAgent.currentNode, choice]
+        self.agentMotionDict[deprioAgent.numID] = plannedPath
+
+        # Set the deprioritized agent path
+        deprioAgent.pathfinder.plannedPath = plannedPath
+        self.sharedInfoManager.handlePathPlanRequest(plannedPath, deprioAgent.numID)
+
+        # Swap priorities in the priority list if necessary
+        priorityAgentOldPrio = self.agentPriorityList.index(prioAgent.numID)
+        depriorityAgentOldPrio = self.agentPriorityList.index(deprioAgent.numID)
+        if priorityAgentOldPrio > depriorityAgentOldPrio:
+            self.agentPriorityList[depriorityAgentOldPrio] = prioAgent.numID
+            self.agentPriorityList[priorityAgentOldPrio] = deprioAgent.numID
+
+    def agentMustWait(self, agent):
+        agent = self.agentManager.agentList[agent]
+        plannedPath = [agent.currentNode, agent.currentNode]
+        agent.pathfinder.plannedPath = plannedPath
+        self.sharedInfoManager.handlePathPlanRequest(plannedPath, agent.numID)
+
+    def resolveNodeConflict(self, agentList):
+        # Node conflicts resolve via priority order, with lower priority agents being forced to wait in place
+        for agentID in self.agentPriorityList:
+            if agentID in agentList:
+                # Found highest priority agent
+                plannedPath = list(self.agentMotionDict[agentID])
+                agentList.pop(agentList.index(agentID))
+        # Remaining agents just try to wait in place
+        for agent in agentList:
+            self.agentMustWait(agent)
+
+    def findValidNeighbors(self, agentData):
+        validNeighbors = []
+        neighbors = self.mapGraph.neighbors(agentData.currentNode)
+        for i, neighbor in enumerate(neighbors):
+            valid = self.sharedInfoManager.evaluateNodeEligibility(0, neighbor, agentData.currentNode, agentData.numID)
+            if valid:
+                validNeighbors.append(neighbor)
+        return validNeighbors

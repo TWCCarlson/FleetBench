@@ -33,7 +33,7 @@ class CAstarReserver:
     def purgePastData(self):
         pass
 
-    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode):
+    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode, agentID):
         # Verifies if the node is open at a specific time
         # Expands the reservation table if the request depth exceeds the table's depth
         if timeDepth + self.currentDepth >= self.timeTracked:
@@ -44,32 +44,41 @@ class CAstarReserver:
         # print(sourceNode)
         if targetNode == sourceNode:
             # Have to check all edges leading to this node, and the future node
-            edgeFree = True
+            edgeReserved = False
             for node in self.reservationTable[timeDepth+self.currentDepth][sourceNode]:
-                edgeFree = edgeFree and self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node)
-            nodeFree = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode)
+                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node, agentID)
+            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode, agentID)
         else:
-            edgeFree = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode)
-            nodeFree = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode)
-        if nodeFree and edgeFree:
+            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID)
+            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID)
+        if not nodeReserved and not edgeReserved:
             # print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             # Node is occupied and ineligible for use in pathfinding
             return True
-        elif not nodeFree:
+        elif nodeReserved:
             # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
-            # Node is free, alert the pathfinder
             return False
-        elif not edgeFree:
+        elif edgeReserved:
             # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
             return False
         
-    def handlePathPlanRequest(self, requestedNodeList):
+    def handlePathPlanRequest(self, requestedNodeList, agentID):
         # Reserves nodes and edges for the found path, starting from currentDepth
         for depth, node in enumerate(requestedNodeList[1:]):
             # Reserve the edge at this time step
-            self.reserveEdge(depth+self.currentDepth, requestedNodeList[depth], node)
+            self.reserveEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
             # Reserve the node at the next time step
-            self.reserveNode(depth+self.currentDepth+1, node)
+            self.reserveNode(depth+self.currentDepth+1, node, agentID)
+
+    def handlePathRelease(self, requestedNodeList, agentID):
+        # Releases nodes and edges for the provided path, starting fromcurrentDepth
+        for depth, node in enumerate(requestedNodeList[1:]):
+            # Release the edge at this time step
+            self.releaseEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
+            # Release the node at the next time step
+            self.releaseNode(depth+self.currentDepth+1, node, agentID)
+            # print(f"Released {node}")
+            # pp.pprint(self.reservationTable[depth+self.currentDepth+1].nodes(data=True))
 
     def createReservationTable(self):
         # Build the table for the depth
@@ -85,28 +94,48 @@ class CAstarReserver:
         self.depthCounter = count()
         self.timeTracked = next(self.depthCounter)
 
-    def reserveNode(self, timeStep, node):
-        self.reservationTable[timeStep].nodes[node]["Free"] = False
+    def reserveNode(self, timeStep, node, agentID):
+        self.reservationTable[timeStep].nodes[node]["Reserved"] = str(agentID)
 
-    def reserveEdge(self, timeStep, sourceNode, targetNode):
+    def reserveEdge(self, timeStep, sourceNode, targetNode, agentID):
         # If the agent's plan is to wait, then all neighboring edges need to be reserved
         if sourceNode == targetNode:
             for neighbor in self.reservationTable[timeStep][sourceNode]:
-                self.reservationTable[timeStep][sourceNode][neighbor]["Free"] = False
+                self.reservationTable[timeStep][sourceNode][neighbor]["Reserved"] = str(agentID)
         else:
-            self.reservationTable[timeStep][sourceNode][targetNode]["Free"] = False
+            self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = str(agentID)
 
-    def releaseNode(self, timeStep, node):
-        self.reservationTable[timeStep].nodes[node]["Free"] = True
+    def releaseNode(self, timeStep, node, agentID):
+        if self.reservationTable[timeStep].nodes[node]["Reserved"] == agentID:
+            self.reservationTable[timeStep].nodes[node]["Reserved"] = False
 
-    def releaseEdge(self, timeStep, sourceNode, targetNode):
-        self.reservationTable[timeStep][sourceNode][targetNode]["Free"] = True
+    def releaseEdge(self, timeStep, sourceNode, targetNode, agentID):
+        if self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] == agentID:
+            self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = False
 
-    def getNodeState(self, timeStep, node):
-        return self.reservationTable[timeStep].nodes[node]["Free"]
+    def getNodeState(self, timeStep, node, agentID):
+        reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
+        # print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
+        if reserver == str(agentID):
+            # print("Node reserved by self.")
+            return False
+        elif reserver == False:
+            return False
+        else:
+            # print("Node reserved by another.")
+            return True
 
-    def getEdgeState(self, timeStep, sourceNode, targetNode):
-        return self.reservationTable[timeStep][sourceNode][targetNode]["Free"]
+    def getEdgeState(self, timeStep, sourceNode, targetNode, agentID):
+        reserver = self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"]
+        # print(f"Edge: {self.reservationTable[timeStep][sourceNode][targetNode]['Reserved']}; {bool(self.reservationTable[timeStep][sourceNode][targetNode]['Reserved'])}")
+        if reserver == str(agentID):
+            # print("Edge reserved by self.")
+            return False
+        elif reserver == False:
+            return False
+        else:
+            # print("Edge reserved by another.")
+            return True
 
     def expandReservationTable(self, timeDepth):
         self.reservationTable[timeDepth+1] = deepcopy(self.graphStructure)
@@ -115,7 +144,7 @@ class CAstarReserver:
         self.timeTracked = next(self.depthCounter)
 
     def preallocNodes(self, timeDepth):
-        nx.set_node_attributes(self.reservationTable[timeDepth], True, "Free")
+        nx.set_node_attributes(self.reservationTable[timeDepth], False, "Reserved")
 
     def preallocEdges(self, timeDepth):
-        nx.set_edge_attributes(self.reservationTable[timeDepth], True, "Free")
+        nx.set_edge_attributes(self.reservationTable[timeDepth], False, "Reserved")

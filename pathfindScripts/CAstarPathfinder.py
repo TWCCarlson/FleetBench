@@ -33,6 +33,7 @@ class CAstarPathfinder:
         self.mapCanvas = mapCanvas
         self.invalid = False
         self.pathManager = pathManager
+        print(f"{self.numID}:{self.sourceNode}->{self.targetNode}")
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -183,15 +184,16 @@ class CAstarPathfinder:
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
+                # print(f"Pathfinder found path: {self.plannedPath}")
                 # Update reservation table
-                self.pathManager.handlePathPlanRequest(path)
+                self.pathManager.handlePathPlanRequest(path, self.numID)
                 return True
             
             # Neighbor nodes needs to be augmented with the same node, but one time step removed
             neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
 
             for neighborNode in neighborNodes:
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     continue
                 est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
@@ -234,9 +236,10 @@ class CAstarPathfinder:
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
+                # print(f"Pathfinder found path: {self.plannedPath}")
                 # print(path)
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
-                self.pathManager.handlePathPlanRequest(path)
+                self.pathManager.handlePathPlanRequest(path, self.numID)
                 # self.mapCanvas.handleRenderQueue()
                 return True
             
@@ -248,7 +251,7 @@ class CAstarPathfinder:
                 # "Temporal adjacency"; True indicates eligibility
                 # print("==========================================")
                 # print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
                     continue

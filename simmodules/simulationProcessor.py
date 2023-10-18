@@ -452,7 +452,7 @@ class simProcessor:
         # Asks the movement manager to verify there are no collisions on this step of the simulation
         if self.agentCollisionBehavior == "Respected":
             conflicts = self.agentMovementManager.checkAgentCollisions()
-            # print(conflicts)
+            print(f"Conflicts: {conflicts}")
             if conflicts is not None:
                 self.agentQueue = conflicts[1]
                 self.requestedStateID = "selectAgent"
