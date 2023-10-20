@@ -18,6 +18,7 @@ pp = pprint.PrettyPrinter(indent=4)
 import inspect
 import traceback
 import functools
+import sys
 
 def log(func):
     # logging decorator
@@ -120,7 +121,7 @@ class App(tk.Tk):
         self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/mapf_many_agents")
 
         # self.after()
-
+        sys.setrecursionlimit(100)
         self.mainloop()
 
     def simulationConfiguration(self):
@@ -172,10 +173,10 @@ def initLogging():
         40:"ERROR",
         50:"CRITICAL"
     }
-    logLevel = logging.DEBUG
+    # logLevel = logging.DEBUG
     # logLevel = logging.INFO
     # logLevel = logging.WARNING
-    # logLevel = logging.ERROR
+    logLevel = logging.ERROR
     # logLevel = logging.CRITICAL
 
     logging.basicConfig(filename='example.log', 

@@ -33,6 +33,7 @@ class HCAstarPathfinder:
         self.mapCanvas = mapCanvas
         self.invalid = False
         self.pathManager = pathManager
+        self.currentStep = 1
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -125,6 +126,17 @@ class HCAstarPathfinder:
         }
         return pathfinderData
     
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __load__(self, pathfinderData):
         # All fields required for this to work properly
         self.sourceNode = pathfinderData["sourceNode"]
@@ -145,6 +157,11 @@ class HCAstarPathfinder:
         self.gScore = {} # gScore is the distance from source to current node
         self.fScore = {} # fScore is the distance from source to target through current node
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
+
+        # Release any claims on the path reservation table
+        # print(f"Path was: {self.plannedPath}")
+        self.pathManager.handlePathRelease(self.plannedPath[self.currentStep-1:], self.numID)
+        self.currentStep = 1
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
@@ -184,14 +201,14 @@ class HCAstarPathfinder:
                 path.reverse()
                 self.plannedPath = path
                 # Update reservation table
-                self.pathManager.handlePathPlanRequest(path)
+                self.pathManager.handlePathPlanRequest(path, self.numID)
                 return True
             
             # Neighbor nodes needs to be augmented with the same node, but one time step removed
             neighborNodes = list(self.mapGraphRef.neighbors(currentNode)) + [currentNode]
 
             for neighborNode in neighborNodes:
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     continue
                 est_gScore = self.gScore[(currentNode, timeDepth)] + self.weight
@@ -211,8 +228,8 @@ class HCAstarPathfinder:
                     self.fScore[(neighborNode, timeDepth+1)] = node_fScore
             return False
         else:
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
         # Render the process of searching
@@ -237,7 +254,7 @@ class HCAstarPathfinder:
                 self.plannedPath = path
                 # print(path)
                 self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
-                self.pathManager.handlePathPlanRequest(path)
+                self.pathManager.handlePathPlanRequest(path, self.numID)
                 # self.mapCanvas.handleRenderQueue()
                 return True
             
@@ -249,7 +266,7 @@ class HCAstarPathfinder:
                 # "Temporal adjacency"; True indicates eligibility
                 # print("==========================================")
                 # print(f">>>Evaluate {currentNode}->{neighborNode}: {timeDepth}")
-                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode) and self.collisionBehavior == "Respected":
+                if not self.pathManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, self.numID) and self.collisionBehavior == "Respected":
                     # print(f"<<<Node {neighborNode} was blocked")
                     self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": neighborNode, "highlightType": "agentHighlight", "multi": True})
                     continue
@@ -283,6 +300,6 @@ class HCAstarPathfinder:
             self.mapCanvas.handleRenderQueue()
             return False
         else:
-            pp.pprint(self.openSet)
-            # return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            # pp.pprint(self.openSet)
+            return "wait"
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")

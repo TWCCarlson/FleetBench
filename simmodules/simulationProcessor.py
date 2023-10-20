@@ -17,6 +17,7 @@ from pathfindMoverScripts.WHCAstarMover import WHCAstarMover
 from pathfindMoverScripts.defaultMover import defaultAgentMover
 pp = pprint.PrettyPrinter(indent=4)
 from copy import deepcopy
+from watchpoints import watch
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -380,7 +381,7 @@ class simProcessor:
         if self.currentAgentActionTaken == True:
             self.requestedStateID = "selectAgent"
             return
-
+        # print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
         # If the agent is already on its task-given target tile, it should act immediately
         if self.currentAgent.currentNode == self.currentAgent.returnTargetNode():
             # print(f"Agent {self.currentAgent.ID} is in position to interact with task {self.currentAgent.currentTask.name}")
@@ -404,16 +405,16 @@ class simProcessor:
     def taskInteraction(self):
         self.persistRenders = False
         # Agent should be able to interact with the task
-        # print(f"Agent {self.currentAgent.ID} interacting at {self.currentAgent.currentNode}")
+        # print(f"Agent {self.currentAgent.numID} interacting at {self.currentAgent.currentNode}")
         self.currentAgent.taskInteraction(self.currentAgent.currentNode)
 
         # If this counted as an action, then the agent cannot move
         if self.currentAgentActionTaken == True:
-            # print(f"Agent {self.currentAgent.ID} has no more actions available")
+            # print(f"\tAgent {self.currentAgent.numID} has no more actions available")
             self.requestedStateID = "checkAgentQueue"
         elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is None:
             # If not, then it can also move
-            # print(f"Agent {self.currentAgent.ID} is able to move.")
+            # print(f"\tAgent {self.currentAgent.numID} is able to move.")
             self.requestedStateID = "taskAssignment"
         elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is not None:
             self.requestedStateID = "selectAction"
@@ -424,21 +425,23 @@ class simProcessor:
         # Determine whether the agent can move or needs to find a path first
         # The agent needs to move toward its target, ensure it has a pathfinder
         agentTargetNode = self.currentAgent.returnTargetNode()
-        if self.currentAgent.pathfinder is None or len(self.currentAgent.pathfinder.plannedPath) == 1 or self.currentAgent.pathfinder.invalid == True:
+        if self.currentAgent.pathfinder is None or self.currentAgent.pathfinder.targetNode != agentTargetNode or self.currentAgent.pathfinder.invalid == True:
             # print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
             self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager)
+            # watch(self.currentAgent.pathfinder.plannedPath)
         
-        # If the agent has a planned path, then it can move along it
-        if self.currentAgent.pathfinder.plannedPath:
+        nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
+        if nextNodeInPath is not None:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
                     "lineType": "pathfind"})
-            nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
+            # nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
+            # nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
             validMove = self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
             if validMove is True or validMove is None:
                 self.requestedStateID = "checkAgentQueue"
             else:
-                print("action invalid")
+                # print("action invalid")
                 self.requestedStateID = "agentPlanMove"
             return
         else:
@@ -452,7 +455,7 @@ class simProcessor:
         # Asks the movement manager to verify there are no collisions on this step of the simulation
         if self.agentCollisionBehavior == "Respected":
             conflicts = self.agentMovementManager.checkAgentCollisions()
-            print(f"Conflicts: {conflicts}")
+            # print(f"Conflicts: {conflicts}")
             if conflicts is not None:
                 self.agentQueue = conflicts[1]
                 self.requestedStateID = "selectAgent"
@@ -462,7 +465,7 @@ class simProcessor:
     def agentPathfind(self):
         self.persistRenders = True
         # For speed, only use the rendered version of the pathfinder if the frame is being rendered
-        # print(f"Agent {self.currentAgent.ID} searching for path...")
+        # print(f"Agent {self.currentAgent.ID} searching for path... {self.currentAgent.currentNode}->{self.currentAgent.pathfinder.targetNode}")
         if self.simulationStateMachineMap["agentPathfind"]["renderStateBool"]:
             pathStatus = self.currentAgent.pathfinder.searchStepRender()
         else:
@@ -473,7 +476,7 @@ class simProcessor:
             self.requestedStateID = "agentPathfind"
             return
         elif pathStatus == True:
-            # print(f"\t...path was found.")
+            # print(f"\t...path was found: {self.currentAgent.pathfinder.plannedPath}")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
