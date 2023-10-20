@@ -108,6 +108,17 @@ class HCAstarPathfinder:
         # Mark the target
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
         pathfinderData = {
@@ -125,17 +136,6 @@ class HCAstarPathfinder:
             "plannedPath": copy.deepcopy(self.plannedPath)
         }
         return pathfinderData
-    
-    def returnNextMove(self):
-        try:
-            nextNode = self.plannedPath[self.currentStep]
-            return nextNode
-        except IndexError:
-            # Path complete
-            return None
-        
-    def agentTookStep(self):
-        self.currentStep = self.currentStep + 1
 
     def __load__(self, pathfinderData):
         # All fields required for this to work properly

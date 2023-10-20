@@ -48,6 +48,7 @@ class defaultAgentMover:
                 self.simCanvasRef.requestRender("agent", "move", {"agentNumID": currentAgent.numID, 
                     "sourceNodeID": currentAgent.currentNode, "targetNodeID": self.agentMotionDict[agent][1]})
                 currentAgent.executeMove(self.agentMotionDict[agent][1])
+                currentAgent.pathfinder.agentTookStep()
 
         # Reset the agent motion queue
         self.agentMotionDict = {}

@@ -433,7 +433,7 @@ class simProcessor:
         nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
         if nextNodeInPath is not None:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
-            self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[1:], 
+            self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[self.currentAgent.pathfinder.currentStep:], 
                     "lineType": "pathfind"})
             # nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
             # nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()

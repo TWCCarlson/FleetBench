@@ -31,6 +31,7 @@ class aStarPathfinder:
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
         self.invalid = False
+        self.currentStep = 1
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -105,6 +106,17 @@ class aStarPathfinder:
         # Highlight the target node
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
         pathfinderData = {
@@ -143,6 +155,9 @@ class aStarPathfinder:
         self.gScore = {} # gScore is the distance from source to current node
         self.fScore = {} # fScore is the distance from source to target through current node
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
+
+        # Reset the current step counter
+        self.currentStep = 1
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
@@ -203,7 +218,7 @@ class aStarPathfinder:
             return False
         else:
             return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
         
     def searchStepRender(self):
         # Render the process of searching
@@ -264,4 +279,4 @@ class aStarPathfinder:
             return False
         else:
             return "wait"
-            raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
+            # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")
