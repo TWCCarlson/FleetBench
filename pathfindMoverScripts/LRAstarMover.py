@@ -40,6 +40,7 @@ class LRAstarMover:
                 self.simCanvasRef.requestRender("agent", "move", {"agentNumID": agent.numID, 
                     "sourceNodeID": agent.currentNode, "targetNodeID": self.agentMotionDict[agent.numID][1]})
                 agent.executeMove(self.agentMotionDict[agent.numID][1])
+                agent.pathfinder.agentTookStep()
                 return True
             else:
                 self.agentManager.agentList[agent.numID].pathfinder.__reset__()

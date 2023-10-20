@@ -31,6 +31,7 @@ class LRAstarPathfinder:
         self.mapGraphRef = mapGraph
         self.mapCanvas = mapCanvas
         self.invalid = False
+        self.currentStep = 1
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -105,6 +106,17 @@ class LRAstarPathfinder:
         # Highlight the target node
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
         pathfinderData = {
@@ -143,6 +155,9 @@ class LRAstarPathfinder:
         self.gScore = {} # gScore is the distance from source to current node
         self.fScore = {} # fScore is the distance from source to target through current node
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
+
+        # Reset the current step counter
+        self.currentStep = 1
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
