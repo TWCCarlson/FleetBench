@@ -133,6 +133,7 @@ class HCAstarReserver:
         self.reservationTable = {
             0: deepcopy(self.graphStructure),
         }
+        
         # Preallocate nodes as being unreserved
         self.preallocNodes(0)
         self.preallocEdges(0)
@@ -142,9 +143,11 @@ class HCAstarReserver:
         self.timeTracked = next(self.depthCounter)
 
     def reserveNode(self, timeStep, node, agentID):
+        # print(f"\tReserving {node}@{timeStep} for {agentID}")
         self.reservationTable[timeStep].nodes[node]["Reserved"] = str(agentID)
 
     def reserveEdge(self, timeStep, sourceNode, targetNode, agentID):
+        # print(f"\tReserving [{sourceNode}->{targetNode}]@{timeStep} for {agentID}")
         # If the agent's plan is to wait, then all neighboring edges need to be reserved
         if sourceNode == targetNode:
             # for neighbor in self.reservationTable[timeStep][sourceNode]:

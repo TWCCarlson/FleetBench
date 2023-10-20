@@ -431,6 +431,7 @@ class simProcessor:
             # watch(self.currentAgent.pathfinder.plannedPath)
         
         nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
+        # print(f"{self.currentAgent} intends to move to {nextNodeInPath}")
         if nextNodeInPath is not None:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[self.currentAgent.pathfinder.currentStep:], 
@@ -447,6 +448,7 @@ class simProcessor:
         else:
             # If the agent does not have a complete path, it needs to find one
             # print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager)
             self.requestedStateID = "agentPathfind"
             return
          

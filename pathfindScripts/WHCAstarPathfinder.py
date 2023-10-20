@@ -34,6 +34,7 @@ class WHCAstarPathfinder:
         self.mapCanvas = mapCanvas
         self.invalid = False
         self.pathManager = pathManager
+        self.currentStep = 1
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -108,6 +109,17 @@ class WHCAstarPathfinder:
         # Mark the target
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
         pathfinderData = {
@@ -148,7 +160,8 @@ class WHCAstarPathfinder:
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
 
         # Release any claims on the path reservation table
-        self.pathManager.handlePathRelease(self.plannedPath, self.numID)
+        self.pathManager.handlePathRelease(self.plannedPath[self.currentStep-1:], self.numID)
+        self.currentStep = 1
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
@@ -212,8 +225,10 @@ class WHCAstarPathfinder:
                     self.cameFrom[(neighborNode, timeDepth+1)] = (currentNode, timeDepth)
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore       
+                    # Calculate nodes estimated distance from the goal
+                    hScore = self.pathManager.calculateHeuristicDistance(neighborNode, self.targetNode, self.heuristic) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
@@ -296,7 +311,7 @@ class WHCAstarPathfinder:
             self.mapCanvas.handleRenderQueue()
             return False
         else:
-            print("Failed to find a path")
+            # print("Failed to find a path")
             # Forcibly claim the tile for a turn
             # self.pathManager.handlePathPlanRequest([self.sourceNode, self.sourceNode], self.numID)
             return "wait"
