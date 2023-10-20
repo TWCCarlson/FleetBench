@@ -33,7 +33,8 @@ class CAstarPathfinder:
         self.mapCanvas = mapCanvas
         self.invalid = False
         self.pathManager = pathManager
-        print(f"{self.numID}:{self.sourceNode}->{self.targetNode}")
+        self.currentStep = 1
+        # print(f"{self.numID}:{self.sourceNode}->{self.targetNode}")
 
         # Define the heuristic based on the input
         # Heuristic accepts two nodes and calculates a "distance" estimate that must be admissible
@@ -108,6 +109,17 @@ class CAstarPathfinder:
         # Mark the target
         self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
+    def returnNextMove(self):
+        try:
+            nextNode = self.plannedPath[self.currentStep]
+            return nextNode
+        except IndexError:
+            # Path complete
+            return None
+        
+    def agentTookStep(self):
+        self.currentStep = self.currentStep + 1
+
     def __copy__(self):
         # Used to export data about the pathfinder's current state for reinit
         pathfinderData = {
@@ -146,6 +158,11 @@ class CAstarPathfinder:
         self.gScore = {} # gScore is the distance from source to current node
         self.fScore = {} # fScore is the distance from source to target through current node
         self.cameFrom = {} # cameFrom holds the optimal previous node on the path to the current node
+
+        # Release any claims on the path reservation table
+        # print(f"Path was: {self.plannedPath}")
+        self.pathManager.handlePathRelease(self.plannedPath[self.currentStep-1:], self.numID)
+        self.currentStep = 1
 
         # The openset, populated with the first node
         # The heap queue pulls the smallest item from the heap
