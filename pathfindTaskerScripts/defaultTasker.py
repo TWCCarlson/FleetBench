@@ -41,3 +41,6 @@ class defaultTasker:
                     "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})
                 self.canvasRef.requestRender("highlight", "new", {"targetNodeID": taskRef.dropoffPosition,
                     "highlightType": "depositHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})
+                return taskID
+        # There were no suitable tasks
+        return None

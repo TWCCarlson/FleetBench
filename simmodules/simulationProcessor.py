@@ -371,28 +371,17 @@ class simProcessor:
         # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
         if self.currentAgent.taskStatus == "unassigned":
             # Agent needs a task
-            # print(f"Agent {self.currentAgent.ID} needs a new task.")
-            self.generateTask()
-            for taskID, task in self.simTaskManagerRef.taskList.items():
-                if task.assignee is None and task.taskStatus == "unassigned":
-                    # Task is eligible for assignment
-                    # print(f"Task {taskID} will be assigned to agent {self.currentAgent.ID}")
-                    taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
-                    # if taskSelect is None:
-                    #     self.generateTask()
-                    #     self.requestedStateID = "taskAssignment"
-                    #     return
-                    # self.simTaskManagerRef.assignAgentToTask(taskID, self.currentAgent)
-                    # taskRef = self.simTaskManagerRef.taskList[taskID]
-                    # self.simCanvasRef.requestRender("highlight", "new", {"targetNodeID": taskRef.pickupPosition,
-                    #     "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})
-                    # self.simCanvasRef.requestRender("highlight", "new", {"targetNodeID": taskRef.dropoffPosition,
-                    #     "highlightType": "depositHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})
-                    self.requestedStateID = "selectAction"
-                    return
+            print(f"Agent {self.currentAgent.ID} needs a new task.")
+            # self.generateTask()
+            taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
+            print(f"\t{taskSelect}")
+            if taskSelect is not None:
+                print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
+                self.requestedStateID = "selectAction"
+                return
             # If there are no tasks meeting the criterion, check if a task can be generated
             if self.simulationSettings["taskGenerationFrequencyMethod"]:
-                # print(f"Need to generate new task for agent {self.currentAgent}")
+                print(f"Need to generate new task for agent {self.currentAgent.ID}")
                 self.generateTask()
                 self.requestedStateID = "taskAssignment"
                 return

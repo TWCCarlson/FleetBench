@@ -12,7 +12,7 @@ class WHCAstarPathfinder:
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager):
+    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager, agentData=None):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."

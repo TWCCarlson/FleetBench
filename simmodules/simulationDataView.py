@@ -274,35 +274,35 @@ class simDataView(tk.Frame):
 
     def updateTaskTreeView(self):
         pass
-        # logging.debug("Received request to refresh the taskTreeView . . .")
-        # # Clear the treeview then regenerate it
-        # for row in self.taskTreeView.get_children():
-        #     self.taskTreeView.delete(row)
-        # logging.debug("Cleared the taskTreeView.")
+        logging.debug("Received request to refresh the taskTreeView . . .")
+        # Clear the treeview then regenerate it
+        for row in self.taskTreeView.get_children():
+            self.taskTreeView.delete(row)
+        logging.debug("Cleared the taskTreeView.")
 
-        # # Access the list of all tasks and rebuild the treeView based on their states
-        # for task in self.parent.parent.simulationProcess.simTaskManager.taskList:
-        #     taskData = self.parent.parent.simulationProcess.simTaskManager.taskList.get(task)
-        #     taskNumID = taskData.numID
-        #     taskName = taskData.name
-        #     taskPickupPosition = taskData.pickupNode
-        #     taskDropoffPosition = taskData.dropoffNode
-        #     if taskData.assignee is not None:
-        #         taskAssignee = taskData.assignee.ID
-        #     else:
-        #         taskAssignee = None
-        #     taskTimeLimit = taskData.timeLimit
-        #     taskStatus = taskData.taskStatus
-        #     self.taskTreeView.insert(parent="",
-        #         index='end',
-        #         iid=taskNumID,
-        #         text=f"{str(taskNumID)}",
-        #         values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
-        #         tags=["task", taskNumID, taskName, taskStatus]
-        #     )
-        #     logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
+        # Access the list of all tasks and rebuild the treeView based on their states
+        for task in self.parent.parent.simulationProcess.simTaskManager.taskList:
+            taskData = self.parent.parent.simulationProcess.simTaskManager.taskList.get(task)
+            taskNumID = taskData.numID
+            taskName = taskData.name
+            taskPickupPosition = taskData.pickupNode
+            taskDropoffPosition = taskData.dropoffNode
+            if taskData.assignee is not None:
+                taskAssignee = taskData.assignee.ID
+            else:
+                taskAssignee = None
+            taskTimeLimit = taskData.timeLimit
+            taskStatus = taskData.taskStatus
+            self.taskTreeView.insert(parent="",
+                index='end',
+                iid=taskNumID,
+                text=f"{str(taskNumID)}",
+                values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
+                tags=["task", taskNumID, taskName, taskStatus]
+            )
+            logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
 
-        # logging.info("Updated taskTreeView with current taskManager state.")
+        logging.info("Updated taskTreeView with current taskManager state.")
 
     def bindTaskClicks(self, *event):
         self.taskClickBindFunc = self.taskTreeView.bind('<Button-1>', self.handleTaskSelect)

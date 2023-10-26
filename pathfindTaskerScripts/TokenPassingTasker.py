@@ -71,6 +71,7 @@ class TokenPassingTasker:
             "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(bestTask.numID)+"Highlight"]})
         self.canvasRef.requestRender("highlight", "new", {"targetNodeID": bestTask.dropoffPosition,
             "highlightType": "depositHighlight", "multi": False, "highlightTags": ["task"+str(bestTask.numID)+"Highlight"]})
+        return bestTask.numID
         
     def handleAimlessAgent(self, currentAgent):
         # An agent is aimless if it does not have a target node (no task assigned)
