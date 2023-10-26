@@ -301,6 +301,6 @@ class CAstarPathfinder:
             self.mapCanvas.handleRenderQueue()
             return False
         else:
-            pp.pprint(self.openSet)
+            # pp.pprint(self.openSet)
             return "wait"
             # raise nx.NetworkXNoPath(f"Node {self.targetNode} not reachable from {self.sourceNode}")

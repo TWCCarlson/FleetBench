@@ -109,7 +109,7 @@ class CAstarReserver:
         # print(f"Releasing: {requestedNodeList} from {self.currentDepth}")
         # Releases nodes and edges for the provided path, starting from currentDepth
         for depth, node in enumerate(requestedNodeList[1:]):
-            print(f"{requestedNodeList[depth]}->{node} @ {self.currentDepth+depth}")
+            # print(f"{requestedNodeList[depth]}->{node} @ {self.currentDepth+depth}")
             # Release the edge at this time step
             self.releaseEdge(depth+self.currentDepth, requestedNodeList[depth], node, agentID)
             # Release the node at the next time step

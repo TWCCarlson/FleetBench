@@ -231,6 +231,7 @@ class simProcessor:
         # self.stateEndTime = time.perf_counter()
         # print(f"State {self.currentState} lasted: {self.stateEndTime - self.stateStartTime}")
         # self.stateStartTime = time.perf_counter()
+        # print(f"State {self.currentState} passed")
         # Track the new current state
         self.currentState = stateID
         
@@ -345,7 +346,12 @@ class simProcessor:
             try:
                 # newAgent = next(self.agentQueue)
                 # print(f"AGENT QUEUE: {self.agentQueue}")
-                newAgent = self.agentQueue.pop(0)
+                # newAgent = self.agentQueue.pop(0)
+                # Sift through the queue until an agent is found that has not acted
+                for agent in self.agentQueue:
+                    if self.simAgentManagerRef.agentList[agent].actionTaken is False:
+                        newAgent = agent
+                        break
                 # print(f"AGENT QUEUE AFTER POP: {self.agentQueue}")
                 # print(f"SELECTING AGENT {newAgent}")
                 self.currentAgent = self.simAgentManagerRef.agentList[newAgent]
@@ -356,7 +362,7 @@ class simProcessor:
                 return
         # There was an agent in the queue, so it should act
         # print(f"New agent {self.currentAgent.ID} has been selected.")
-        self.currentAgentActionTaken = False
+        self.currentAgent.actionTaken = False
         self.simCanvasRef.requestRender("highlight", "new", {"targetNodeID": self.currentAgent.position,
                 "highlightType": "agentHighlight", "multi": False, "highlightTags": ["agent"+str(self.currentAgent.numID)+"Highlight"]})
         self.requestedStateID = "taskAssignment"
@@ -371,17 +377,21 @@ class simProcessor:
         # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
         if self.currentAgent.taskStatus == "unassigned":
             # Agent needs a task
-            print(f"Agent {self.currentAgent.ID} needs a new task.")
+            # print(f"Agent {self.currentAgent.ID} needs a new task.")
             # self.generateTask()
             taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
-            print(f"\t{taskSelect}")
-            if taskSelect is not None:
-                print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
+            # print(f"\t{taskSelect}")
+            if isinstance(taskSelect, dict):
+                if taskSelect["requestedStateID"] in self.simulationStateMachineMap.keys():
+                    self.requestedStateID = taskSelect["requestedStateID"]
+                    return
+            elif taskSelect is not None:
+                # print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
                 self.requestedStateID = "selectAction"
                 return
             # If there are no tasks meeting the criterion, check if a task can be generated
             if self.simulationSettings["taskGenerationFrequencyMethod"]:
-                print(f"Need to generate new task for agent {self.currentAgent.ID}")
+                # print(f"Need to generate new task for agent {self.currentAgent.ID}")
                 self.generateTask()
                 self.requestedStateID = "taskAssignment"
                 return
@@ -400,7 +410,7 @@ class simProcessor:
         self.persistRenders = True
         # Agent needs to determine its action for this step
         # If the agent has already acted, then its "turn" is over
-        if self.currentAgentActionTaken == True:
+        if self.currentAgent.actionTaken == True:
             self.requestedStateID = "selectAgent"
             return
         # print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
@@ -413,11 +423,11 @@ class simProcessor:
             self.requestedStateID = "taskInteraction"
             if self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "No cost for pickup/dropoff":
                 # print(f"\tInteraction was free.")
-                self.currentAgentActionTaken = False
+                self.currentAgent.actionTaken = False
                 self.requestedStateID = "taskInteraction"
             elif self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step":
                 # print(f"\tInteraction consumed agent's action.")
-                self.currentAgentActionTaken = True
+                self.currentAgent.actionTaken = True
                 self.requestedStateID = "taskInteraction"
             return
         else:
@@ -433,14 +443,14 @@ class simProcessor:
         self.currentAgent.taskInteraction(self.currentAgent.currentNode)
 
         # If this counted as an action, then the agent cannot move
-        if self.currentAgentActionTaken == True:
+        if self.currentAgent.actionTaken == True:
             # print(f"\tAgent {self.currentAgent.numID} has no more actions available")
             self.requestedStateID = "checkAgentQueue"
-        elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is None:
+        elif self.currentAgent.actionTaken == False and self.currentAgent.currentTask is None:
             # If not, then it can also move
             # print(f"\tAgent {self.currentAgent.numID} is able to move.")
             self.requestedStateID = "taskAssignment"
-        elif self.currentAgentActionTaken == False and self.currentAgent.currentTask is not None:
+        elif self.currentAgent.actionTaken == False and self.currentAgent.currentTask is not None:
             self.requestedStateID = "selectAction"
         return
 
@@ -472,6 +482,7 @@ class simProcessor:
             # nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
             validMove = self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
             if validMove is True or validMove is None:
+                self.currentAgent.actionTaken = True
                 self.requestedStateID = "checkAgentQueue"
             else:
                 # print("action invalid")
@@ -523,20 +534,32 @@ class simProcessor:
             # self.simCanvasRef.requestRender("text", "clear", {})
             self.agentMovementManager.submitAgentAction(self.currentAgent, "crash")
             self.currentAgent.pathfinder.__reset__()
+            self.currentAgent.actionTaken = True
             self.requestedStateID = "checkAgentQueue"
             # print(f"!!! {self.agentQueue}")
 
     def checkAgentQueue(self):
         self.persistRenders = False
         # Check the current queue
-        if not self.agentQueue:
-            # If the queue is empty, then movements can resolve
-            self.requestedStateID = "agentMove"
-            return
-        else:
-            # Otherwise, pull a new agent out of it to take actions
-            self.requestedStateID = "selectAgent"
-            return
+        # if not self.agentQueue:
+        #     # If the queue is empty, then movements can resolve
+        #     self.requestedStateID = "agentMove"
+        #     return
+        # else:
+        #     # Otherwise, pull a new agent out of it to take actions
+        #     self.requestedStateID = "selectAgent"
+        #     return
+        # print("Queue action states:")
+        for agent in self.agentQueue:
+            # print(f"\t{agent}:{self.simAgentManagerRef.agentList[agent].actionTaken}")
+            if self.simAgentManagerRef.agentList[agent].actionTaken is False:
+                # If at least one agent is found that has not acted, select it
+                self.requestedStateID = "selectAgent"
+                return
+        # Otherwise, all agents have acted and the simulation should advance
+        # print("All agents have acted . . .")
+        self.requestedStateID = "agentMove"
+        return
 
     def simulationError(self):
         # print(f"Simulation reached an error.")
@@ -560,6 +583,10 @@ class simProcessor:
             # if self.stepCompleted % 100 == 0:
             #     logging.error(mem_top())
             self.infoShareManager.updateSimulationDepth(self.stepCompleted+1)
+
+        # Reset all agents action taken states
+        for agent in self.agentQueue:
+            self.simAgentManagerRef.agentList[agent].actionTaken = False
 
         self.agentQueue = self.agentMovementManager.getCurrentPriorityOrder()
         self.agentMovementManager.setCurrentPriorityOrder([])

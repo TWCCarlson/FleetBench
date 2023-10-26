@@ -84,14 +84,14 @@ class LRAstarMover:
         for edge, agents in edgeDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                print("EDGE CONFLICT")
+                # print("EDGE CONFLICT")
                 # Force a replan by returning an incomplete action list
                 return ("crash", agents)
 
         for node, agents in vertexDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                print("VERTEX CONFLICT")
+                # print("VERTEX CONFLICT")
                 # Force a replan by returning an incomplete action list
                 # Higher priority agent should just move in
                 plannedPath = list(self.agentMotionDict[agents[0]])

@@ -180,6 +180,7 @@ class simAgentClass:
         self.taskStatus = kwargs.get("taskStatus")
         self.pathfinder = None
         self.targetNode = None
+        self.actionTaken = False
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
@@ -229,9 +230,10 @@ class simAgentClass:
                 None: None,
             }
             self.targetNode = taskStatusMapping[self.taskStatus]
+            return self.targetNode
         else:
-            pass
-        return self.targetNode
+            return None
+        
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
