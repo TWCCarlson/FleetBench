@@ -20,6 +20,7 @@ from pathfindMoverScripts.TokenPassingMover import TokenPassingMover
 from pathfindMoverScripts.defaultMover import defaultAgentMover
 from pathfindTaskerScripts.defaultTasker import defaultTasker
 from pathfindTaskerScripts.TokenPassingTasker import TokenPassingTasker
+from pathfindTaskerScripts.TPTaskSwapTasker import TPTSTasker
 pp = pprint.PrettyPrinter(indent=4)
 from copy import deepcopy
 from watchpoints import watch
@@ -133,7 +134,8 @@ class simProcessor:
             "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover, None),
             "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover, None),
             "Windowed HCA* (WHCA*)": (WHCAstarPathfinder, WHCAstarReserver, WHCAstarMover, None),
-            "Token Passing with A* (TP)": (TokenPassingPathfinder, TokenPassingReserver, TokenPassingMover, TokenPassingTasker)
+            "Token Passing with A* (TP)": (TokenPassingPathfinder, TokenPassingReserver, TokenPassingMover, TokenPassingTasker),
+            "TP with Task Swaps (TPTS)": (TokenPassingPathfinder, TokenPassingReserver, TokenPassingMover, TPTSTasker)
         }
         algorithmConfigDict = {
             "Single-agent A*": {"heuristic": simulationSettings["aStarPathfinderConfig"]["algorithmSAPFAStarHeuristic"],
@@ -148,7 +150,9 @@ class simProcessor:
                                       "heuristicCoefficient": simulationSettings["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarHeuristicCoefficient"],
                                       "windowSize": simulationSettings["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarWindowSize"]},
             "Token Passing with A* (TP)": {"heuristic": simulationSettings["TPPathfinderConfig"]["algorithmMAPFTPHeuristic"],
-                                           "heuristicCoefficient": simulationSettings["TPPathfinderConfig"]["algorithmMAPFTPHeuristicCoefficient"]}
+                                           "heuristicCoefficient": simulationSettings["TPPathfinderConfig"]["algorithmMAPFTPHeuristicCoefficient"]},
+            "TP with Task Swaps (TPTS)": {"heuristic": simulationSettings["TPTSPathfinderConfig"]["algorithmMAPDTPHeuristic"],
+                                          "heuristicCoefficient": simulationSettings["TPTSPathfinderConfig"]["algorithmMAPDTPHeuristicCoefficient"]}
         }
 
         # Call option's pathfinder class

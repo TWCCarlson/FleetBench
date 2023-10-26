@@ -122,7 +122,7 @@
                     "labelText": "Heuristic",
                     "elementType": "optionMenu",
                     "elementDefault": "Manhattan",
-                    "optionValue": self.MAPFHCAstarHeuristic,
+                    "optionValue": self.MAPFTPHeuristic,
                     "elementData": {
                         "Manhattan": None,
                     }
@@ -131,7 +131,25 @@
                     "labelText": "Heuristic Relaxation Coefficient",
                     "elementType": "numericSpinbox",
                     "elementDefault": 1,
-                    "optionValue": self.MAPFHCAstarHeuristicCoefficient,
+                    "optionValue": self.MAPFTPHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "TP with Task Swaps (TPTS)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Manhattan",
+                    "optionValue": self.MAPDTPTSHeuristic,
+                    "elementData": {
+                        "Manhattan": None,
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPDTPTSHeuristicCoefficient,
                     "elementData": (1, 50, 1)
                 }
             ],

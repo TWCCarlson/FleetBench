@@ -1,7 +1,7 @@
 import random
 from numpy import inf
 
-class TokenPassingTasker:
+class TPTSTasker:
     """
         Fallback method for generating and assigning tasks
     """

@@ -112,7 +112,8 @@ class simulationConfigManager(tk.Toplevel):
             "Multi-Agent Cooperative A* (CA*)": "mapf",
             "Hierarchical A* with RRA* (HCA*)": "mapf",
             "Windowed HCA* (WHCA*)": "mapf",
-            "Token Passing with A* (TP)": "mapf"
+            "Token Passing with A* (TP)": "mapf",
+            "TP with Task Swaps (TPTS)": "mapf"
         }
 
         ### Algorithm Selection
@@ -139,9 +140,13 @@ class simulationConfigManager(tk.Toplevel):
         self.MAPFWHCAstarHeuristicCoefficient = tk.IntVar()
         self.MAPFWHCAstarWindowSize = tk.IntVar()
 
-        ### TP MAPF Suboptions
+        ### TP MAPD Suboptions
         self.MAPFTPHeuristic = tk.StringVar()
         self.MAPFTPHeuristicCoefficient = tk.IntVar()
+
+        ### TPTS MAPD Suboptions
+        self.MAPDTPTSHeuristic = tk.StringVar()
+        self.MAPDTPTSHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -156,27 +161,27 @@ class simulationConfigManager(tk.Toplevel):
         # Intermediate function grouping together declarations and renders for the algorithm choices page
         # self.createAlgorithmOptions()
 
-    def createAlgorithmOptions(self):
-        # Creates a drop down menu for the user to select the driving algorithm for the simulation
-        # Keys of the dict are the displayed options
-        algorithmOptions = list(self.algorithmOptionTypeDict.keys())
+    # def createAlgorithmOptions(self):
+    #     # Creates a drop down menu for the user to select the driving algorithm for the simulation
+    #     # Keys of the dict are the displayed options
+    #     algorithmOptions = list(self.algorithmOptionTypeDict.keys())
 
-        # Stringvar to hold the algorithm selection
-        self.algorithmSelectionStringVar = tk.StringVar()
+    #     # Stringvar to hold the algorithm selection
+    #     self.algorithmSelectionStringVar = tk.StringVar()
 
-        # Set a default selection - maybe skip this to force a choice
-        self.algorithmSelectionStringVar.set(algorithmOptions[0])
+    #     # Set a default selection - maybe skip this to force a choice
+    #     self.algorithmSelectionStringVar.set(algorithmOptions[0])
 
-        # Declare the drop down menu
-        self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
+    #     # Declare the drop down menu
+    #     self.algorithmChoiceMenu = tk.OptionMenu(self.pathfindingAlgorithmFrame, self.algorithmSelectionStringVar, *algorithmOptions)
 
-        # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
-        for algorithm, type in self.algorithmOptionTypeDict.items():
-            if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
-                self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
+    #     # If there is more than one agent in the simulation space, disable single-agent pathfinding algorithm options
+    #     for algorithm, type in self.algorithmOptionTypeDict.items():
+    #         if type == "sapf" and len(self.parent.agentManager.agentList) > 1:
+    #             self.algorithmChoiceMenu['menu'].entryconfigure(algorithm, state=tk.DISABLED)
 
-        # Render the menu
-        self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
+    #     # Render the menu
+    #     self.algorithmChoiceMenu.grid(row=1, column=0, sticky=tk.W)
 
     def buildAgentConfigurationPage(self):
         SPINBOX_DEFAULT_RANGE = (1, 100000, 1)
@@ -782,6 +787,10 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["TPPathfinderConfig"] = {}
         dataPackage["TPPathfinderConfig"]["algorithmMAPFTPHeuristic"] = self.MAPFTPHeuristic.get()
         dataPackage["TPPathfinderConfig"]["algorithmMAPFTPHeuristicCoefficient"] = self.MAPFTPHeuristicCoefficient.get()
+        # TPTS
+        dataPackage["TPTSPathfinderConfig"] = {}
+        dataPackage["TPTSPathfinderConfig"]["algorithmMAPDTPHeuristic"] = self.MAPDTPTSHeuristic.get()
+        dataPackage["TPTSPathfinderConfig"]["algorithmMAPDTPHeuristicCoefficient"] = self.MAPDTPTSHeuristicCoefficient.get()
 
 
         # Agent Configuration Options
