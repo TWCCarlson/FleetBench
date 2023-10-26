@@ -238,8 +238,6 @@ class TokenPassingPathfinder:
                     # print(f"<<<Node {neighborNode} was blocked")
                     continue
                 if neighborNode == self.targetNode:
-                    if self.numID == 1:
-                        print(f"<<<Node {neighborNode} is an endpoint")
                     # print(f"\tNode {neighborNode} is an endpoint")
                     if not self.tokenManager.evaluateEndpointEligibility(timeDepth, neighborNode, self.numID):
                         # print(f"<<<Node {neighborNode} is not a safe endpoint")
@@ -278,23 +276,6 @@ class TokenPassingPathfinder:
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
             if currentNode == self.targetNode:
-                # if self.agentData.currentTask is not None and self.agentData.currentTask.pickupNode == currentNode:
-                #     # Found path to pickup node, now find path to delivery node
-                #     print("Found path to pickup, now seeking delivery...")
-                #     self.partialPath = self.reconstructPath(currentNode, timeDepth)
-                #     self.agentData.taskStatus = "pickedUp"
-                #     self.newSearch(currentNode, self.agentData.currentTask.dropoffNode, timeDepth)
-                # elif self.agentData is not None and self.agentData.currentTask.dropoffNode == currentNode:
-                #     # Found path from pickup to delivery, return the completed path
-                #     self.remainingPath = self.reconstructPath(currentNode, timeDepth)
-                #     if len(self.partialPath)>0:
-                #         self.plannedPath = self.partialPath + self.remainingPath[1:]
-                #     else:
-                #         self.plannedPath = self.remainingPath
-                #     print(f"Pathfinder found path: {self.plannedPath}")
-                #     self.tokenManager.handlePathPlanRequest(self.plannedPath, self.numID)
-                #     return True
-                # else:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
