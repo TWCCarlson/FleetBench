@@ -189,7 +189,7 @@ class taskClass:
         self.dropoffNode = f"({self.dropoffPosition[0]}, {self.dropoffPosition[1]})"
         self.graphRef = self.parent.parent.mapData.mapGraph
         self.assignee = kwargs.get("assignee", None)
-        self.taskStatus = kwargs.get("taskStatus", None)
+        self.taskStatus = kwargs.get("taskStatus", "unassigned")
         # self.status = kwargs.pop("status")
         # Verify that the task is completable (no obstacles considered)
         # try:

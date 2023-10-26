@@ -64,6 +64,10 @@ class mapDataClass:
             nodeType = node['nodeType']
             nodeEdges = node['nodeEdges']
 
+            if nodeType == "void":
+                # Skip this node, it doesn't really exist
+                continue
+
             logging.debug(f"Add node '{nodeName}':{node}")
             # Add nodes to the graph with name
             self.mapGraph.add_node(nodeName, pos=nodePosition, type=nodeType, edgeDirs=nodeEdges)

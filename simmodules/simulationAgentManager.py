@@ -179,6 +179,7 @@ class simAgentClass:
         self.currentTask = kwargs.get("currentTask")
         self.taskStatus = kwargs.get("taskStatus")
         self.pathfinder = None
+        self.targetNode = None
 
         # Build useful references
         self.mapGraphRef = self.parent.parent.simGraphData.simMapGraph
@@ -195,7 +196,7 @@ class simAgentClass:
 
     def taskInteraction(self, targetNode):
         # Called when the agent is sharing a node with its task target node
-        if self.currentNode == targetNode:
+        if self.currentNode == targetNode and self.currentTask is not None:
             targetNodeIDDict = {
                 self.currentTask.pickupNode: "pickup",
                 self.currentTask.dropoffNode: "dropoff"
@@ -211,19 +212,26 @@ class simAgentClass:
                 self.currentTask.taskStatus = "completed"
                 self.currentTask.assignee = None
                 self.currentTask = None
+                self.targetNode = None
+        elif self.currentTask is None:
+            # No action is needed
+            return
 
         self.parent.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
         self.parent.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
     def returnTargetNode(self):
-        # Called to determine the target node for pathfinding, dependant on task status
-        taskStatusMapping = {
-            "retrieving": self.currentTask.pickupNode,
-            "pickedUp": self.currentTask.dropoffNode,
-            None: None
-        }
-        targetNode = taskStatusMapping[self.taskStatus]
-        return targetNode
+        if self.currentTask is not None:
+            # Called to determine the target node for pathfinding, dependant on task status
+            taskStatusMapping = {
+                "retrieving": self.currentTask.pickupNode,
+                "pickedUp": self.currentTask.dropoffNode,
+                None: None,
+            }
+            self.targetNode = taskStatusMapping[self.taskStatus]
+        else:
+            pass
+        return self.targetNode
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
@@ -257,7 +265,7 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        print(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        # print(f"Moving agent '{self.ID}' to node '{targetNode}'")
         # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
         # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):

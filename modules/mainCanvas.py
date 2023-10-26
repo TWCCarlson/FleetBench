@@ -445,6 +445,13 @@ class mainCanvas(tk.Canvas):
         else:
             newNodePath = list(nodePath)
 
+        # print(newNodePath)
+        # If there are fewer nodes than 2 in the line, what is being asked for is not a line
+        # Reject the request
+        if len(newNodePath) < 4:
+            return
+
+
         # Style
         if color is None:
             color = self.appearanceValues.canvasArrowDefaultColor
@@ -1059,6 +1066,11 @@ class mainCanvas(tk.Canvas):
         for i, node in enumerate(nodePath):
             posCanvasX, posCanvasY = self.nodeToCanvasTile(node)
             convertedNodePath.append((posCanvasX, posCanvasY))
+
+        # If there are fewer nodes than 2 in the line, what is being asked for is not a line
+        # Reject the request
+        if len(convertedNodePath) < 4:
+            return
 
         # Style settings
         if color is None:

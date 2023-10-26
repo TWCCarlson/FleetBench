@@ -47,6 +47,7 @@ class simTaskManager:
         # Set assignments
         agentRef.currentTask = task
         agentRef.taskStatus = "retrieving"
+        agentRef.targetNode = None
         task.assignee = agentRef
         task.taskStatus = "retrieving"
 

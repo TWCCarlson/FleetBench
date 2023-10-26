@@ -183,6 +183,8 @@ class simDataView(tk.Frame):
                 self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightType": "pickupHighlight"})
                 self.parent.simMainView.simCanvas.requestRender("highlight", "delete", {"highlightType": "depositHighlight"})
             self.parent.simMainView.simCanvas.handleRenderQueue()
+            if agentRef.pathfinder:
+                print(agentRef.pathfinder.plannedPath)
             # Update agentManager's currentAgent prop
             self.parent.parent.simulationProcess.simAgentManager.currentAgent = agentRef
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")
@@ -271,35 +273,36 @@ class simDataView(tk.Frame):
         logging.info("Finished building Simulation taskTreeView scrolling.")
 
     def updateTaskTreeView(self):
-        logging.debug("Received request to refresh the taskTreeView . . .")
-        # Clear the treeview then regenerate it
-        for row in self.taskTreeView.get_children():
-            self.taskTreeView.delete(row)
-        logging.debug("Cleared the taskTreeView.")
+        pass
+        # logging.debug("Received request to refresh the taskTreeView . . .")
+        # # Clear the treeview then regenerate it
+        # for row in self.taskTreeView.get_children():
+        #     self.taskTreeView.delete(row)
+        # logging.debug("Cleared the taskTreeView.")
 
-        # Access the list of all tasks and rebuild the treeView based on their states
-        for task in self.parent.parent.simulationProcess.simTaskManager.taskList:
-            taskData = self.parent.parent.simulationProcess.simTaskManager.taskList.get(task)
-            taskNumID = taskData.numID
-            taskName = taskData.name
-            taskPickupPosition = taskData.pickupNode
-            taskDropoffPosition = taskData.dropoffNode
-            if taskData.assignee is not None:
-                taskAssignee = taskData.assignee.ID
-            else:
-                taskAssignee = None
-            taskTimeLimit = taskData.timeLimit
-            taskStatus = taskData.taskStatus
-            self.taskTreeView.insert(parent="",
-                index='end',
-                iid=taskNumID,
-                text=f"{str(taskNumID)}",
-                values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
-                tags=["task", taskNumID, taskName, taskStatus]
-            )
-            logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
+        # # Access the list of all tasks and rebuild the treeView based on their states
+        # for task in self.parent.parent.simulationProcess.simTaskManager.taskList:
+        #     taskData = self.parent.parent.simulationProcess.simTaskManager.taskList.get(task)
+        #     taskNumID = taskData.numID
+        #     taskName = taskData.name
+        #     taskPickupPosition = taskData.pickupNode
+        #     taskDropoffPosition = taskData.dropoffNode
+        #     if taskData.assignee is not None:
+        #         taskAssignee = taskData.assignee.ID
+        #     else:
+        #         taskAssignee = None
+        #     taskTimeLimit = taskData.timeLimit
+        #     taskStatus = taskData.taskStatus
+        #     self.taskTreeView.insert(parent="",
+        #         index='end',
+        #         iid=taskNumID,
+        #         text=f"{str(taskNumID)}",
+        #         values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit],
+        #         tags=["task", taskNumID, taskName, taskStatus]
+        #     )
+        #     logging.debug(f"Add to taskTreeView: {self.taskTreeView.item(taskNumID, 'values')}")
 
-        logging.info("Updated taskTreeView with current taskManager state.")
+        # logging.info("Updated taskTreeView with current taskManager state.")
 
     def bindTaskClicks(self, *event):
         self.taskClickBindFunc = self.taskTreeView.bind('<Button-1>', self.handleTaskSelect)

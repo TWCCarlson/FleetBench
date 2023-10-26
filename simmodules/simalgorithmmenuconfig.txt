@@ -117,6 +117,24 @@
                     "elementData": (1, 100, 1)
                 }
             ],
+            "Token Passing with A* (TP)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Manhattan",
+                    "optionValue": self.MAPFHCAstarHeuristic,
+                    "elementData": {
+                        "Manhattan": None,
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFHCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
         }
     }
 ]

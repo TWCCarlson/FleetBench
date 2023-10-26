@@ -111,7 +111,8 @@ class simulationConfigManager(tk.Toplevel):
             "Multi-Agent A* (LRA*)": "mapf",
             "Multi-Agent Cooperative A* (CA*)": "mapf",
             "Hierarchical A* with RRA* (HCA*)": "mapf",
-            "Windowed HCA* (WHCA*)": "mapf"
+            "Windowed HCA* (WHCA*)": "mapf",
+            "Token Passing with A* (TP)": "mapf"
         }
 
         ### Algorithm Selection
@@ -137,6 +138,10 @@ class simulationConfigManager(tk.Toplevel):
         self.MAPFWHCAstarHeuristic = tk.StringVar()
         self.MAPFWHCAstarHeuristicCoefficient = tk.IntVar()
         self.MAPFWHCAstarWindowSize = tk.IntVar()
+
+        ### TP MAPF Suboptions
+        self.MAPFTPHeuristic = tk.StringVar()
+        self.MAPFTPHeuristicCoefficient = tk.IntVar()
 
         # UI Definition Dict
         # Sorcery
@@ -773,6 +778,10 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarHeuristic"] = self.MAPFWHCAstarHeuristic.get()
         dataPackage["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarHeuristicCoefficient"] = self.MAPFWHCAstarHeuristicCoefficient.get()
         dataPackage["WHCAstarPathfinderConfig"]["algorithmMAPFWHCAstarWindowSize"] = self.MAPFWHCAstarWindowSize.get()
+        # TP
+        dataPackage["TPPathfinderConfig"] = {}
+        dataPackage["TPPathfinderConfig"]["algorithmMAPFTPHeuristic"] = self.MAPFTPHeuristic.get()
+        dataPackage["TPPathfinderConfig"]["algorithmMAPFTPHeuristicCoefficient"] = self.MAPFTPHeuristicCoefficient.get()
 
 
         # Agent Configuration Options
