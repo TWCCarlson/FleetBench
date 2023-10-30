@@ -3,7 +3,7 @@ from heapq import heappop, heappush
 from itertools import count
 from numpy import Inf
 
-class defaultTasker:
+class CAstarTasker:
     """
         Fallback method for generating and assigning tasks
     """
@@ -76,6 +76,7 @@ class defaultTasker:
                     parentNode = cameFrom.get(parentNode, None)
                 # Reverse the path to get source->target
                 path.reverse()
+                self.infoShareManager.handlePathPlanRequest(path, agentID)
                 return path
             # If not, examine successors
             neighborNodes = list(self.graphRef.neighbors(currentNode)) + [currentNode]

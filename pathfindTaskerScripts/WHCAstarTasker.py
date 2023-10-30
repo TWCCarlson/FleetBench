@@ -3,7 +3,7 @@ from heapq import heappop, heappush
 from itertools import count
 from numpy import Inf
 
-class defaultTasker:
+class WHCAstarTasker:
     """
         Fallback method for generating and assigning tasks
     """
@@ -67,7 +67,7 @@ class defaultTasker:
             _, __, currentNode, timeDepth = heappop(openSet)
             # print(f"Exploring {currentNode} at T+{timeDepth}")
             # If it is the goal
-            if currentNode == targetNode and timeDepth != 0:
+            if currentNode == targetNode and timeDepth != 0 or timeDepth == self.simAgentManager.agentList[agentID].pathfinder.windowSize:
                 # Reconstruct the path from best parents
                 path = [currentNode]
                 parentNode = cameFrom.get((currentNode, timeDepth), None)
@@ -76,6 +76,7 @@ class defaultTasker:
                     parentNode = cameFrom.get(parentNode, None)
                 # Reverse the path to get source->target
                 path.reverse()
+                self.infoShareManager.handlePathPlanRequest(path, agentID)
                 return path
             # If not, examine successors
             neighborNodes = list(self.graphRef.neighbors(currentNode)) + [currentNode]
@@ -97,7 +98,7 @@ class defaultTasker:
                     # Record the new gScore
                     gScore[(neighborNode, timeDepth+1)] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.simAgentManager.agentList[agentID].pathfinder.heuristicFunc(neighborNode, targetNode)
+                    hScore = self.infoShareManager.calculateHeuristicDistance(neighborNode, targetNode, self.simAgentManager.agentList[agentID].pathfinder.heuristicFunc)
                     # Calculate the fScore for the new node
                     node_fScore = est_gScore + hScore
                     # If the node isn't in the openSet, it should be added

@@ -84,6 +84,8 @@ fallthrough case for crash recovery: when an agent wants to stay where it is but
     - it would attempt to reserve the node its on for t+1
     - it would also need to reserve edges entering the node on t+0
 
+something is not right about deleting tasks and then porting into the simulation    
+
 Informational Classes are then:
     mapData
     agentData

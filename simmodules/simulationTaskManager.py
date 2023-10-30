@@ -55,6 +55,21 @@ class simTaskManager:
         self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
         self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
+    def unassignAgentFromTask(self, taskID, agentRef):
+        # Fetch task object
+        task = self.taskList[taskID]
+
+        # Set assignments
+        agentRef.currentTask = None
+        agentRef.taskStatus = "unassigned"
+        agentRef.targetNode = None
+        task.assignee = None
+        task.taskStatus = "unassigned"
+
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
     def fixAssignments(self):
         # Iterate through the list of all tasks, fixing assignee to refer to objects instead of IDs
         # Needed to overcome pickling of data when retrieving the state

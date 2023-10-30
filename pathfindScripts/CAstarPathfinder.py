@@ -12,7 +12,7 @@ class CAstarPathfinder:
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager, agentData=None):
+    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager, agentData=None, simulationSettings=None):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
@@ -45,7 +45,7 @@ class CAstarPathfinder:
             self.heuristicFunc = heuristic
         elif self.heuristic == "Manhattan":
             def heuristic(u, v):
-                # Manhattan/taxicab distance is the absolute value of the difference 
+                # Manhattan/taxicab distance is the absolute value of the difference
                 uPos = self.mapGraphRef.nodes[u]['pos']
                 vPos = self.mapGraphRef.nodes[v]['pos']
                 heuristicDistance = abs(uPos['X']-vPos['X']) + abs(uPos['Y']-vPos['Y'])
@@ -90,9 +90,10 @@ class CAstarPathfinder:
 
         # Set the start of the heap up
         # Initialize the starting node into the queue, alongside its appropriate maps
-        heappush(self.openSet, (0, next(self.counter), sourceNode, 0))
-        self.gScore[(sourceNode, 0)] = 0
-        self.fScore[(sourceNode, 0)] = self.heuristicFunc(sourceNode, targetNode)
+        if targetNode is not None and sourceNode is not None:
+            heappush(self.openSet, (0, next(self.counter), sourceNode, 0))
+            self.gScore[(sourceNode, 0)] = 0
+            self.fScore[(sourceNode, 0)] = self.heuristicFunc(sourceNode, targetNode)
 
         # Data used for tracking pathfinder performance
         self.searchOps = count()
@@ -107,7 +108,7 @@ class CAstarPathfinder:
         # self.mapCanvas.handleRenderQueue()
 
         # Mark the target
-        self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
+        # self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
     def returnNextMove(self):
         try:
@@ -191,7 +192,8 @@ class CAstarPathfinder:
         # Recursively work through the queue 
         if self.openSet:
             _, __, currentNode, timeDepth = heappop(self.openSet)
-            if currentNode == self.targetNode:
+            # print(f"Searching {currentNode}>>{self.targetNode} at {timeDepth}")
+            if currentNode == self.targetNode and timeDepth != 0:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
@@ -243,7 +245,7 @@ class CAstarPathfinder:
             # Indicate tile is explored
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
-            if currentNode == self.targetNode:
+            if currentNode == self.targetNode and timeDepth != 0:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)

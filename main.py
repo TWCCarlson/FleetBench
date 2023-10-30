@@ -123,7 +123,12 @@ class App(tk.Tk):
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/mapf_many_agents")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/tokenpass_manytask")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/tokenpass_blockedtask")
-        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_agent")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_agent")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/task_swap_test")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/corridor_with_rests")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_task")
+        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_path2_problem")
+
 
         # self.after()
         sys.setrecursionlimit(100)

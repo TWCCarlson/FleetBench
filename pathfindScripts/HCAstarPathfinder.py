@@ -12,7 +12,7 @@ class HCAstarPathfinder:
         Class which persists the state of pathfinding
         Should contain methods for advancing the search
     """
-    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager, agentData=None):
+    def __init__(self, numID, mapCanvas, mapGraph, sourceNode, targetNode, config, pathManager, agentData=None, simulationSettings=None):
         # Verify that the requested nodes exist in the graph first
         if not mapGraph.has_node(sourceNode) and not mapGraph.has_node(targetNode):
             msg = f"Either source {sourceNode} or target {targetNode} is not in graph."
@@ -89,9 +89,10 @@ class HCAstarPathfinder:
 
         # Set the start of the heap up
         # Initialize the starting node into the queue, alongside its appropriate maps
-        heappush(self.openSet, (0, next(self.counter), sourceNode, 0))
-        self.gScore[(sourceNode, 0)] = 0
-        self.fScore[(sourceNode, 0)] = self.heuristicFunc(sourceNode, targetNode)
+        if targetNode is not None and sourceNode is not None:
+            heappush(self.openSet, (0, next(self.counter), sourceNode, 0))
+            self.gScore[(sourceNode, 0)] = 0
+            self.fScore[(sourceNode, 0)] = self.heuristicFunc(sourceNode, targetNode)
 
         # Data used for tracking pathfinder performance
         self.searchOps = count()

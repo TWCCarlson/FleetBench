@@ -223,16 +223,22 @@ class simAgentClass:
 
     def returnTargetNode(self):
         if self.currentTask is not None:
-            # Called to determine the target node for pathfinding, dependant on task status
+        # Called to determine the target node for pathfinding, dependant on task status
             taskStatusMapping = {
                 "retrieving": self.currentTask.pickupNode,
                 "pickedUp": self.currentTask.dropoffNode,
+                "unassigned": self.targetNode,
                 None: None,
             }
+            print(self.taskStatus)
             self.targetNode = taskStatusMapping[self.taskStatus]
             return self.targetNode
         else:
-            return None
+            taskStatusMapping = {
+                "unassigned": self.targetNode,
+                None: None,
+            }
+            return self.targetNode
         
 
     def highlightAgent(self, multi):
@@ -267,7 +273,7 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        # print(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        print(f"Moving agent '{self.ID}' to node '{targetNode}'")
         # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
         # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):

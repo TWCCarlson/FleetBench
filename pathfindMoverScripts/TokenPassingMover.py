@@ -49,6 +49,17 @@ class TokenPassingMover:
 
         # Decompose the list of agent desired actions into vertex and edge plan lists
         for agentID, agentMove in self.agentMotionDict.items():
+            # Make sure the submitted move matches the finalized plan (task swapping)
+            agentObj = self.agentManager.agentList[agentID]
+            path =  agentObj.pathfinder.plannedPath
+            step = agentObj.pathfinder.currentStep
+            # print(step)
+            move = path[step-1:step+1]
+            # print(f"Agent {agentID}: {move} from {path}")
+            if move != agentMove:
+                # The new plan takes precedence
+                agentMove = move
+                self.agentMotionDict[agentID] = agentMove
             # self.sharedInfoManager.showReservationsByAgent(agentID)
             # print(f"{agentID}: {agentMove}")
 

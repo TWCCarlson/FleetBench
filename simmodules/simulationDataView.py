@@ -101,6 +101,7 @@ class simDataView(tk.Frame):
         logging.info("Simulation agentTreeView finished rendering.")
 
     def updateAgentTreeView(self):
+        pass
         logging.debug("Received request to refresh the agentTreeView. . .")
         # Clear the treeview then regenerate it
         for row in self.agentTreeView.get_children():
@@ -185,6 +186,8 @@ class simDataView(tk.Frame):
             self.parent.simMainView.simCanvas.handleRenderQueue()
             if agentRef.pathfinder:
                 print(agentRef.pathfinder.plannedPath)
+                print(agentRef.currentTask.pickupNode)
+                print(agentRef.currentTask.dropoffNode)
             # Update agentManager's currentAgent prop
             self.parent.parent.simulationProcess.simAgentManager.currentAgent = agentRef
             logging.debug(f"User clicked on agent '{agentID}' in agentTreeView.")

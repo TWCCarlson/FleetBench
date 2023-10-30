@@ -36,7 +36,7 @@ class TokenPassingReserver:
             else:
                 # Node is not an endpoint
                 pass
-            V_endpoint = self.V_task + self.V_ntask
+            self.V_endpoint = self.V_task + self.V_ntask
         
         # Compute the heuristic distances from all nodes to all endpoints
         # Only allow the use of manhattan for guiding the search
@@ -48,7 +48,7 @@ class TokenPassingReserver:
             heuristicDistance = abs(uPos['X']-vPos['X']) + abs(uPos['Y']-vPos['Y'])
             return heuristicDistance
         for sourceNode in self.mapGraphRef.nodes(data=False):
-            for targetNode in V_endpoint:
+            for targetNode in self.V_endpoint:
                 if targetNode not in self.hScores.keys():
                     self.hScores[targetNode] = {}
                 distance = nx.astar_path_length(self.graphStructure, sourceNode, targetNode, heuristic=heuristic)
@@ -68,8 +68,10 @@ class TokenPassingReserver:
     def purgePastData(self):
         pass
 
-    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode, agentID):
-        # print(f"Searching at {timeDepth+self.currentDepth}")
+    def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode, agentID, ignoredAgentID=None):
+        # if agentID == 6:
+        #     print(f">>>Searching {sourceNode}->{targetNode}:T{timeDepth+self.currentDepth} for {agentID}, ignoring {ignoredAgentID}")
+        #     print(f"\t{self.reservationTable[timeDepth+self.currentDepth].nodes(data=True)['(9, 2)']}")
         # Verifies if the node is open at a specific time
         # Expands the reservation table if the request depth exceeds the table's depth
         if timeDepth + self.currentDepth >= self.timeTracked:
@@ -84,32 +86,47 @@ class TokenPassingReserver:
             # Have to check all edges leading to this node, and the future node
             edgeReserved = False
             for node in self.reservationTable[timeDepth+self.currentDepth][sourceNode]:
-                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node, agentID)
-            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode, agentID)
+                edgeReserved = edgeReserved or self.getEdgeState(timeDepth+self.currentDepth, sourceNode, node, agentID, ignoredAgentID)
+            nodeReserved = self.getNodeState(timeDepth+self.currentDepth+1, sourceNode, agentID, ignoredAgentID)
         else:
-            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID)
-            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID)
+            edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID, ignoredAgentID)
+            nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID, ignoredAgentID)
         if not nodeReserved and not edgeReserved:
-            # print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
-            # Node is occupied and ineligible for use in pathfinding
+            # if agentID == 6:
+            #     print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             return True
-        elif nodeReserved:
-            # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
+        elif nodeReserved and not edgeReserved:
+            # if agentID == 6:
+            #     print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
             return False
-        elif edgeReserved:
-            # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
+        elif edgeReserved and not nodeReserved:
+            # if agentID == 6:
+                # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
+            return False
+        else:
+            # if agentID == 6:
+                # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE+NODE BLOCKED")
             return False
         
-    def evaluateEndpointEligibility(self, timeDepth, targetNode, agentID):
+    def evaluateEndpointEligibility(self, timeDepth, targetNode, agentID, ignoredAgentID=None):
+        # print(f"!!! Agent {agentID} reached its endpoint ({targetNode}), checking if valid...")
+        claimedEndpoints = [path[-1] for agent, path in self.reservedPaths.items() if (not agent == agentID and not agent == ignoredAgentID)]
+        # print(f"\t{claimedEndpoints}")
+        if targetNode in claimedEndpoints:
+            # If the endpoint is already being claimed, it should automatically be rejected (this shouldn't even be able to happen)
+            # if agentID == 6:
+            #     print(f"\tNot valid. Try again.")
+            return False
         # Endpoints need to be available all the way through the time horizon
-        # print(f"Checking that endpoint is available from {timeDepth}-{self.timeTracked}")
+        # print(f"Checking that endpoint for {agentID} is available from {timeDepth}-{self.timeTracked}")
         timeStepsToCheck = range(timeDepth+self.currentDepth, self.timeTracked)
         # print(timeStepsToCheck)
         for depth in timeStepsToCheck:
-            nodeReserved = self.getNodeState(depth, targetNode, agentID)
+            nodeReserved = self.getNodeState(depth, targetNode, agentID, ignoredAgentID)
             if nodeReserved is True:
                 # print(f"Node {targetNode} is reserved at {depth} by {self.getNodeReserver(depth, targetNode)}, have to wait")
                 return False
+        
         return True
 
     def initializeToken(self):
@@ -138,6 +155,7 @@ class TokenPassingReserver:
             self.reserveNode(depth+self.currentDepth+1, node, agentID)
         # Note down the path for access by other agents
         self.reservedPaths[agentID] = requestedNodeList
+        # print(f"Added planned path, leaving \n\t{self.reservedPaths}")
 
     def handlePathRelease(self, requestedNodeList, agentID):
         # print(f"Releasing: {requestedNodeList} from {self.currentDepth}")
@@ -154,6 +172,7 @@ class TokenPassingReserver:
         # Release the idea of a path too
         if agentID in self.reservedPaths:
             del self.reservedPaths[agentID]
+        # print(f"Removed planned path, leaving \n\t{self.reservedPaths}")
 
     def reserveNode(self, timeStep, node, agentID):
         self.reservationTable[timeStep].nodes[node]["Reserved"] = str(agentID)
@@ -185,9 +204,21 @@ class TokenPassingReserver:
                 # print(f"\t edge released")
                 self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"] = False
 
-    def getNodeState(self, timeStep, node, agentID):
-        # Nodes can be outright reserved:
-        reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
+    def getNodeState(self, timeStep, node, agentID, ignoredAgentID=None):
+        # if agentID == 1:
+        #     print(f"\tChecking {node}:T{timeStep} for {agentID}, ignoring {ignoredAgentID}")
+        # # # Nodes can be outright reserved:
+        # reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
+        # validReserveStates = [str(agentID), False, str(ignoredAgentID)]
+        # if reserver not in validReserveStates:
+        #     if agentID == 1:
+        #         print(f"Node blocked by {reserver}")
+        #     # Node is reserved by non-overwritable agent
+        #     return True
+        # else:
+        #     # Node is free, whether via non-reservation or overwritability
+        #     return False
+        
         # print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
         # if reserver == str(agentID):
         #     # print("Node reserved by self.")
@@ -198,18 +229,20 @@ class TokenPassingReserver:
         #     # print("Node reserved by another.")
         #     return True
         
+        reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
         # In token passing, it is also assumed that the end of agent paths is reserved:
-        claimedEndpoints = [path[-1] for agent, path in self.reservedPaths.items() if not agent == agentID]
+        claimedEndpoints = [path[-1] for agent, path in self.reservedPaths.items() if (not agent == agentID and not agent == ignoredAgentID)]
         #### ^^^^^^ needs to exclude agents own endpoint or else it cannot stay in place
 
-        validReserveStates = [str(agentID), False]
+        validReserveStates = [str(agentID), False, str(ignoredAgentID)]
         if node in claimedEndpoints or reserver not in validReserveStates:
-            # print(f"Node is not available")
+            # if agentID == 1:
+                # print(f"Node is not available: {node in claimedEndpoints}/{reserver not in validReserveStates}")
             # if agentID == 6 or agentID == 1:
-            #     # print(node in claimedEndpoints)
-            #     # print(claimedEndpoints)
-            #     # print(reserver not in validReserveStates)
-            #     # print(reserver)
+                # print(node in claimedEndpoints)
+                # print(claimedEndpoints)
+                # print(reserver not in validReserveStates)
+                # print(reserver)
             return True
         elif not node in claimedEndpoints:
             # if agentID == 6 or agentID == 1:
@@ -226,16 +259,18 @@ class TokenPassingReserver:
         # print(self.reservationTable[timeStep].nodes(data=True))
         return reserver
 
-    def getEdgeState(self, timeStep, sourceNode, targetNode, agentID):
+    def getEdgeState(self, timeStep, sourceNode, targetNode, agentID, ignoredAgentID=None):
+        # if agentID == 6:
+        #     print(f"\tChecking {sourceNode}->{targetNode}:T{timeStep} for {agentID}, ignoring {ignoredAgentID}")
         reserver = self.reservationTable[timeStep][sourceNode][targetNode]["Reserved"]
         # print(f"Edge: {self.reservationTable[timeStep][sourceNode][targetNode]['Reserved']}; {bool(self.reservationTable[timeStep][sourceNode][targetNode]['Reserved'])}")
-        if reserver == str(agentID):
+        validReserveStates = [str(agentID), str(ignoredAgentID), False]
+        if reserver in validReserveStates:
             # print("Edge reserved by self.")
             return False
-        elif reserver == False:
-            return False
         else:
-            # print("Edge reserved by another.")
+            # if agentID == 6:
+            #     print(f"Edge reserved by {reserver}.")
             return True
         
     def getEdgeReserver(self, timeStep, sourceNode, targetNode):

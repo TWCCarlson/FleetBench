@@ -37,8 +37,9 @@ class simulationProcess():
         self.simGraphData.retrieveInitialSimState()
         self.simAgentManager.retrieveInitialSimState()
         self.simTaskManager.retrieveInitialSimState()
-        self.simProcessor.setInitialMapState()
 
         # Fix any non-object references
         self.simAgentManager.fixAssignments()
         self.simTaskManager.fixAssignments()
+
+        self.simProcessor.setInitialMapState()

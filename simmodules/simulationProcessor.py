@@ -1,4 +1,5 @@
 import pprint
+pp = pprint.PrettyPrinter(indent=4)
 import logging
 import time
 import random
@@ -19,9 +20,11 @@ from pathfindMoverScripts.WHCAstarMover import WHCAstarMover
 from pathfindMoverScripts.TokenPassingMover import TokenPassingMover
 from pathfindMoverScripts.defaultMover import defaultAgentMover
 from pathfindTaskerScripts.defaultTasker import defaultTasker
+from pathfindTaskerScripts.CAstarTasker import CAstarTasker
+from pathfindTaskerScripts.HCAstarTasker import HCAstarTasker
+from pathfindTaskerScripts.WHCAstarTasker import WHCAstarTasker
 from pathfindTaskerScripts.TokenPassingTasker import TokenPassingTasker
 from pathfindTaskerScripts.TPTaskSwapTasker import TPTSTasker
-pp = pprint.PrettyPrinter(indent=4)
 from copy import deepcopy
 from watchpoints import watch
 import sys
@@ -131,9 +134,9 @@ class simProcessor:
         algorithmDict = {
             "Single-agent A*": (aStarPathfinder, None, None, None),
             "Multi-Agent A* (LRA*)": (LRAstarPathfinder, None, LRAstarMover, None),
-            "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover, None),
-            "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover, None),
-            "Windowed HCA* (WHCA*)": (WHCAstarPathfinder, WHCAstarReserver, WHCAstarMover, None),
+            "Multi-Agent Cooperative A* (CA*)": (CAstarPathfinder, CAstarReserver, CAstarMover, CAstarTasker),
+            "Hierarchical A* with RRA* (HCA*)": (HCAstarPathfinder, HCAstarReserver, HCAstarMover, HCAstarTasker),
+            "Windowed HCA* (WHCA*)": (WHCAstarPathfinder, WHCAstarReserver, WHCAstarMover, WHCAstarTasker),
             "Token Passing with A* (TP)": (TokenPassingPathfinder, TokenPassingReserver, TokenPassingMover, TokenPassingTasker),
             "TP with Task Swaps (TPTS)": (TokenPassingPathfinder, TokenPassingReserver, TokenPassingMover, TPTSTasker)
         }
@@ -175,13 +178,13 @@ class simProcessor:
                                                      self.simulationSettings["taskNodeAvailableDict"]["dropoff"],
                                                      self.simulationSettings["taskNodeWeightDict"],
                                                      self.simulationSettings["taskNodeAvailableDict"],
-                                                     self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef)
+                                                     self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simulationSettings)
         else:
             self.simulationTasker = defaultTasker(self.simulationSettings["taskNodeAvailableDict"]["pickup"],                 
                                                   self.simulationSettings["taskNodeAvailableDict"]["dropoff"],
                                                   self.simulationSettings["taskNodeWeightDict"],
                                                   self.simulationSettings["taskNodeAvailableDict"],
-                                                  self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef)
+                                                  self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simulationSettings)
 
         # Call option's agent movement manager
         agentMovementManager = algorithmDict[self.algorithmSelection][2]
@@ -213,6 +216,9 @@ class simProcessor:
             self.infoShareManager.build()
 
         self.agentQueue = list(self.simAgentManagerRef.agentList.keys())
+
+        for agentID, agent in self.simAgentManagerRef.agentList.items():
+            agent.pathfinder = self.agentActionAlgorithm(agentID, self.simCanvasRef, self.simGraph, agent.currentNode, None, self.agentActionConfig, self.infoShareManager, agent, self.simulationSettings)
         # pp.pprint(self.simGraph.edges('(1, 0)'))
         # pp.pprint(self.simGraph.nodes())
         # import networkx as nx
@@ -378,35 +384,36 @@ class simProcessor:
         # Assign a new task if the task status is "unassigned"
         # Or generate a new task if there are not, and generation on demand is enabled
         # Or if there are no tasks, and generation is disabled end the agent's turn
-        # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}")
-        if self.currentAgent.taskStatus == "unassigned":
+        # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}, {self.currentAgent.currentTask.numID}")
+        if self.currentAgent.taskStatus == "unassigned" and self.currentAgent.currentTask is None and self.currentAgent.pathfinder.returnNextMove() is None:
             # Agent needs a task
-            # print(f"Agent {self.currentAgent.ID} needs a new task.")
+            print(f"Agent {self.currentAgent.ID} needs a new task.")
             # self.generateTask()
+            # print("=============================================")
             taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
-            # print(f"\t{taskSelect}")
+            print(f"\t {self.currentAgent.numID} wound up with:{taskSelect}")
             if isinstance(taskSelect, dict):
                 if taskSelect["requestedStateID"] in self.simulationStateMachineMap.keys():
                     self.requestedStateID = taskSelect["requestedStateID"]
                     return
             elif taskSelect is not None:
-                # print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
+                print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
                 self.requestedStateID = "selectAction"
                 return
             # If there are no tasks meeting the criterion, check if a task can be generated
-            if self.simulationSettings["taskGenerationFrequencyMethod"]:
-                # print(f"Need to generate new task for agent {self.currentAgent.ID}")
+            if self.simulationSettings["taskGenerationFrequencyMethod"] == "ondemand":
+                print(f"Need to generate new task for agent {self.currentAgent.ID}")
                 self.generateTask()
                 self.requestedStateID = "taskAssignment"
                 return
             else:
                 # If task cannot be generated yet, then the agent is free and directionless and does nothing
-                # print(f"No available tasks and could not generate a new task for agent {self.currentAgent.ID}, skipping.")
-                self.requestedStateID = "selectAgent"
+                print(f"No available tasks and could not generate a new task for agent {self.currentAgent.ID}, skipping.")
+                self.requestedStateID = "selectAction"
                 return
         else:
             # Agent does not need a task, so continue to the next state
-            # print(f"Agent {self.currentAgent.ID} has task; continuing to action determination state.")
+            print(f"Agent {self.currentAgent.ID} has task; continuing to action determination state.")
             self.requestedStateID = "selectAction"
             return
 
@@ -417,9 +424,9 @@ class simProcessor:
         if self.currentAgent.actionTaken == True:
             self.requestedStateID = "selectAgent"
             return
-        # print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
+        print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
         # If the agent is already on its task-given target tile, it should act immediately
-        # print(self.currentAgent.returnTargetNode())
+        print(self.currentAgent.returnTargetNode())
         if self.currentAgent.currentNode == self.currentAgent.returnTargetNode():
             # print(f"\tAgent {self.currentAgent} has task {self.currentAgent.currentTask}")
             # print(f"Agent {self.currentAgent.ID} is in position to interact with task {self.currentAgent.currentTask.name}")
@@ -436,7 +443,7 @@ class simProcessor:
             return
         else:
             # If the agent is not at its target tile, it should be trying to move there
-            # print(f"Agent {self.currentAgent.ID} needs to move toward its target tile.")
+            print(f"Agent {self.currentAgent.ID} needs to move toward its target tile.")
             self.requestedStateID = "agentPlanMove"
             return
         
@@ -463,21 +470,24 @@ class simProcessor:
         # Determine whether the agent can move or needs to find a path first
         # The agent needs to move toward its target, ensure it has a pathfinder
         agentTargetNode = self.currentAgent.returnTargetNode()
-        # print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
+        print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
         if agentTargetNode is None:
             # Agent doesn't currently have a target
             # agentTargetNode = self.currentAgent.currentNode
             agentTargetNode = self.simulationTasker.handleAimlessAgent(self.currentAgent)
-            # print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
+            print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
             # self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, self.currentAgent.currentNode, self.agentActionAlgorithm, self.infoShareManager)
-        if self.currentAgent.pathfinder is None or self.currentAgent.pathfinder.targetNode != agentTargetNode or self.currentAgent.pathfinder.invalid == True:
-            # print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent)
+        if self.currentAgent.pathfinder is None or self.currentAgent.pathfinder.invalid == True:
+            # or self.currentAgent.pathfinder.targetNode != agentTargetNode
+            print(f"Agent {self.currentAgent.ID} needs a new pathfinder from {self.currentAgent.currentNode}->{agentTargetNode}")
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent, self.simulationSettings)
             # watch(self.currentAgent.pathfinder.plannedPath)
+            self.requestedStateID = "agentPathfind"
+            return
         
         nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
-        # print(f"{self.currentAgent.ID} has planned path: {self.currentAgent.pathfinder.plannedPath}")
-        # print(f"{self.currentAgent.ID} intends to move to {nextNodeInPath}")
+        print(f"{self.currentAgent.ID} has planned path: {self.currentAgent.pathfinder.plannedPath}")
+        print(f"{self.currentAgent.ID} intends to move to {nextNodeInPath}")
         if nextNodeInPath is not None:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[self.currentAgent.pathfinder.currentStep:], 
@@ -494,8 +504,8 @@ class simProcessor:
             return
         else:
             # If the agent does not have a complete path, it needs to find one
-            # print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
-            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent)
+            print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
+            self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent, self.simulationSettings)
             self.requestedStateID = "agentPathfind"
             return
          
@@ -525,7 +535,7 @@ class simProcessor:
             self.requestedStateID = "agentPathfind"
             return
         elif pathStatus == True:
-            # print(f"\t...path was found: {self.currentAgent.pathfinder.plannedPath}")
+            print(f"\t...path was found: {self.currentAgent.pathfinder.plannedPath}")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
