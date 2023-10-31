@@ -101,16 +101,10 @@ class simDataView(tk.Frame):
         logging.info("Simulation agentTreeView finished rendering.")
 
     def updateAgentTreeView(self):
-        pass
-        logging.debug("Received request to refresh the agentTreeView. . .")
-        # Clear the treeview then regenerate it
-        for row in self.agentTreeView.get_children():
-            self.agentTreeView.delete(row)
-        logging.debug("Cleared the agentTreeView.")
-
-        # Access the list of all agents and rebuild the treeView based on their states
+        availableRows = iter(self.agentTreeView.get_children())
         simAgentManagerRef = self.parent.parent.simulationProcess.simAgentManager
         for agent in simAgentManagerRef.agentList:
+            # Extract relevant data
             agentData = simAgentManagerRef.agentList.get(agent)
             agentNumID = agentData.numID
             agentID = agentData.ID
@@ -120,16 +114,49 @@ class simDataView(tk.Frame):
                 agentCurrentTask = agentData.currentTask.name
             except AttributeError:
                 agentCurrentTask = None
-            self.agentTreeView.insert(parent="",
-                index='end',
-                iid=agentID,
-                text=f"A{str(agentNumID)}",
-                values=[agentID, agentPosition, agentClass, agentCurrentTask],
-                tags=["agent", agentNumID, agentID]
-            )
-            logging.debug(f"Add to agentTreeView: {self.agentTreeView.item(agentID, 'values')}")
+            values=[agentID, agentPosition, agentClass, agentCurrentTask]
+            try:
+                targetRow = next(availableRows)
+                self.agentTreeView.item(targetRow, values=values)
+                # print(targetRow)
+            except StopIteration:
+                # Need new row
+                self.agentTreeView.insert(parent="",
+                    index='end',
+                    iid=agentID,
+                    text=f"A{str(agentNumID)}",
+                    values=values,
+                    tags=["agent", agentNumID, agentID]
+                )
+        pass
+        # logging.debug("Received request to refresh the agentTreeView. . .")
+        # # Clear the treeview then regenerate it
+        # for row in self.agentTreeView.get_children():
+        #     self.agentTreeView.delete(row)
+        # logging.debug("Cleared the agentTreeView.")
+
+        # # Access the list of all agents and rebuild the treeView based on their states
+        # simAgentManagerRef = self.parent.parent.simulationProcess.simAgentManager
+        # for agent in simAgentManagerRef.agentList:
+        #     agentData = simAgentManagerRef.agentList.get(agent)
+        #     agentNumID = agentData.numID
+        #     agentID = agentData.ID
+        #     agentPosition = str(agentData.position)
+        #     agentClass = agentData.className
+        #     try:
+        #         agentCurrentTask = agentData.currentTask.name
+        #     except AttributeError:
+        #         agentCurrentTask = None
+        #     self.agentTreeView.insert(parent="",
+        #         index='end',
+        #         iid=agentID,
+        #         text=f"A{str(agentNumID)}",
+        #         values=[agentID, agentPosition, agentClass, agentCurrentTask],
+        #         tags=["agent", agentNumID, agentID]
+        #     )
+        #     logging.debug(f"Add to agentTreeView: {self.agentTreeView.item(agentID, 'values')}")
         
-        logging.info("Updated agentTreeView with current agentManager state.")
+        # logging.info("Updated agentTreeView with current agentManager state.")
 
     def initAgentTreeScrolling(self):
         logging.debug("Building scrolling capability in the Simulation agentTreeView.")
