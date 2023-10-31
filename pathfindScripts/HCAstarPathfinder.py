@@ -107,7 +107,7 @@ class HCAstarPathfinder:
         # self.mapCanvas.handleRenderQueue()
 
         # Mark the target
-        self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
+        # self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": self.targetNode, "highlightType": "pathfindHighlight", "multi": True, "color": "cyan"})
 
     def returnNextMove(self):
         try:

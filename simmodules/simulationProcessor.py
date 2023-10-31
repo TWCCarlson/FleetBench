@@ -107,7 +107,7 @@ class simProcessor:
                 "exec": self.endSimulation,
                 "stateLabel": "Simulation Complete",
                 "renderStateBool": True,
-                "stateRenderDuration": 1
+                "stateRenderDuration": 1000
             }
         }
 
@@ -193,6 +193,23 @@ class simProcessor:
         else:
             self.agentMovementManager = defaultAgentMover(self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simCanvasRef)
 
+        # Simulation end state trigger values
+        simEndTriggerData = simulationSettings["simulationEndConditions"]
+        pp.pprint(simulationSettings["simulationEndConditions"])
+        endOnTaskCount = simEndTriggerData["simulationEndOnTaskCount"]
+        endTaskCount = simEndTriggerData["simulationEndTaskCount"]
+        self.tasksCompleted = 0
+        endOnStepCount = simEndTriggerData["simulationEndOnStepCount"]
+        endStepCount = simEndTriggerData["simulationEndStepCount"]
+        self.stepCompleted = 0
+        endOnSchedule = simEndTriggerData["simulationEndOnSchedule"]
+        self.scheduleCompleted = False
+        self.simEndTriggerSet = {
+            "endOnTaskCount": [endOnTaskCount, (endTaskCount, "tasksCompleted")],
+            "endOnStepCount": [endOnStepCount, (endStepCount, "stepCompleted")],
+            "endOnSchedule": [endOnSchedule, (True, "scheduleCompleted")]
+        }
+
         # State history control
         self.stateHistoryManager = simProcessStateHandler(self)
 
@@ -252,7 +269,10 @@ class simProcessor:
         # Enact the state
         
         # self.stateTimerStart = time.perf_counter()
-        self.simulationStateMachineMap[stateID]["exec"]()
+        try:
+            self.simulationStateMachineMap[stateID]["exec"]()
+        except:
+            self.requestedStateID = "simulationErrorState"
         # self.stateTimerEnd = time.perf_counter()
         # print(f"State {self.currentState} function time: {self.stateTimerEnd-self.stateTimerStart}")
 
@@ -451,7 +471,10 @@ class simProcessor:
         self.persistRenders = False
         # Agent should be able to interact with the task
         # print(f"Agent {self.currentAgent.numID} interacting at {self.currentAgent.currentNode}")
-        self.currentAgent.taskInteraction(self.currentAgent.currentNode)
+        interactionResult = self.currentAgent.taskInteraction(self.currentAgent.currentNode)
+        if interactionResult == "completed":
+            # If the task was finshed, count the completion
+            self.tasksCompleted = self.tasksCompleted + 1
 
         # If this counted as an action, then the agent cannot move
         if self.currentAgent.actionTaken == True:
@@ -576,18 +599,33 @@ class simProcessor:
         return
 
     def simulationError(self):
-        # print(f"Simulation reached an error.")
+        print(f"Simulation reached an error.")
+        self.doNextStep = False
         raise Exception("Simulation reached an error state")
     
     def endSimStep(self):
         self.persistRenders = False
         # print(f"All agents have acted.")
         # print(f"AGENT QUEUE: {self.agentQueue}")
-        # if the simulation hasnt reached its "objective", do another step
         self.requestedStateID = "newSimStep"
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         self.stepCompleted = targetLabelText.get()
-        # print(f">>>>>Steps completed: {self.stepCompleted}")
+        print(f">>>>>Steps completed: {self.stepCompleted}")
+        # Check if simulation objectives have been met
+        print("CHECKING END CONDITIONS . . .")
+        for conditionType, evaluateCondition in self.simEndTriggerSet.items():
+            if evaluateCondition[0] is True:
+                conditionTuple = evaluateCondition[1]
+                triggerValue = conditionTuple[0]
+                currentValue = getattr(self, conditionTuple[1])
+                if currentValue >= triggerValue:
+                    print(f"\t{conditionType} triggering end of sim")
+                    self.requestedStateID = "endSimulation"
+                    return
+                else:
+                    print(f"\t{conditionType} not met: {currentValue} vs {triggerValue}")
+        print("========")
+        # if the simulation hasnt reached its "objective", do another step
         targetLabelText.set(self.stepCompleted + 1)
         # print(stepCompleted)
         if self.infoShareManager is not None:
@@ -608,6 +646,8 @@ class simProcessor:
 
     def endSimulation(self):
         print(f"Simulation reached its end goal state.")
+        self.doNextStep = False
+        self.simulationStopTicking()
 
     def generateTask(self):
         # Kwargs for generating a task

@@ -1,6 +1,7 @@
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import logging
+import networkx as nx
 
 class simTaskManager:
     def __init__(self, parent):
@@ -16,6 +17,7 @@ class simTaskManager:
         self.simAgentManager = self.parent.simAgentManager
         self.simTaskManager = self.parent.simTaskManager
         self.simProcessor = self.parent.simProcessor
+        self.mapGraph = self.parent.simGraphData.simMapGraph
 
     def createNewTask(self, **kwargs):
         """
@@ -187,6 +189,9 @@ class simTaskClass:
         # Helpful references
         self.mainViewRef = self.parent.parent.parent.simulationWindow.simMainView
 
+        # Calculate optimal service time
+        self.calculateOptimalServiceTime()
+
     def highlightTask(self, multi):
         # Hightlight the pickup position
         logging.debug(f"Task '{self.name}:{self.numID}' requests highlighting from 'mainCanvas'.")
@@ -195,3 +200,8 @@ class simTaskClass:
         self.mainViewRef.simCanvas.requestRender("highlight", "new", {"targetNodeID": self.dropoffPosition,
                 "highlightType": "depositHighlight", "multi": False, "highlightTags": ["task"+str(self.numID)+"Highlight"]})
         self.mainViewRef.simCanvas.handleRenderQueue()
+
+    def calculateOptimalServiceTime(self):
+        self.optimalServiceTime = nx.shortest_path_length(self.parent.mapGraph, self.pickupNode, self.dropoffNode)
+        self.pickupTime = None
+        self.dropoffTime = None

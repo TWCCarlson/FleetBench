@@ -208,18 +208,22 @@ class simAgentClass:
                 # Update task status fields
                 self.taskStatus = "pickedUp"
                 self.currentTask.taskStatus = "pickedUp"
+                result = "executing"
             elif action == "dropoff" and self.taskStatus == "pickedUp":
                 self.taskStatus = "unassigned"
                 self.currentTask.taskStatus = "completed"
                 self.currentTask.assignee = None
                 self.currentTask = None
                 self.targetNode = None
+                result = "completed"
         elif self.currentTask is None:
             # No action is needed
             return
 
         self.parent.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
         self.parent.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
+        return result
 
     def returnTargetNode(self):
         if self.currentTask is not None:

@@ -35,13 +35,15 @@ class simulationConfigManager(tk.Toplevel):
         self.agentConfigurationFrame = tk.Frame(self.configNotebook)
         self.taskGenerationFrame = tk.Frame(self.configNotebook)
         self.displayOptionsFrame = tk.Frame(self.configNotebook)
+        self.simulationEndFrame = tk.Frame(self.configNotebook)
 
         # Tabnames-tabframes,tabbuildfunction dictionary
         noteBookTabs = {
             "Pathfinding Algorithm": (self.pathfindingAlgorithmFrame, self.buildPathfindingAlgorithmPage),
             "Agent Configuration": (self.agentConfigurationFrame, self.buildAgentConfigurationPage),
             "Task Generation": (self.taskGenerationFrame, self.buildTaskGenerationPage),
-            "Display Options": (self.displayOptionsFrame, self.buildDisplayOptionsPage)
+            "Display Options": (self.displayOptionsFrame, self.buildDisplayOptionsPage),
+            "End Sim Conditions": (self.simulationEndFrame, self.buildSimulationEndPage)
         }
 
         # Add all pages to the notebook and build their content
@@ -226,6 +228,61 @@ class simulationConfigManager(tk.Toplevel):
         # Build option menu from config file
         self.agentChargeOptionSetUI = tk_e.ConfigOptionSet(self.agentConfigurationFrame)
         self.agentChargeOptionSetUI.buildOutOptionSetUI(self.agentOptionSet)
+
+    def buildSimulationEndPage(self):
+        # Defines the simulation end condition(s)
+
+        # A number of tasks have been completed
+        self.endSimOnTaskCount = tk.BooleanVar()
+        self.endSimOnTaskCount.set(False)
+        self.endSimTaskCount = tk.IntVar()
+        self.endSimTaskCount.set(0)
+        self.triggerSimEndOnTaskCountCheckbutton = tk.Checkbutton(self.simulationEndFrame, 
+            text="Simulation ends after number of task completions", variable=self.endSimOnTaskCount, 
+            onvalue=True, offvalue=False)
+        self.triggerSimEndOnTaskCountCheckbutton.grid(row=0, column=0)
+        # Custom entry numeric spinbox declaration
+        self.endSimTaskCountValidator = self.register(self.validateNumericSpinbox)
+        self.endSimTaskCountSelector = ttk.Spinbox(self.simulationEndFrame,
+            width=6,
+            from_=1,
+            to=1000,
+            increment=1,
+            textvariable=self.endSimTaskCount,
+            validate='key',
+            validatecommand=(self.endSimTaskCountValidator, '%P')
+        )
+        self.endSimTaskCountSelector.grid(row=0, column=1, sticky=tk.W)
+
+        # A number of timesteps have passed
+        self.endSimOnStepCount = tk.BooleanVar()
+        self.endSimOnStepCount.set(False)
+        self.endSimStepCount = tk.IntVar()
+        self.endSimStepCount.set(0)
+        self.triggerSimEndOnStepCountCheckbutton = tk.Checkbutton(self.simulationEndFrame,
+            text="Simulation ends after number of steps completed", variable=self.endSimOnStepCount,
+            onvalue=True, offvalue=False)
+        self.triggerSimEndOnStepCountCheckbutton.grid(row=1, column=0)
+        # Custom entry numeric spinbox declaration
+        self.endSimStepCountValidator = self.register(self.validateNumericSpinbox)
+        self.endSimStepCountSelector = ttk.Spinbox(self.simulationEndFrame,
+            width=6,
+            from_=1,
+            to=1000,
+            increment=1,
+            textvariable=self.endSimStepCount,
+            validate='key',
+            validatecommand=(self.endSimStepCountValidator, '%P')
+        )
+        self.endSimStepCountSelector.grid(row=1, column=1, sticky=tk.W)
+
+        # All scheduled tasks have been completed
+        self.endSimOnScheduleEnd = tk.BooleanVar()
+        self.endSimOnScheduleEnd.set(False)
+        self.triggerSimEndOnScheduleEnd = tk.Checkbutton(self.simulationEndFrame,
+            text="Simulation ends after task schedule completed", variable=self.endSimOnScheduleEnd,
+            onvalue=True, offvalue=False)
+        self.triggerSimEndOnScheduleEnd.grid(row=2, column=0)
 
     def buildTaskGenerationPage(self):
         # StringVars declared here for reference
@@ -865,6 +922,14 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["renderCheckAgentQueueTime"] = self.renderCheckAgentQueueTime.get()
         dataPackage["renderEndSimStep"] = self.renderEndSimStep.get()
         dataPackage["renderEndSimStepTime"] = self.renderEndSimStepTime.get()
+
+        ### Simulation end statements
+        dataPackage["simulationEndConditions"] = {}
+        dataPackage["simulationEndConditions"]["simulationEndOnTaskCount"] = self.endSimOnTaskCount.get()
+        dataPackage["simulationEndConditions"]["simulationEndTaskCount"] = self.endSimTaskCount.get()
+        dataPackage["simulationEndConditions"]["simulationEndOnStepCount"] = self.endSimOnStepCount.get()
+        dataPackage["simulationEndConditions"]["simulationEndStepCount"] = self.endSimStepCount.get()
+        dataPackage["simulationEndConditions"]["simulationEndOnSchedule"] = self.endSimOnScheduleEnd.get()
 
         return dataPackage
     

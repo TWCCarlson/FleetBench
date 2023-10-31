@@ -129,7 +129,6 @@ class mainCanvas(tk.Canvas):
 
         # self.requestRender("agent", "clear", {})
         # self.requestRender("agent", "delete", {"agentNumID": 1})
-        print(self.renderQueue)
         self.handleRenderQueue()
 
     def buildRenderManager(self):
