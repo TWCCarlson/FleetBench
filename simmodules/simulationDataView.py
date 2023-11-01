@@ -317,10 +317,11 @@ class simDataView(tk.Frame):
             taskTimeLimit = taskData.timeLimit
             taskStatus = taskData.taskStatus
             values=[taskName, taskPickupPosition, taskDropoffPosition, taskAssignee, taskTimeLimit]
+            tags=["task", taskNumID, taskName, taskStatus]
             try:
                 # Attempt to reuse an existing row if possible
                 targetRow = next(availableRows)
-                self.taskTreeView.item(targetRow, values=values)
+                self.taskTreeView.item(targetRow, values=values, tags=["task", taskNumID, taskName, taskStatus])
             except StopIteration:
                 # Need new row 
                 self.taskTreeView.insert(parent="",
