@@ -382,3 +382,5 @@ class ConfigOption(tk.Frame):
         # Grid lengths are larger than the rendered size by 1, so the "next" row is directly found
         gridLoc = self.grid_size()
         return gridLoc
+    
+# class numericSpinbox()

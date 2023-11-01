@@ -69,9 +69,9 @@ class TokenPassingReserver:
         pass
 
     def evaluateNodeEligibility(self, timeDepth, targetNode, sourceNode, agentID, ignoredAgentID=None):
-        # if agentID == 6:
+        # if agentID == 4:
         #     print(f">>>Searching {sourceNode}->{targetNode}:T{timeDepth+self.currentDepth} for {agentID}, ignoring {ignoredAgentID}")
-        #     print(f"\t{self.reservationTable[timeDepth+self.currentDepth].nodes(data=True)['(9, 2)']}")
+        #     print(f"\t{self.reservationTable[timeDepth+self.currentDepth].nodes(data=True)['(0, 1)']}")
         # Verifies if the node is open at a specific time
         # Expands the reservation table if the request depth exceeds the table's depth
         if timeDepth + self.currentDepth >= self.timeTracked:
@@ -92,15 +92,15 @@ class TokenPassingReserver:
             edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID, ignoredAgentID)
             nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID, ignoredAgentID)
         if not nodeReserved and not edgeReserved:
-            # if agentID == 6:
-            #     print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
+            # if agentID == 4:
+                # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             return True
         elif nodeReserved and not edgeReserved:
-            # if agentID == 6:
-            #     print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
+            # if agentID == 4:
+                # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
             return False
         elif edgeReserved and not nodeReserved:
-            # if agentID == 6:
+            # if agentID == 4:
                 # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
             return False
         else:
@@ -236,13 +236,13 @@ class TokenPassingReserver:
 
         validReserveStates = [str(agentID), False, str(ignoredAgentID)]
         if node in claimedEndpoints or reserver not in validReserveStates:
-            # if agentID == 1:
-                # print(f"Node is not available: {node in claimedEndpoints}/{reserver not in validReserveStates}")
-            # if agentID == 6 or agentID == 1:
-                # print(node in claimedEndpoints)
-                # print(claimedEndpoints)
-                # print(reserver not in validReserveStates)
-                # print(reserver)
+            # if agentID == 4:
+            #     print(f"Node is not available: {node in claimedEndpoints}/{reserver not in validReserveStates}")
+            # if agentID == 4 or agentID == 4:
+            #     print(node in claimedEndpoints)
+            #     print(claimedEndpoints)
+            #     print(reserver not in validReserveStates)
+            #     print(reserver)
             return True
         elif not node in claimedEndpoints:
             # if agentID == 6 or agentID == 1:

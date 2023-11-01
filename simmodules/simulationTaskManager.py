@@ -2,6 +2,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import logging
 import networkx as nx
+import sys
 
 class simTaskManager:
     def __init__(self, parent):
@@ -39,9 +40,28 @@ class simTaskManager:
         self.latestTask = simTaskClass(self, **kwargs, taskName=taskName, numID=self.dictLength)
         self.taskList[self.dictLength] = self.latestTask
         logging.info("Task added to 'simTaskManager' task list.")
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
         return self.dictLength
     
+    def purgeTaskList(self):
+        # Unassign every task
+        for taskID, task in self.taskList.items():
+            if task.assignee:
+                self.unassignAgentFromTask(taskID, task.assignee)
+
+        # Delete every task
+        self.taskList = {}
+        taskTreeView = self.parent.parent.simulationWindow.simDataView.taskTreeView
+        for row in taskTreeView.get_children():
+            taskTreeView.delete(row)
+
+        print(self.taskList)
+
+        # Update the treeView
+        self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
+        self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
+
     def assignAgentToTask(self, taskID, agentRef):
         # Fetch task object
         task = self.taskList[taskID]
@@ -171,9 +191,9 @@ class simTaskClass:
         logging.debug(f"Task settings: {kwargs}")
         self.numID = kwargs.get("numID")        # Numeric ID, internal use only
         self.name = kwargs.get("taskName")      # Human-readable ID, name
-        self.timeLimit = kwargs.get("timeLimit")
-        self.assignee = kwargs.get("assignee")
-        self.taskStatus = kwargs.get("taskStatus")
+        self.timeLimit = kwargs.get("timeLimit", 0)
+        self.assignee = kwargs.get("assignee", None)
+        self.taskStatus = kwargs.get("taskStatus", "unassigned")
         # Allow passing positions (tuples) or nodes (strings)
         if kwargs.get("pickupPosition"):
             self.pickupPosition = kwargs.get("pickupPosition")      # Expects Tuple

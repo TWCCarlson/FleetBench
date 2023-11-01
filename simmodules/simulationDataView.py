@@ -321,7 +321,7 @@ class simDataView(tk.Frame):
             try:
                 # Attempt to reuse an existing row if possible
                 targetRow = next(availableRows)
-                self.taskTreeView.item(targetRow, values=values, tags=["task", taskNumID, taskName, taskStatus])
+                self.taskTreeView.item(targetRow, values=values, tags=tags)
             except StopIteration:
                 # Need new row 
                 self.taskTreeView.insert(parent="",
@@ -329,9 +329,8 @@ class simDataView(tk.Frame):
                     iid=taskNumID,
                     text=f"{str(taskNumID)}",
                     values=values,
-                    tags=["task", taskNumID, taskName, taskStatus]
+                    tags=tags
                 )
-
         pass
         # logging.debug("Received request to refresh the taskTreeView . . .")
         # # Clear the treeview then regenerate it

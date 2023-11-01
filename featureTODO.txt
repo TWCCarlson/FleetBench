@@ -58,10 +58,16 @@
 - ui can be made more adaptive with .grid_info(), so that new widgets are always placed at edges of the frame
 - may need an integer spinbox for extra restriction on numeric spinbox (agent charge costs)
 - task generation should allow assignment and intermediate state setting to an agent in the editor mode
+- agent/task treeviews need something like a render queue that only updates the one object that needs changing instead of all objects in the treeview
 
 The graph datastructure should probably contain as much information as possible
 The redraw/validation loop should probably rely on the graph as much as possible, with exceptions for application state semaphores
     This should be decoupled from the functional code and called after every change
+
+agent color randomizer
+agent move preview graphic
+task schedule
+simulation score screen
 
 GRAPHICS OVERHAUL
 8-neighborhood graph options

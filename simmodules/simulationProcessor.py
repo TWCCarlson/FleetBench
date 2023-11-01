@@ -26,9 +26,9 @@ from pathfindTaskerScripts.WHCAstarTasker import WHCAstarTasker
 from pathfindTaskerScripts.TokenPassingTasker import TokenPassingTasker
 from pathfindTaskerScripts.TPTaskSwapTasker import TPTSTasker
 from copy import deepcopy
-from watchpoints import watch
 import sys
-from mem_top import mem_top
+import traceback
+import csv
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -195,7 +195,7 @@ class simProcessor:
 
         # Simulation end state trigger values
         simEndTriggerData = simulationSettings["simulationEndConditions"]
-        pp.pprint(simulationSettings["simulationEndConditions"])
+        # pp.pprint(simulationSettings["simulationEndConditions"])
         endOnTaskCount = simEndTriggerData["simulationEndOnTaskCount"]
         endTaskCount = simEndTriggerData["simulationEndTaskCount"]
         self.tasksCompleted = 0
@@ -236,6 +236,22 @@ class simProcessor:
 
         for agentID, agent in self.simAgentManagerRef.agentList.items():
             agent.pathfinder = self.agentActionAlgorithm(agentID, self.simCanvasRef, self.simGraph, agent.currentNode, None, self.agentActionConfig, self.infoShareManager, agent, self.simulationSettings)
+
+        # Task generation strategy
+        if self.simulationSettings["tasksAreScheduled"]:
+            # Disable generation
+            self.simulationSettings["taskGenerationAsAvailableTrigger"] = "scheduled"
+            # Delete existing tasks
+            self.simTaskManagerRef.purgeTaskList()
+            # Load the schedule
+            fid = self.simulationSettings["taskScheduleFile"]
+            with open(fid, 'r') as inp:
+                # Extract all the data
+                reader = csv.reader(inp)
+                self.taskSchedule = list(reader)
+                # Ignore the first row of the schedule
+                self.taskSchedule.pop(0)
+                # pp.pprint(self.taskSchedule)
         # pp.pprint(self.simGraph.edges('(1, 0)'))
         # pp.pprint(self.simGraph.nodes())
         # import networkx as nx
@@ -272,6 +288,8 @@ class simProcessor:
         try:
             self.simulationStateMachineMap[stateID]["exec"]()
         except:
+            self.tb = traceback.format_exc()
+            print(self.tb)
             self.requestedStateID = "simulationErrorState"
         # self.stateTimerEnd = time.perf_counter()
         # print(f"State {self.currentState} function time: {self.stateTimerEnd-self.stateTimerStart}")
@@ -400,6 +418,25 @@ class simProcessor:
 
     def taskAssignment(self):
         self.persistRenders = True
+        if self.simulationSettings["tasksAreScheduled"]:
+            # Use the task schedule, bringing in new tasks as their release times are met
+            tasksToPop = []
+            for i, task in enumerate(self.taskSchedule):
+                # print(task)
+                # print(f"{eval(task[3])} vs {self.stepCompleted}")
+                if eval(task[3]) <= self.stepCompleted:
+                    tasksToPop.append(i)
+                    # The task can be brought in
+                    pickupNode = task[0]
+                    dropoffNode = task[1]
+                    timeLimit = eval(task[2])
+                    name = task[4]
+                    # print(name)
+                    self.simTaskManagerRef.createNewTask(pickupNode=pickupNode, 
+                        dropoffNode=dropoffNode, timeLimit=timeLimit, taskName=name)
+            # Pop the tasks
+            for index in sorted(tasksToPop, reverse=True):
+                self.taskSchedule.pop(index)
         # Assign tasks if agent needs a task
         # Assign a new task if the task status is "unassigned"
         # Or generate a new task if there are not, and generation on demand is enabled
@@ -407,33 +444,33 @@ class simProcessor:
         # print(f"{self.currentAgent.ID}: {self.currentAgent.taskStatus}, {self.currentAgent.currentTask.numID}")
         if self.currentAgent.taskStatus == "unassigned" and self.currentAgent.currentTask is None and self.currentAgent.pathfinder.returnNextMove() is None:
             # Agent needs a task
-            print(f"Agent {self.currentAgent.ID} needs a new task.")
+            # print(f"Agent {self.currentAgent.ID} needs a new task.")
             # self.generateTask()
             # print("=============================================")
             taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
-            print(f"\t {self.currentAgent.numID} wound up with:{taskSelect}")
-            if isinstance(taskSelect, dict):
-                if taskSelect["requestedStateID"] in self.simulationStateMachineMap.keys():
-                    self.requestedStateID = taskSelect["requestedStateID"]
+            # print(f"\t {self.currentAgent.numID} wound up with:{taskSelect}")
+            if type(taskSelect) is not int:
+                # If there are no tasks meeting the criterion, check if a task can be generated
+                if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "ondemand":
+                    # print(f"Need to generate new task for agent {self.currentAgent.ID}")
+                    self.generateTask()
+                    self.requestedStateID = "taskAssignment"
                     return
-            elif taskSelect is not None:
-                print(f"Task {taskSelect} will be assigned to agent {self.currentAgent.ID}")
-                self.requestedStateID = "selectAction"
-                return
-            # If there are no tasks meeting the criterion, check if a task can be generated
-            if self.simulationSettings["taskGenerationFrequencyMethod"] == "ondemand":
-                print(f"Need to generate new task for agent {self.currentAgent.ID}")
-                self.generateTask()
-                self.requestedStateID = "taskAssignment"
-                return
+                else:
+                    # If task cannot be generated yet, then the agent is free and directionless and does nothing
+                    # print(f"No available tasks and could not generate a new task for agent {self.currentAgent.ID}, skipping.")
+                    self.requestedStateID = "selectAction"
+                    return
             else:
-                # If task cannot be generated yet, then the agent is free and directionless and does nothing
-                print(f"No available tasks and could not generate a new task for agent {self.currentAgent.ID}, skipping.")
+                if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "onassignment":
+                    # print(f"{self.currentAgent.ID} assigned, generate new task")
+                    self.generateTask()
+                # Task generated successfully
                 self.requestedStateID = "selectAction"
-                return
+                return 
         else:
             # Agent does not need a task, so continue to the next state
-            print(f"Agent {self.currentAgent.ID} has task; continuing to action determination state.")
+            # print(f"Agent {self.currentAgent.ID} has task; continuing to action determination state.")
             self.requestedStateID = "selectAction"
             return
 
@@ -444,9 +481,9 @@ class simProcessor:
         if self.currentAgent.actionTaken == True:
             self.requestedStateID = "selectAgent"
             return
-        print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
+        # print(f"Agent {self.currentAgent.numID} has target {self.currentAgent.returnTargetNode()}")
         # If the agent is already on its task-given target tile, it should act immediately
-        print(self.currentAgent.returnTargetNode())
+        # print(self.currentAgent.returnTargetNode())
         if self.currentAgent.currentNode == self.currentAgent.returnTargetNode():
             # print(f"\tAgent {self.currentAgent} has task {self.currentAgent.currentTask}")
             # print(f"Agent {self.currentAgent.ID} is in position to interact with task {self.currentAgent.currentTask.name}")
@@ -462,8 +499,11 @@ class simProcessor:
                 self.requestedStateID = "taskInteraction"
             return
         else:
+            if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "onrest" and self.currentAgent.returnTargetNode() is None:
+                print(f"{self.currentAgent.ID} is resting, generate new task")
+                self.generateTask()
             # If the agent is not at its target tile, it should be trying to move there
-            print(f"Agent {self.currentAgent.ID} needs to move toward its target tile.")
+            # print(f"Agent {self.currentAgent.ID} needs to move toward its target tile.")
             self.requestedStateID = "agentPlanMove"
             return
         
@@ -475,6 +515,13 @@ class simProcessor:
         if interactionResult == "completed":
             # If the task was finshed, count the completion
             self.tasksCompleted = self.tasksCompleted + 1
+            if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "completed":
+                print(f"{self.currentAgent.ID} completed task, generate new task")
+                self.generateTask()
+        elif interactionResult == "pickedUp":
+            if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "onpickup":
+                print(f"{self.currentAgent.ID} picked up, generate new task")
+                self.generateTask()
 
         # If this counted as an action, then the agent cannot move
         if self.currentAgent.actionTaken == True:
@@ -493,7 +540,7 @@ class simProcessor:
         # Determine whether the agent can move or needs to find a path first
         # The agent needs to move toward its target, ensure it has a pathfinder
         agentTargetNode = self.currentAgent.returnTargetNode()
-        print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
+        # print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
         if agentTargetNode is None:
             # Agent doesn't currently have a target
             # agentTargetNode = self.currentAgent.currentNode
@@ -509,8 +556,8 @@ class simProcessor:
             return
         
         nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
-        print(f"{self.currentAgent.ID} has planned path: {self.currentAgent.pathfinder.plannedPath}")
-        print(f"{self.currentAgent.ID} intends to move to {nextNodeInPath}")
+        # print(f"{self.currentAgent.ID} has planned path: {self.currentAgent.pathfinder.plannedPath}")
+        # print(f"{self.currentAgent.ID} intends to move to {nextNodeInPath}")
         if nextNodeInPath is not None:
             # print(f"Agent {self.currentAgent.ID} has a plan: {self.currentAgent.pathfinder.plannedPath}")
             self.simCanvasRef.requestRender("canvasLine", "new", {"nodePath": [self.currentAgent.currentNode] + self.currentAgent.pathfinder.plannedPath[self.currentAgent.pathfinder.currentStep:], 
@@ -518,6 +565,7 @@ class simProcessor:
             # nextNodeInPath = self.currentAgent.pathfinder.plannedPath.pop(1)
             # nextNodeInPath = self.currentAgent.pathfinder.returnNextMove()
             validMove = self.agentMovementManager.submitAgentAction(self.currentAgent, (self.currentAgent.currentNode, nextNodeInPath))
+            # print(validMove)
             if validMove is True or validMove is None:
                 self.currentAgent.actionTaken = True
                 self.requestedStateID = "checkAgentQueue"
@@ -527,7 +575,7 @@ class simProcessor:
             return
         else:
             # If the agent does not have a complete path, it needs to find one
-            print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
+            # print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
             self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent, self.simulationSettings)
             self.requestedStateID = "agentPathfind"
             return
@@ -558,7 +606,7 @@ class simProcessor:
             self.requestedStateID = "agentPathfind"
             return
         elif pathStatus == True:
-            print(f"\t...path was found: {self.currentAgent.pathfinder.plannedPath}")
+            # print(f"\t...path was found: {self.currentAgent.pathfinder.plannedPath}")
             # self.simCanvasRef.requestRender("canvasLine", "clear", {})
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
@@ -590,6 +638,7 @@ class simProcessor:
         for agent in self.agentQueue:
             # print(f"\t{agent}:{self.simAgentManagerRef.agentList[agent].actionTaken}")
             if self.simAgentManagerRef.agentList[agent].actionTaken is False:
+                # print(f"\t{agent} is able to move!")
                 # If at least one agent is found that has not acted, select it
                 self.requestedStateID = "selectAgent"
                 return
@@ -619,12 +668,13 @@ class simProcessor:
                 triggerValue = conditionTuple[0]
                 currentValue = getattr(self, conditionTuple[1])
                 if currentValue >= triggerValue:
-                    print(f"\t{conditionType} triggering end of sim")
+                    # print(f"\t{conditionType} triggering end of sim")
                     self.requestedStateID = "endSimulation"
                     return
                 else:
-                    print(f"\t{conditionType} not met: {currentValue} vs {triggerValue}")
-        print("========")
+                    pass
+                    # print(f"\t{conditionType} not met: {currentValue} vs {triggerValue}")
+        # print("========")
         # if the simulation hasnt reached its "objective", do another step
         targetLabelText.set(self.stepCompleted + 1)
         # print(stepCompleted)
@@ -654,6 +704,7 @@ class simProcessor:
         # Packaged taskData: {'name': 'task1', 'pickupPosition': (0, 1), 'dropoffPosition': (4, 8), 'timeLimit': 0, 'assignee': 0}
         # name is optional, no need to generate one
         newTaskID = self.simulationTasker.generateTask()
+        # print(f"\tGenerated new task: {newTaskID}")
         # pickupNodes = self.simulationSettings["taskNodeAvailableDict"]["pickup"]
         # dropoffNodes = self.simulationSettings["taskNodeAvailableDict"]["dropoff"]
         

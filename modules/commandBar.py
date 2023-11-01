@@ -177,7 +177,7 @@ class fileCommands(tk.Menu):
         }
         logging.info("Save data collected.")
         logging.debug(f"{itemsToSave}")
-        fid = tk.filedialog.asksaveasfilename(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
+        fid = filedialog.asksaveasfilename(initialfile = 'Untitled', filetypes=[("All Files", "*.*")])
         logging.debug(f"User requested data be saved to: {fid}")
         with open(fid, 'wb') as out:
             pickle.dump(itemsToSave, out, pickle.HIGHEST_PROTOCOL)

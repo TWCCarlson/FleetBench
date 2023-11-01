@@ -1,12 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
+from tkinter import messagebox
+from tkinter import filedialog
 import logging
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 import numpy as np
 import itertools
 import modules.tk_extensions as tk_e
+import csv
+import random
 
 from collections import Counter
 
@@ -96,15 +100,6 @@ class simulationConfigManager(tk.Toplevel):
             self.maximumOptimalPathLength = np.max(optimalTaskPathLengthsArray)     # Longest length of an optimal path
             self.minimumOptimalPathLength = np.min(optimalTaskPathLengthsArray)     # Shortest length of an optimal path
             self.medianOptimalTaskPathLength = np.median(optimalTaskPathLengthsArray)   # Median length of optimal paths
-
-            # Update relevant text
-            self.updateTaskStatsText()
-
-            # Update relevant graph
-            self.updateTaskInfoPlot()
-
-            # Maximum optimal traversal distance from anywhere in the warehouse to anywhere in the warehouse
-            # Turns out this is NP hard and probably not all that useful anyway
 
     def buildPathfindingAlgorithmPage(self):
         # Using types to separate multi-agent and single-agent pathfinding algorithms
@@ -285,6 +280,12 @@ class simulationConfigManager(tk.Toplevel):
         self.triggerSimEndOnScheduleEnd.grid(row=2, column=0)
 
     def buildTaskGenerationPage(self):
+        self.tasksAreScheduled = False
+        self.taskSchedule = None
+        # Remove all child widgets
+        for child in self.taskGenerationFrame.winfo_children():
+            child.destroy()
+
         # StringVars declared here for reference
         self.taskFrequencySelectionStringvar = tk.StringVar()
         self.taskFixedRateSelectionStringvar = tk.StringVar()
@@ -293,6 +294,16 @@ class simulationConfigManager(tk.Toplevel):
         self.taskFixedRateCustomTaskBatchingStrategyValue = tk.StringVar()
         self.taskAsAvailableDelayValue = tk.StringVar()
         self.taskAsAvailableTriggerStringvar = tk.StringVar()
+
+        # Load a .csv with a task schedule instead
+        self.loadTaskScheduleButton = tk.Button(self.taskGenerationFrame,
+            command=self.loadTaskSchedule, text="Load a Task Schedule (.csv)")
+        self.loadTaskScheduleButton.grid(row=3, column=0)
+
+        # Generate a .csv with a task schedule
+        self.generateTaskScheduleButton = tk.Button(self.taskGenerationFrame,
+            command=self.generateTaskScheduleOptions, text="Create a Task Schedule")
+        self.generateTaskScheduleButton.grid(row=3, column=1)
 
         # Intermediate function grouping together declarations and renders for the task generation page
         self.taskGenerationRateFrame = tk.Frame(self.taskGenerationFrame)
@@ -312,6 +323,185 @@ class simulationConfigManager(tk.Toplevel):
         self.taskStatisticsFrame = tk.Frame(self.taskGenerationFrame)
         self.taskStatisticsFrame.grid(row=1, column=0)
         self.createTaskInformationPane()
+
+    def loadTaskSchedule(self):
+        # Ask for a .csv
+        fid = tk.filedialog.askopenfilename(filetypes=[("Comma-separated values","*.*"),])
+        with open(fid, 'r') as inp:
+            # Extract all the data
+            reader = csv.reader(inp)
+            data = list(reader)
+        
+        # Row one should contain specific headers if it is a valid file
+        columnNames = ["PickupNode", "DropoffNode", "TimeLimit", "ReleaseTime", "Name"]
+        if data[0] != columnNames:
+            print("Data does not match the timeplate")
+            # Invalid
+            return
+
+        # Remove all child widgets
+        for child in self.taskGenerationFrame.winfo_children():
+            child.destroy()
+
+        # Having pressed this button indicates a schedule should be used
+        self.tasksAreScheduled = True
+        self.taskSchedule = fid
+
+        # Display the loaded schedule (with scrollbar)
+        self.buildTaskSchedulePage(data)
+
+    def buildTaskSchedulePage(self, csvData):
+        # Build a display frame for the schedule
+        # self.taskScheduleDisplayFrame = tk.Frame(self.taskGenerationFrame)
+        self.taskScheduleDisplayHeaderFrame = tk.LabelFrame(self.taskGenerationFrame, text="First 300 tasks")
+        self.taskScheduleDisplayHeaderFrame.grid(row=1, column=0, sticky="ew")
+        self.taskScheduleDisplayScrollFrame = tk_e.VerticalScrolledFrame(self.taskGenerationFrame)
+        self.taskScheduleDisplayFrame = self.taskScheduleDisplayScrollFrame.interior
+        self.taskGenerationFrame.columnconfigure(0, weight=1)
+        self.taskGenerationFrame.rowconfigure(0, weight=1)
+        self.taskScheduleDisplayScrollFrame.grid(row=2, column=0, sticky="news")
+
+        graph = self.parent.mapData.mapGraph
+        print("Displaying task schedule")
+        pp.pprint(csvData[0])
+        # Column headers
+        for i, col in enumerate(csvData[0]):
+            print(col)
+            tk.Label(self.taskScheduleDisplayHeaderFrame, text=col).grid(row=0, column=i, sticky=tk.W+tk.E)
+            self.taskScheduleDisplayHeaderFrame.columnconfigure(i, weight=1)
+            self.taskScheduleDisplayFrame.columnconfigure(i, weight=1)
+        # Data
+        for i, row in enumerate(csvData, start=1):
+            if row[0] not in graph.nodes(data=False):
+                # First column must be a node in the graph (pickupNode)
+                continue
+            if row[1] not in graph.nodes(data=False):
+                # Second column must be a node in the graph (dropoffNode)
+                continue
+            if not isinstance(row[2], int):
+                row[2] = int(row[2])
+                # Third column must be an integer (timeLimit)
+            if not isinstance(row[3], int):
+                row[3] = int(row[3])
+                # Fourth column must be an integer (releaseTime)
+            if not isinstance(row[4], str):
+                # Fifth column must be a string (name)
+                row[4] = str(row[4])
+            tk.Label(self.taskScheduleDisplayFrame, text=row[0]).grid(row=i, column=0, sticky=tk.W+tk.E)
+            tk.Label(self.taskScheduleDisplayFrame, text=row[1]).grid(row=i, column=1, sticky=tk.W+tk.E)
+            tk.Label(self.taskScheduleDisplayFrame, text=row[2]).grid(row=i, column=2, sticky=tk.W+tk.E)
+            tk.Label(self.taskScheduleDisplayFrame, text=row[3]).grid(row=i, column=3, sticky=tk.W+tk.E)
+            tk.Label(self.taskScheduleDisplayFrame, text=row[4]).grid(row=i, column=4, sticky=tk.W+tk.E)
+            if i > 300:
+                # There is a size limitation of the canvas (xd)
+                break
+
+        # Build a button to return to the generator configuration page
+        self.taskGenerationReturnButton = tk.Button(self.taskGenerationFrame,
+            command=self.buildTaskGenerationPage, text="Use Live Task Generation")
+        self.taskGenerationReturnButton.grid(row=3, column=0)
+
+    def generateTaskScheduleOptions(self):
+        # Remove all child widgets
+        for child in self.taskStatisticsFrame.winfo_children():
+            child.destroy()
+        for child in self.taskGenerationRateFrame.winfo_children():
+            child.destroy()
+        self.generateTaskScheduleButton.destroy()
+
+        # N tasks should be generated
+        agentCount = len(self.parent.agentManager.agentList)
+        self.taskScheduleTasksPerGenerate = tk.Label(self.taskStatisticsFrame, text="Tasks per batch:")
+        self.tasksPerGenerate = tk.IntVar(value=agentCount)
+        # Interval validation callback on spinbox entry
+        self.validateTasksPerGenerate = self.register(self.validateNumericSpinbox)
+        # Custom entry numeric spinbox declaration
+        self.tasksPerGenerateSpinbox = ttk.Spinbox(self.taskStatisticsFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.tasksPerGenerate,
+            validate='key',
+            validatecommand=(self.validateTasksPerGenerate, '%P')
+        )
+        # Render label and spinbox
+        self.taskScheduleTasksPerGenerate.grid(row=0, column=0)
+        self.tasksPerGenerateSpinbox.grid(row=0, column=1)
+
+        # Every M steps
+        self.taskScheduleTaskGenerateFreq = tk.Label(self.taskStatisticsFrame, text="Batch every:")
+        self.taskGenerateEvery = tk.IntVar(value= int(self.meanOptimalTaskPathLength))
+        # Interval validation callback on spinbox entry
+        self.validateGenerateFreq = self.register(self.validateNumericSpinbox)
+        # Custom entry numeric spinbox declaration
+        self.taskGenerateFreqSpinbox = ttk.Spinbox(self.taskStatisticsFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.taskGenerateEvery,
+            validate='key',
+            validatecommand=(self.validateGenerateFreq, '%P')
+        )
+        # Render label and spinbox
+        self.taskScheduleTaskGenerateFreq.grid(row=1, column=0)
+        self.taskGenerateFreqSpinbox.grid(row=1, column=1)
+
+        # Out to P steps in total
+        self.taskScheduleLengthLabel = tk.Label(self.taskStatisticsFrame, text="Timesteps in Schedule:")
+        self.taskScheduleLength = tk.IntVar(value=2000)
+        # Interval validation callback on spinbox entry
+        self.validateScheduleLength = self.register(self.validateNumericSpinbox)
+        # Custom entry numeric spinbox declaration
+        self.taskScheduleLengthSpinbox = ttk.Spinbox(self.taskStatisticsFrame,
+            width=6,
+            from_=1,
+            to=100000,
+            increment=1,
+            textvariable=self.taskScheduleLength,
+            validate='key',
+            validatecommand=(self.validateScheduleLength, '%P')
+        )
+        # Render label and spinbox
+        self.taskScheduleLengthLabel.grid(row=2, column=0)
+        self.taskScheduleLengthSpinbox.grid(row=2, column=1)
+
+        # Generate button
+        self.triggerScheduleGeneration = tk.Button(self.taskStatisticsFrame,
+            command=self.generateTaskSchedule, text="Generate the schedule")
+        self.triggerScheduleGeneration.grid(row=3, column=1)
+        # Build a button to return to the generator configuration page
+        self.taskGenerationReturnButton = tk.Button(self.taskGenerationFrame,
+            command=self.buildTaskGenerationPage, text="Use Live Task Generation")
+        self.taskGenerationReturnButton.grid(row=3, column=1)
+        
+    def generateTaskSchedule(self):
+        fid = filedialog.asksaveasfilename(initialfile="Untitled", filetypes=[("CSV", "*.csv")])
+        batchCount = itertools.count()
+        taskCount = itertools.count()
+        currentStep = next(batchCount)
+        tasksGenEvery = self.taskGenerateEvery.get()
+        tasksPerBatch = self.tasksPerGenerate.get()
+        scheduleLength = self.taskScheduleLength.get()
+        with open(fid, 'w', newline="") as csvfile:
+            # Write the header row
+            taskScheduler = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
+            taskScheduler.writerow(["PickupNode", "DropoffNode", "TimeLimit", "ReleaseTime", "Name"])
+            nodeAvailability = [[node for node, value in nodeDict.items() if value.get() == 1] for key, nodeDict in self.nodeAvailableVarDict.items()]
+            nodeWeights = [[eval(value.get()) for node, value in nodeDict.items() if node in nodeAvailability[0] or node in nodeAvailability[1]] for key, nodeDict in self.nodeWeightVarDict.items()]
+            pp.pprint(nodeAvailability)
+            pp.pprint(nodeWeights)
+            while currentStep*tasksGenEvery < scheduleLength:
+                # Generate another batch of tasks
+                for i in range(1, tasksPerBatch):
+                    taskPickupNode = random.choices(population=nodeAvailability[0], weights=nodeWeights[0], k=1)[0]
+                    taskDropoffNode = random.choices(population=nodeAvailability[1], weights=nodeWeights[1], k=1)[0]
+                    taskTimeLimit = 0
+                    taskReleaseTime = currentStep*tasksGenEvery
+                    taskName = next(taskCount)
+                    taskScheduler.writerow([taskPickupNode, taskDropoffNode, taskTimeLimit, taskReleaseTime, taskName])
+                currentStep = next(batchCount)
 
     def createTaskInformationPane(self):
         # Some things need to be precalculated to inform the user while they make decisions regarding simulation setup
@@ -604,9 +794,9 @@ class simulationConfigManager(tk.Toplevel):
         self.agentAvailabilityTriggerDict = {
             "On Dropoff": "completed",
             "On Demand": "ondemand",
-            # "On Pickup": "onpickup", 
-            # "On Assignment": "onassignment", 
-            # "On Rest": "onrest",
+            "On Pickup": "onpickup", 
+            "On Assignment": "onassignment", 
+            "On Rest": "onrest",
             # "On Recharge": "onrecharge"
         }
 
@@ -892,6 +1082,8 @@ class simulationConfigManager(tk.Toplevel):
         dataPackage["taskGenerationFixedRateMedianTasksPerAgent"] = self.medianOptimalTaskPathLength
         dataPackage["taskGenerationAsAvailableDelayTime"] = self.taskAsAvailableDelayValue.get()
         dataPackage["taskGenerationAsAvailableTrigger"] = self.agentAvailabilityTriggerDict[self.taskAsAvailableTriggerStringvar.get()]
+        dataPackage["tasksAreScheduled"] = self.tasksAreScheduled
+        dataPackage["taskScheduleFile"] = self.taskSchedule
 
         ### Node selection options
         dataPackage["taskNodeWeightDict"] = self.nodeWeightVarDict

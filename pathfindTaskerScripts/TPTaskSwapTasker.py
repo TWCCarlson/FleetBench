@@ -40,7 +40,7 @@ class TPTSTasker:
         return newTaskID
     
     def selectTaskForAgent(self, currentAgent, availableTaskSet=None):
-        # print(f"Fetching new task for agent{currentAgent.numID}")
+        print(f"Fetching new task for agent{currentAgent.numID}")
         validTasks = []
         claimedEndpoints = []
         # The list of claimed endpoints is equivalent to the POIs for tasks that are not unassigned
@@ -98,7 +98,7 @@ class TPTSTasker:
             if occupied:
                 # Try a different task
                 continue
-            # print("\tTask is valid, checking optimality...")
+            # print(f"\tTask {nextBestTask.numID} is valid, checking optimality...")
             if nextBestTask.assignee is not None:
                 # Instance the old data in case it needs to be restored
                 prevAssignee = nextBestTask.assignee
@@ -114,7 +114,9 @@ class TPTSTasker:
                 prevAssignee.pathfinder.invalid = False
                 # self.infoShareManager.handlePathRelease(prevAssigneePath[prevAssigneePathStep-1:], prevAssignee.numID)
                 # prevAssignee.pathfinder.plannedPath = []
-                # print(f"\tFound competitor: {prevAssignee.numID} w/ path length: {prevAssigneePath.index(nextBestTask.pickupNode)-prevAssigneePathStep}")
+                # print(f"\t{currentAgent.numID}:Found competitor: {prevAssignee.numID}:")
+                # print(f"\t\t w/ path: {prevAssigneePath}")
+                # print(f"\t\t w/ path length: {prevAssigneePath.index(nextBestTask.pickupNode)-prevAssigneePathStep}")
                 # Otherwise, try to find a path so that it can be evaluated for fastness
                 newAssigneePickupPath = self.AStar(currentAgent.currentNode, nextBestTask.pickupNode, 0, currentAgent.numID, prevAssignee.numID)
                 if newAssigneePickupPath is False:
@@ -184,11 +186,15 @@ class TPTSTasker:
                     # Agent is slower than the currently assigned agent, so move on
                     continue
             else:
-                # print("There was no competitor...")
+                # print(f"{currentAgent.numID}:There was no competitor...")
                 # Then the new agent can just take the task
                 self.simTaskManager.assignAgentToTask(nextBestTask.numID, currentAgent)
+                # print(f"{currentAgent.numID}: claiming task {nextBestTask.numID}")
                 # Complete the pathfinding operation for the new agent
                 newAssigneePickupPath = self.AStar(currentAgent.currentNode, nextBestTask.pickupNode, 0, currentAgent.numID)
+                if newAssigneePickupPath == False:
+                    self.simTaskManager.unassignAgentFromTask(nextBestTask.numID, currentAgent)
+                    return False
                 newAssigneeDropoffPath = self.AStar(nextBestTask.pickupNode, nextBestTask.dropoffNode, len(newAssigneePickupPath)-1, currentAgent.numID)
                 # Splice the paths
                 if self.simulationSettings["agentMiscOptionTaskInteractCostValue"] == "Pickup/dropoff require step":
@@ -229,43 +235,67 @@ class TPTSTasker:
             # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
             return True
         # Agent should attempt to find a free endpoint (path2)
-        for taskID, task in self.simTaskManager.taskList.items():
-            # print(f"{taskID}>>{task.dropoffNode}vs{currentAgent.currentNode}:{task.dropoffNode == currentAgent.currentNode}?")
-            # print(f"{taskID}>>{task.pickupNode}vs{currentAgent.currentNode}:{task.pickupNode == currentAgent.currentNode}?")
-            # print(f"{taskID}>>Task active:{task.taskStatus}?")
-            if (task.dropoffNode == currentAgent.currentNode or task.pickupNode == currentAgent.currentNode) and task.taskStatus != "completed":
-                # print(f"Agent{currentAgent.numID} is standing on task {taskID}'s endpoint")
-                # The agent is standing on an active task's deposit node
-                # Find the nearest non-task endpoint
-                winner = inf
-                for endpoint in self.infoShareManager.V_ntask:
-                    claimedEndpoints = [path[-1] for agent, path in self.infoShareManager.reservedPaths.items() if (not agent == currentAgent.numID)]
-                    if endpoint in claimedEndpoints:
-                        continue
-                    # Don't use already claimed endpoints
-                    taskDistance = self.infoShareManager.hScores[endpoint][currentAgent.currentNode]
-                    if taskDistance < winner:
-                        winner = taskDistance
-                        bestEndpoint = endpoint
-                # This is the Path2 call
-                newAgentPath = self.AStar(currentAgent.currentNode, bestEndpoint, 0, currentAgent.numID)
-                if newAgentPath == False:
-                    return False
-                self.infoShareManager.handlePathPlanRequest(newAgentPath, currentAgent.numID)
-                currentAgent.pathfinder.plannedPath = newAgentPath
-                currentAgent.pathfinder.currentStep = 1
-                # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
-                return True
+        reservedEndpoints = [path[-1] for agent, path in self.infoShareManager.reservedPaths.items() if (not agent == currentAgent.numID)]
+        taskPickupPoints = [task.pickupNode for taskID, task in self.simTaskManager.taskList.items() if not task.assignee == currentAgent]
+        taskDeliveryPoints = [task.dropoffNode for taskID, task in self.simTaskManager.taskList.items() if not task.assignee == currentAgent]
+        claimedEndpoints = reservedEndpoints + taskPickupPoints + taskDeliveryPoints
+        if currentAgent.currentNode in claimedEndpoints:
+            # Agent is standing on a task or claimed endpoint and needs to move
+            winner = inf
+            for endpoint in self.infoShareManager.V_ntask:
+                if endpoint in claimedEndpoints:
+                    continue
+                hDistance = self.infoShareManager.hScores[endpoint][currentAgent.currentNode]
+                if hDistance < winner:
+                    winner = hDistance
+                    bestEndpoint = endpoint
+            # This is the path2 call
+            newAgentPath = self.AStar(currentAgent.currentNode, bestEndpoint, 0, currentAgent.numID)
+            if newAgentPath == False:
+                return False
+            self.infoShareManager.handlePathPlanRequest(newAgentPath, currentAgent.numID)
+            currentAgent.pathfinder.plannedPath = newAgentPath
+            currentAgent.pathfinder.currentStep = 1
+            # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
+            return True
+        # for taskID, task in self.simTaskManager.taskList.items():
+        #     # print(f"{taskID}>>{task.dropoffNode}vs{currentAgent.currentNode}:{task.dropoffNode == currentAgent.currentNode}?")
+        #     # print(f"{taskID}>>{task.pickupNode}vs{currentAgent.currentNode}:{task.pickupNode == currentAgent.currentNode}?")
+        #     # print(f"{taskID}>>Task active:{task.taskStatus}?")
+        #     if (task.dropoffNode == currentAgent.currentNode or task.pickupNode == currentAgent.currentNode) and task.taskStatus != "completed":
+        #         # print(f"Agent{currentAgent.numID} is standing on task {taskID}'s endpoint")
+        #         # The agent is standing on an active task's deposit node
+        #         # Find the nearest non-task endpoint
+        #         winner = inf
+        #         for endpoint in self.infoShareManager.V_ntask:
+        #             claimedEndpoints = [path[-1] for agent, path in self.infoShareManager.reservedPaths.items() if (not agent == currentAgent.numID)]
+        #             if endpoint in claimedEndpoints:
+        #                 continue
+        #             # Don't use already claimed endpoints
+        #             taskDistance = self.infoShareManager.hScores[endpoint][currentAgent.currentNode]
+        #             if taskDistance < winner:
+        #                 winner = taskDistance
+        #                 bestEndpoint = endpoint
+        #         # This is the Path2 call
+        #         newAgentPath = self.AStar(currentAgent.currentNode, bestEndpoint, 0, currentAgent.numID)
+        #         if newAgentPath == False:
+        #             return False
+        #         self.infoShareManager.handlePathPlanRequest(newAgentPath, currentAgent.numID)
+        #         currentAgent.pathfinder.plannedPath = newAgentPath
+        #         currentAgent.pathfinder.currentStep = 1
+        #         # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
+        #         return True
         # Agent is fine to stay where it is
         # print(f"Agent{currentAgent.numID} is fine to stay where it is")
         if currentAgent.pathfinder is not None:
             stayInPlace = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
             if stayInPlace == False:
+                print("Failed to stay in place.")
                 return False
             self.infoShareManager.handlePathPlanRequest(stayInPlace, currentAgent.numID)
             currentAgent.pathfinder.plannedPath = stayInPlace
             currentAgent.pathfinder.currentStep = 1
-            # print(f"Agent{currentAgent.numID} planned: {stayInPlace}")
+            print(f"Agent{currentAgent.numID} planned: {stayInPlace}")
             return True
         return False
 
@@ -285,6 +315,9 @@ class TPTSTasker:
         while openSet:
             # Get the next best node to explore
             _, __, currentNode, timeDepth = heappop(openSet)
+            # if agentID == 4:
+            #     print(f"Exploring {currentNode} at T+{timeDepth}")
+            #     print("?")
             # print(f"Exploring {currentNode} at T+{timeDepth}")
             # If it is the goal
             if currentNode == targetNode and timeDepth != 0:
@@ -301,7 +334,7 @@ class TPTSTasker:
             neighborNodes = list(self.graphRef.neighbors(currentNode)) + [currentNode]
             for neighborNode in neighborNodes:
                 # if agentID == 1:
-                    # print(f">>>Evaluate {currentNode}->{neighborNode}>>{targetNode}: {timeDepth}")
+                # print(f">>>Evaluate {currentNode}->{neighborNode}>>{targetNode}: {timeDepth}")
                 if not self.infoShareManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, agentID, ignoredAgent) and self.simulationSettings["agentCollisionsValue"] == "Respected":
                     # if agentID == 0:
                         # print(f"\tBlocked...")
@@ -356,28 +389,30 @@ class TPTSTasker:
             currentAgent.pathfinder.currentStep = 1
             # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
             return True
-        for taskID, task in self.simTaskManager.taskList.items():
-            if (task.dropoffNode == currentAgent.currentNode or task.pickupNode == currentAgent.currentNode) and task.taskStatus != "completed":
-                # The agent is standing on an active task's deposit node
-                # Find the nearest non-task endpoint
-                winner = inf
-                # Don't use already claimed endpoints
-                claimedEndpoints = [path[-1] for agent, path in self.infoShareManager.reservedPaths.items() if (not agent == currentAgent.numID)]
-                for endpoint in self.infoShareManager.V_ntask:
-                    if endpoint in claimedEndpoints:
-                        continue
-                    taskDistance = self.infoShareManager.hScores[endpoint][currentAgent.currentNode]
-                    if taskDistance < winner:
-                        winner = taskDistance
-                        bestEndpoint = endpoint
-                # This is the Path2 call
-                newAgentPath = self.AStar(currentAgent.currentNode, bestEndpoint, 0, currentAgent.numID)
-                if newAgentPath == False:
-                    return False
-                self.infoShareManager.handlePathPlanRequest(newAgentPath, currentAgent.numID)
-                currentAgent.pathfinder.plannedPath = newAgentPath
-                currentAgent.pathfinder.currentStep = 1
-                return bestEndpoint
+        # Agent should attempt to find a free endpoint (path2)
+        reservedEndpoints = [path[-1] for agent, path in self.infoShareManager.reservedPaths.items() if (not agent == currentAgent.numID)]
+        taskPickupPoints = [task.pickupNode for taskID, task in self.simTaskManager.taskList.items() if not task.assignee == currentAgent]
+        taskDeliveryPoints = [task.dropoffNode for taskID, task in self.simTaskManager.taskList.items() if not task.assignee == currentAgent]
+        claimedEndpoints = reservedEndpoints + taskPickupPoints + taskDeliveryPoints
+        if currentAgent.currentNode in claimedEndpoints:
+            # Agent is standing on a task or claimed endpoint and needs to move
+            winner = inf
+            for endpoint in self.infoShareManager.V_ntask:
+                if endpoint in claimedEndpoints:
+                    continue
+                hDistance = self.infoShareManager.hScores[endpoint][currentAgent.currentNode]
+                if hDistance < winner:
+                    winner = hDistance
+                    bestEndpoint = endpoint
+            # This is the path2 call
+            newAgentPath = self.AStar(currentAgent.currentNode, bestEndpoint, 0, currentAgent.numID)
+            if newAgentPath == False:
+                return False
+            self.infoShareManager.handlePathPlanRequest(newAgentPath, currentAgent.numID)
+            currentAgent.pathfinder.plannedPath = newAgentPath
+            currentAgent.pathfinder.currentStep = 1
+            # print(f"Agent{currentAgent.numID} planned: {newAgentPath}")
+            return True
         # Agent is fine to stay where it is
         if currentAgent.pathfinder is not None:
             stayInPlace = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
