@@ -353,7 +353,7 @@ class simulationConfigManager(tk.Toplevel):
     def buildTaskSchedulePage(self, csvData):
         # Build a display frame for the schedule
         # self.taskScheduleDisplayFrame = tk.Frame(self.taskGenerationFrame)
-        self.taskScheduleDisplayHeaderFrame = tk.LabelFrame(self.taskGenerationFrame, text="First 300 tasks")
+        self.taskScheduleDisplayHeaderFrame = tk.LabelFrame(self.taskGenerationFrame, text="First 100 tasks")
         self.taskScheduleDisplayHeaderFrame.grid(row=1, column=0, sticky="ew")
         self.taskScheduleDisplayScrollFrame = tk_e.VerticalScrolledFrame(self.taskGenerationFrame)
         self.taskScheduleDisplayFrame = self.taskScheduleDisplayScrollFrame.interior
@@ -392,7 +392,7 @@ class simulationConfigManager(tk.Toplevel):
             tk.Label(self.taskScheduleDisplayFrame, text=row[2]).grid(row=i, column=2, sticky=tk.W+tk.E)
             tk.Label(self.taskScheduleDisplayFrame, text=row[3]).grid(row=i, column=3, sticky=tk.W+tk.E)
             tk.Label(self.taskScheduleDisplayFrame, text=row[4]).grid(row=i, column=4, sticky=tk.W+tk.E)
-            if i > 300:
+            if i > 100:
                 # There is a size limitation of the canvas (xd)
                 break
 
@@ -490,8 +490,8 @@ class simulationConfigManager(tk.Toplevel):
             taskScheduler.writerow(["PickupNode", "DropoffNode", "TimeLimit", "ReleaseTime", "Name"])
             nodeAvailability = [[node for node, value in nodeDict.items() if value.get() == 1] for key, nodeDict in self.nodeAvailableVarDict.items()]
             nodeWeights = [[eval(value.get()) for node, value in nodeDict.items() if node in nodeAvailability[0] or node in nodeAvailability[1]] for key, nodeDict in self.nodeWeightVarDict.items()]
-            pp.pprint(nodeAvailability)
-            pp.pprint(nodeWeights)
+            # pp.pprint(nodeAvailability)
+            # pp.pprint(nodeWeights)
             while currentStep*tasksGenEvery < scheduleLength:
                 # Generate another batch of tasks
                 for i in range(1, tasksPerBatch):
