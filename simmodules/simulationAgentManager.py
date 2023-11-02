@@ -82,6 +82,7 @@ class simAgentManager:
             position = dataPackage[agent]["position"]
             orientation = dataPackage[agent]["orientation"]
             className = dataPackage[agent]["className"]
+            renderColor = dataPackage[agent]["renderColor"]
             if "currentTask" in dataPackage[agent]:
                 currentTask = dataPackage[agent]["currentTask"]
                 taskStatus = dataPackage[agent]["taskStatus"]
@@ -94,7 +95,8 @@ class simAgentManager:
                 orientation=orientation, 
                 className=className,
                 currentTask=currentTask,
-                taskStatus=taskStatus
+                taskStatus=taskStatus,
+                renderColor=renderColor
                 )
         logging.info("All agents ported from main session state into simulation state.")
 
@@ -178,6 +180,7 @@ class simAgentClass:
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
         self.taskStatus = kwargs.get("taskStatus")
+        self.renderColor = kwargs.get("renderColor", None)
         self.pathfinder = None
         self.targetNode = None
         self.actionTaken = False

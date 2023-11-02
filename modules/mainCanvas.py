@@ -282,7 +282,8 @@ class mainCanvas(tk.Canvas):
         # Create a new agent, exposing style options
         agentPos = renderData["position"] # req'd
         agentNumID = renderData["agentNumID"] # req'd
-        agentColor = renderData.get("color", None) #optional
+        defaultColor = self.agentManager.agentList[agentNumID].renderColor
+        agentColor = renderData.get("color", defaultColor) #optional
         agentOrientation = renderData.get("orientation", None) #optional
 
         # Check if there is an available agent object
@@ -739,7 +740,8 @@ class mainCanvas(tk.Canvas):
             nodeGraphPosX, nodeGraphPosY = self.nodeToCanvasTile(agent.position)
             agentOrientation = agent.orientation
             agentID = agent.numID
-            self.createAgent(agent.position, agentID, agentOrientation=agentOrientation)
+            agentColor = self.agentManager.agentList[agentID].renderColor
+            self.createAgent(agent.position, agentID, agentColor=agentColor, agentOrientation=agentOrientation)
         logging.info(f"Rendered all agents onto Canvas '{self.ID}'")
 
     def createAgent(self, agentPosition, agentID, agentColor=None, agentOrientation=None):

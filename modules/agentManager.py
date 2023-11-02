@@ -19,6 +19,12 @@ class agentManager:
         self.currentAgent = []
         logging.debug("Class 'agentManager' initialized.")
 
+        self.colorList = [
+            '#dc143c', '#0000ff', '#ff00ff', '#1e90ff', '#90ee90', '#ff1493', '#7b68ee', '#ee82ee', '#ffc0cb',
+            '#696969', "#7f0000", '#006400', '#808000', '#483d8b', '#008b8b', '#4682b4', '#000080', '#d2691e', '#9acd32',
+            '#8b008b', '#b03060', '#ff4500', '#ffa500', '#ffff00', '#deb887', '#40e0d0', '#00ff00', '#8a2be2', '#00ff7f',
+            ]
+
     def createNewAgent(self, **kwargs):
         """
             Create a new instance of the Agent class, using collected properties from the generation UI
@@ -41,8 +47,11 @@ class agentManager:
             ID = str(dictLength)
             logging.debug(f"Request does not contain an ID. Agent was automatically assigned ID '{ID}'")
 
+        # Get the next render color
+        renderColor = self.colorList[dictLength % len(self.colorList)]
+
         # Create a new agent and add it to the manager's list
-        self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = dictLength)
+        self.latestAgent = agentClass(self, **kwargs, ID=ID, numID = dictLength, renderColor=renderColor)
         self.agentList[dictLength] = self.latestAgent
         self.agentDict[ID] = self.latestAgent
         logging.info(f"Agent added to the dict of agents.")
@@ -133,7 +142,8 @@ class agentManager:
                 "orientation": self.agentList[agent].orientation,
                 "className": self.agentList[agent].className,
                 "currentTask": currentTask,
-                "taskStatus": self.agentList[agent].taskStatus
+                "taskStatus": self.agentList[agent].taskStatus,
+                "renderColor": self.agentList[agent].renderColor
             }
             dataPackage[self.agentList[agent].numID] = agentData
             logging.debug(f"Packaged agentData: {agentData}")
@@ -155,6 +165,7 @@ class agentClass:
         self.className = kwargs.get("className")
         self.currentTask = kwargs.get("currentTask")
         self.taskStatus = kwargs.get("taskStatus", "unassigned")
+        self.renderColor = kwargs.get("renderColor", None)
 
         # Add the agent to the position list for reference in tileHover
         self.parent.agentPositionList[str(self.position)] = [self.ID, self.numID]
