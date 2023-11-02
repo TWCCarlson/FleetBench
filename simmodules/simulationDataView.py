@@ -212,6 +212,7 @@ class simDataView(tk.Frame):
             self.parent.simMainView.simCanvas.handleRenderQueue()
             if agentRef.pathfinder:
                 print(agentRef.pathfinder.plannedPath)
+                print(agentRef.pathfinder.currentStep)
                 print(agentRef.currentTask.pickupNode)
                 print(agentRef.currentTask.dropoffNode)
             # Update agentManager's currentAgent prop

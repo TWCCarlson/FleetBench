@@ -37,9 +37,11 @@ class WHCAstarMover:
         # Check for conflicts
         vertexDict, edgeDict = self.comprehendAgentMotions()
         hasConflict = self.checkForConflicts(vertexDict, edgeDict)
-        conflictCount = 0
+        if hasConflict:
+            conflictCount = 1
+        else:
+            conflictCount = 0
         while hasConflict:
-            conflictCount = conflictCount + 1 
             # If there is a conflict, cycle the resolver until there isn't
             vertexDict, edgeDict = self.comprehendAgentMotions()
             hasConflict = self.checkForConflicts(vertexDict, edgeDict)
@@ -56,6 +58,7 @@ class WHCAstarMover:
 
         # Reset the agent motion queue
         self.agentMotionDict = {}
+        return conflictCount
 
     def comprehendAgentMotions(self):
         vertexDict = {}
@@ -68,7 +71,7 @@ class WHCAstarMover:
             # print(f"{agentID}: {agentMove}")
 
             # Crashed agents need priority and a replan
-            if agentMove == "crash":
+            if agentMove == "crash" or agentMove[1] == "crash":
                 # Agent is completely blocked in, unable to avoid collision via reservation table
                 # Examine neighbors to find the ideal movement for the agent
                 currentNode = self.agentManager.agentList[agentID].currentNode
@@ -113,7 +116,7 @@ class WHCAstarMover:
         for edge, agents in edgeDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                # print("EDGE CONFLICT")
+                print("EDGE CONFLICT")
                 self.resolveEdgeConflict(agents[0], agents[1])
                 # print(f"New motions: {self.agentMotionDict}")
                 return True
@@ -121,7 +124,7 @@ class WHCAstarMover:
         for node, agents in vertexDict.items():
             if len(agents) > 1:
                 self.conflictFound = True
-                # print("VERTEX CONFLICT")
+                print("VERTEX CONFLICT")
                 self.resolveNodeConflict(agents)
                 # print(f"New motions: {self.agentMotionDict}")
                 return True

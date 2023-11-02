@@ -19,11 +19,6 @@ class WHCAstarTasker:
         self.simTaskManager = simTaskManager
         self.simulationSettings = simulationSettings
 
-        self.processNodeList()
-
-    def processNodeList(self):
-        pass
-
     def generateTask(self, timeStamp=0):
         pickupNode = random.choice(list(self.pickupNodes.keys()))
         depositNode = random.choice(list(self.depositNodes.keys()))
@@ -51,7 +46,7 @@ class WHCAstarTasker:
         return None
 
     def AStar(self, sourceNode, targetNode, startTime, agentID, ignoredAgent=None):
-        # print(f"{agentID} seeks {sourceNode}->{targetNode} from relative T{startTime}, ignoring {ignoredAgent}")
+        print(f"{agentID} seeks {sourceNode}->{targetNode} from relative T{startTime}, ignoring {ignoredAgent}")
         weight = 1
         gScore = {}
         fScore = {}
@@ -66,7 +61,7 @@ class WHCAstarTasker:
         while openSet:
             # Get the next best node to explore
             _, __, currentNode, timeDepth = heappop(openSet)
-            # print(f"Exploring {currentNode} at T+{timeDepth}")
+            print(f"Exploring {currentNode} at T+{timeDepth}")
             # If it is the goal
             if currentNode == targetNode and timeDepth != 0 or timeDepth == self.simAgentManager.agentList[agentID].pathfinder.windowSize:
                 # Reconstruct the path from best parents
@@ -83,11 +78,11 @@ class WHCAstarTasker:
             neighborNodes = list(self.graphRef.neighbors(currentNode)) + [currentNode]
             for neighborNode in neighborNodes:
                 # if agentID == 1:
-                    # print(f">>>Evaluate {currentNode}->{neighborNode}>>{targetNode}: {timeDepth}")
+                print(f">>>Evaluate {currentNode}->{neighborNode}>>{targetNode}: {timeDepth}")
                 if not self.infoShareManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, agentID) and self.simulationSettings["agentCollisionsValue"] == "Respected":
                     # if agentID == 0:
                         # print(f"\tBlocked...")
-                    # print(f"{agentID}: {neighborNode} Not eligible")
+                    print(f"{agentID}: {neighborNode} Not eligible")
                     # Node is blocked, but if its an agent we want to ignore that is fine
                     continue
                 # Node g scores increase by "weight" per step
@@ -112,7 +107,23 @@ class WHCAstarTasker:
     def handleAimlessAgent(self, currentAgent):
         # Default behavior for agents with no objective is to wait in place
         # It is the job of the algorithm to deal with agents when they cannot
-        # currentAgent.pathfinder.__reset__()
-        currentAgent.pathfinder.plannedPath = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
-        currentAgent.pathfinder.currentStep = 1
-        return currentAgent.currentNode
+        
+        # print(f"handle aimless: {currentAgent.numID}")
+        # plan = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
+        # if plan is False:
+        #     currentAgent.pathfinder.plannedPath = [currentAgent.currentNode, "crash"]
+        # else:
+        #     currentAgent.pathfinder.plannedPath = plan
+        # print(currentAgent.pathfinder.plannedPath)
+        # currentAgent.pathfinder.currentStep = 1
+        # return currentAgent.pathfinder.plannedPath
+
+        # Pick a random non-task node to try and get to
+        # print([node for node in self.graphRef.nodes(data=True)])
+        targetNode = random.choice([node[0] for node in self.graphRef.nodes(data=True) if node[1]["type"] in ["rest", "charge"]])
+
+        # print(targetNode)
+        currentAgent.targetNode = targetNode
+        currentAgent.pathfinder.targetNode = targetNode
+        currentAgent.pathfinder.__reset__()
+        return targetNode

@@ -222,6 +222,7 @@ class simAgentClass:
                 self.targetNode = None
                 result = "completed"
         elif self.currentTask is None:
+            self.targetNode = None
             # No action is needed
             return "rest"
 
@@ -248,7 +249,6 @@ class simAgentClass:
                 None: None,
             }
             return self.targetNode
-        
 
     def highlightAgent(self, multi):
         # Have the agent request highlighting from the main canvas
@@ -282,7 +282,7 @@ class simAgentClass:
             Move the agent to the targetNode, to be done only after the move is valid
         """
         logging.debug(f"Moving agent '{self.ID}' to node '{targetNode}'")
-        print(f"Moving agent '{self.ID}' to node '{targetNode}'")
+        # print(f"Moving agent '{self.ID}' to node '{targetNode}'")
         # self.mainViewRef.simCanvas.requestRender("agent", "move", {"agentNumID": self.numID, "sourceNodeID": self.currentNode, "targetNodeID": targetNode})
         # self.mainViewRef.simCanvas.handleRenderQueue()
         if isinstance(targetNode, str):

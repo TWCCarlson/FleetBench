@@ -198,7 +198,7 @@ class WHCAstarPathfinder:
         # Recursively work through the queue 
         if self.openSet:
             _, __, currentNode, timeDepth = heappop(self.openSet)
-            if currentNode == self.targetNode or timeDepth == self.windowSize:
+            if (currentNode == self.targetNode or timeDepth == self.windowSize) and timeDepth != 0:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)
@@ -253,7 +253,7 @@ class WHCAstarPathfinder:
             # Indicate tile is explored
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
-            if currentNode == self.targetNode or timeDepth == self.windowSize:
+            if (currentNode == self.targetNode or timeDepth == self.windowSize) and timeDepth != 0:
                 # Return successfully, with the reconstructed path if the currentNode is the targetNode
                 path = [currentNode]
                 parentNodeTime = self.cameFrom.get((currentNode, timeDepth), None)

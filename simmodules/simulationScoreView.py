@@ -40,14 +40,14 @@ class simScoreView(tk.Frame):
         self.scoreAlgorithmText = tk.Label(self, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"), text="Algo")
         self.scoreAlgorithmText.grid(row=0, column=1, sticky=tk.E)
         self.flatStatsFrame = tk.Frame(self)
-        self.flatStatsFrame.grid(row=1, column=0, sticky="ew")
+        self.flatStatsFrame.grid(row=1, column=0, sticky="ew", columnspan=2)
         self.separator = ttk.Separator(self, orient="horizontal")
         self.separator.grid(row=2, column=0, columnspan=50)
         # Table items
         self.timeTableNameHeader = tk.Label(self, text="Completed Task Stats . . .", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
         self.timeTableNameHeader.grid(row=3, column=0, sticky=tk.W+tk.E)
         self.tableStatsFrame = tk.Frame(self)
-        self.tableStatsFrame.grid(row=4, column=0, sticky="ew")
+        self.tableStatsFrame.grid(row=4, column=0, sticky="ew", columnspan=2)
 
         # Number of tasks completed
         self.taskCompletionLabel = tk.Label(self.flatStatsFrame, text="Task Completion Count:", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
@@ -57,21 +57,28 @@ class simScoreView(tk.Frame):
         self.taskCompletionText = tk.Label(self.flatStatsFrame, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"), textvariable=self.taskCompletionValue)
         self.taskCompletionText.grid(row=0, column=1, sticky=tk.W)
 
+        # Steps taken
+        self.simulationStepLabel = tk.Label(self.flatStatsFrame, text="Time Steps Elapsed:", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
+        self.simulationStepLabel.grid(row=1, column=0, sticky=tk.E)
+        # Dynamic text linked to the stepview
+        self.simulationStepText = tk.Label(self.flatStatsFrame, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"), textvariable=self.parent.simStepView.simStepCountTextValue)
+        self.simulationStepText.grid(row=1, column=1, sticky=tk.W)
+
         # Conflict count
         self.conflictCountLabel = tk.Label(self.flatStatsFrame, text="Conflict Count:", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
-        self.conflictCountLabel.grid(row=1, column=0, sticky=tk.E)
+        self.conflictCountLabel.grid(row=0, column=2, sticky=tk.E)
         # Dynamic text needs a stringvar
         self.conflictCountValue = tk.StringVar(value="0")
         self.conflictCountText = tk.Label(self.flatStatsFrame, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"), textvariable=self.conflictCountValue)
-        self.conflictCountText.grid(row=1, column=1, sticky=tk.W)
+        self.conflictCountText.grid(row=0, column=3, sticky=tk.W)
 
         # Pathfind failures
         self.pathfindFailCountLabel = tk.Label(self.flatStatsFrame, text="Pathfinder Fails:", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
-        self.pathfindFailCountLabel.grid(row=2, column=0, sticky=tk.E)
+        self.pathfindFailCountLabel.grid(row=1, column=2, sticky=tk.E)
         # Dynamic text needs a stringvar
         self.pathfindFailCountValue = tk.StringVar(value="?")
         self.pathfindFailCountText = tk.Label(self.flatStatsFrame, font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"), textvariable=self.pathfindFailCountValue)
-        self.pathfindFailCountText.grid(row=2, column=1, sticky=tk.W)
+        self.pathfindFailCountText.grid(row=1, column=3, sticky=tk.W)
 
         ### Table items
         
