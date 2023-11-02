@@ -337,7 +337,7 @@ class TokenPassingPathfinder:
             # Indicate tile is explored
             self.mapCanvas.requestRender("highlight", "delete", {"highlightType": "openSet"})
             self.mapCanvas.requestRender("highlight", "new", {"targetNodeID": currentNode, "highlightType": "pathfindHighlight", "multi": True})
-            if currentNode == self.targetNode:
+            if currentNode == self.targetNode and timeDepth != 0:
                 # If the found target node is the pickup node
                 if self.targetNode == self.pickupNode:
                     self.foundPickupNode(currentNode=currentNode, timeDepth=timeDepth)
@@ -384,7 +384,7 @@ class TokenPassingPathfinder:
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it
-                    if neighborNode not in self.fScore:
+                    if (neighborNode, timeDepth+1) not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
                     # Update the fScore of the neighbor node
                     self.fScore[(neighborNode, timeDepth+1)] = node_fScore

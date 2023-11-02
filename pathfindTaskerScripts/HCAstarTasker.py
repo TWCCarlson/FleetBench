@@ -24,7 +24,7 @@ class HCAstarTasker:
     def processNodeList(self):
         pass
 
-    def generateTask(self):
+    def generateTask(self, timeStamp=0):
         pickupNode = random.choice(list(self.pickupNodes.keys()))
         depositNode = random.choice(list(self.depositNodes.keys()))
         timeLimit = 0
@@ -32,14 +32,15 @@ class HCAstarTasker:
         taskStatus = "unassigned"
 
         newTaskID = self.simTaskManager.createNewTask(pickupNode=pickupNode, 
-            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus)
+            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus,
+            timeStamp=timeStamp)
         return newTaskID
     
-    def selectTaskForAgent(self, currentAgent):
+    def selectTaskForAgent(self, currentAgent, timeStamp=0):
         for taskID, task in self.simTaskManager.taskList.items():
             if task.assignee is None and task.taskStatus == "unassigned":
                 # Task is eligible for assignment
-                self.simTaskManager.assignAgentToTask(taskID, currentAgent)
+                self.simTaskManager.assignAgentToTask(taskID, currentAgent, timeStamp)
                 taskRef = self.simTaskManager.taskList[taskID]
                 self.canvasRef.requestRender("highlight", "new", {"targetNodeID": taskRef.pickupPosition,
                     "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})

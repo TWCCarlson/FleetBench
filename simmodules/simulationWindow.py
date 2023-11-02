@@ -5,6 +5,7 @@ from simmodules.simulationInfoBox import simInfoBox
 from simmodules.simulationControlPanel import simControlPanel
 from simmodules.simulationDataView import simDataView
 from simmodules.simulationStepView import simStepView
+from simmodules.simulationScoreView import simScoreView
 
 class simulationWindow(tk.Toplevel):
     # Window for displaying the current state of simulation
@@ -44,3 +45,6 @@ class simulationWindow(tk.Toplevel):
         # Simulation Agent and Task display
         self.simDataView = simDataView(self, self.rightPanel)
         logging.info("Simulation Component class 'simDataView' instantiated successfully.")
+
+        self.simScoreView = simScoreView(self, self.rightPanel)
+        logging.info("Simulation Component class 'simScore' instantiated successfully.")

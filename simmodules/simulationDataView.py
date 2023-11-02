@@ -27,7 +27,7 @@ class simDataView(tk.Frame):
         logging.debug("Simulation Data View Containing Frame constructed.")
 
         # Render frame
-        self.grid(row=2, column=0, sticky="ew")
+        self.grid(row=2, column=0, sticky="news")
         self.columnconfigure(0, weight=1)
 
         self.createTreeViewNotebook()

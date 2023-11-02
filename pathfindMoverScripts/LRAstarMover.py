@@ -36,7 +36,7 @@ class LRAstarMover:
         vertexDict, edgeDict = self.comprehendAgentMotions()
         conflicts = self.checkForConflicts(vertexDict, edgeDict)
         if conflicts is None and desiredMove is not "crash":
-            if "agent" not in self.mapGraph.nodes(data=True)[desiredMove[1]]:
+            if "agent" not in self.mapGraph.nodes(data=True)[desiredMove[1]] or agent == self.mapGraph.nodes(data=True)[desiredMove[1]]["agent"]:
                 self.simCanvasRef.requestRender("agent", "move", {"agentNumID": agent.numID, 
                     "sourceNodeID": agent.currentNode, "targetNodeID": self.agentMotionDict[agent.numID][1]})
                 agent.executeMove(self.agentMotionDict[agent.numID][1])

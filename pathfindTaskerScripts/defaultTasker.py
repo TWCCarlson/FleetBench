@@ -24,7 +24,7 @@ class defaultTasker:
     def processNodeList(self):
         pass
 
-    def generateTask(self):
+    def generateTask(self, timeStamp=0):
         pickupNode = random.choice(list(self.pickupNodes.keys()))
         depositNode = random.choice(list(self.depositNodes.keys()))
         timeLimit = 0
@@ -32,14 +32,15 @@ class defaultTasker:
         taskStatus = "unassigned"
 
         newTaskID = self.simTaskManager.createNewTask(pickupNode=pickupNode, 
-            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus)
+            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus,
+            timeStamp=timeStamp)
         return newTaskID
     
-    def selectTaskForAgent(self, currentAgent):
+    def selectTaskForAgent(self, currentAgent, timeStamp=0):
         for taskID, task in self.simTaskManager.taskList.items():
             if task.assignee is None and task.taskStatus == "unassigned":
                 # Task is eligible for assignment
-                self.simTaskManager.assignAgentToTask(taskID, currentAgent)
+                self.simTaskManager.assignAgentToTask(taskID, currentAgent, timeStamp)
                 taskRef = self.simTaskManager.taskList[taskID]
                 self.canvasRef.requestRender("highlight", "new", {"targetNodeID": taskRef.pickupPosition,
                     "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(taskRef.numID)+"Highlight"]})
@@ -65,7 +66,7 @@ class defaultTasker:
         while openSet:
             # Get the next best node to explore
             _, __, currentNode, timeDepth = heappop(openSet)
-            # print(f"Exploring {currentNode} at T+{timeDepth}")
+            # print(f"Exploring {currentNode} at T+{timeDepth}>>{targetNode}")
             # If it is the goal
             if currentNode == targetNode and timeDepth != 0:
                 # Reconstruct the path from best parents
@@ -80,14 +81,6 @@ class defaultTasker:
             # If not, examine successors
             neighborNodes = list(self.graphRef.neighbors(currentNode)) + [currentNode]
             for neighborNode in neighborNodes:
-                # if agentID == 1:
-                    # print(f">>>Evaluate {currentNode}->{neighborNode}>>{targetNode}: {timeDepth}")
-                if not self.infoShareManager.evaluateNodeEligibility(timeDepth, neighborNode, currentNode, agentID) and self.simulationSettings["agentCollisionsValue"] == "Respected":
-                    # if agentID == 0:
-                        # print(f"\tBlocked...")
-                    # print(f"{agentID}: {neighborNode} Not eligible")
-                    # Node is blocked, but if its an agent we want to ignore that is fine
-                    continue
                 # Node g scores increase by "weight" per step
                 est_gScore = gScore[(currentNode, timeDepth)] + weight
                 # If this estimated gScore is an improvement over the existing value (default infinity for unexpanded nodes)
@@ -112,5 +105,6 @@ class defaultTasker:
         # It is the job of the algorithm to deal with agents when they cannot
         # currentAgent.pathfinder.__reset__()
         currentAgent.pathfinder.plannedPath = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
+        # print(f"found path for aimless agent {currentAgent}")
         currentAgent.pathfinder.currentStep = 1
         return currentAgent.currentNode

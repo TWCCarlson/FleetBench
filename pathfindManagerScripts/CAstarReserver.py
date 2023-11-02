@@ -52,14 +52,14 @@ class CAstarReserver:
             edgeReserved = self.getEdgeState(timeDepth + self.currentDepth, sourceNode, targetNode, agentID)
             nodeReserved = self.getNodeState(timeDepth + self.currentDepth + 1, targetNode, agentID)
         if not nodeReserved and not edgeReserved:
-            # print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
+            print(f"{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is accessible.")
             # Node is occupied and ineligible for use in pathfinding
             return True
         elif nodeReserved:
-            # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
+            print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is NODE BLOCKED.")
             return False
         elif edgeReserved:
-            # print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
+            print(f"<<<{targetNode} in {timeDepth} from now ({timeDepth+self.currentDepth}) is EDGE BLOCKED")
             return False
         
     def evaluateNodeOverwritability(self, timeDepth, targetNode, sourceNode, agentID, agentPriority):
@@ -166,12 +166,12 @@ class CAstarReserver:
         reserver = self.reservationTable[timeStep].nodes[node]["Reserved"]
         # print(f"Node: {self.reservationTable[timeStep].nodes[node]['Reserved']}; {bool(self.reservationTable[timeStep].nodes[node]['Reserved'])}")
         if reserver == str(agentID):
-            # print("Node reserved by self.")
+            print("Node reserved by self.")
             return False
         elif reserver == False:
             return False
         else:
-            # print("Node reserved by another.")
+            print(f"Node reserved by another: {reserver}")
             return True
         
     def getNodeReserver(self, timeStep, node):

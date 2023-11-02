@@ -195,7 +195,7 @@ class simAgentClass:
             "E" : 3
         }
 
-    def taskInteraction(self, targetNode):
+    def taskInteraction(self, targetNode, timeStamp=None):
         # Called when the agent is sharing a node with its task target node
         if self.currentNode == targetNode and self.currentTask is not None:
             targetNodeIDDict = {
@@ -208,10 +208,12 @@ class simAgentClass:
                 # Update task status fields
                 self.taskStatus = "pickedUp"
                 self.currentTask.taskStatus = "pickedUp"
+                self.currentTask.serviceStartTime = timeStamp
                 result = "pickedUp"
             elif action == "dropoff" and self.taskStatus == "pickedUp":
                 self.taskStatus = "unassigned"
                 self.currentTask.taskStatus = "completed"
+                self.currentTask.serviceCompleteTime = timeStamp
                 self.currentTask.assignee = None
                 self.currentTask = None
                 self.targetNode = None

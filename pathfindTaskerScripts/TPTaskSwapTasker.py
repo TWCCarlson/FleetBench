@@ -27,7 +27,7 @@ class TPTSTasker:
     def processNodeList(self):
         pass
 
-    def generateTask(self):
+    def generateTask(self, timeStamp=0):
         pickupNode = random.choice(list(self.pickupNodes.keys()))
         depositNode = random.choice(list(self.depositNodes.keys()))
         timeLimit = 0
@@ -35,11 +35,12 @@ class TPTSTasker:
         taskStatus = "unassigned"
 
         newTaskID = self.simTaskManager.createNewTask(pickupNode=pickupNode, 
-            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus)
+            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus,
+            timeStamp=timeStamp)
         # print(f">>>Created new task: {newTaskID}")
         return newTaskID
     
-    def selectTaskForAgent(self, currentAgent, availableTaskSet=None):
+    def selectTaskForAgent(self, currentAgent, availableTaskSet=None, timeStamp=0):
         print(f"Fetching new task for agent{currentAgent.numID}")
         validTasks = []
         claimedEndpoints = []
@@ -159,7 +160,7 @@ class TPTSTasker:
                     # The replaced agent now needs a new task
                     # print(f">>> Stole task from {prevAssignee.numID}, seeking replacement task...")
                     # print(f"\t...{availableTaskSet}")
-                    if self.selectTaskForAgent(prevAssignee, deepcopy(availableTaskSet)):
+                    if self.selectTaskForAgent(prevAssignee, availableTaskSet=deepcopy(availableTaskSet)):
                         # print(f"<<< gave {prevAssignee.numID} something to do :)")
                         return nextBestTask.numID
                     else:
@@ -188,12 +189,13 @@ class TPTSTasker:
             else:
                 # print(f"{currentAgent.numID}:There was no competitor...")
                 # Then the new agent can just take the task
-                self.simTaskManager.assignAgentToTask(nextBestTask.numID, currentAgent)
+                self.simTaskManager.assignAgentToTask(nextBestTask.numID, currentAgent, timeStamp)
                 # print(f"{currentAgent.numID}: claiming task {nextBestTask.numID}")
                 # Complete the pathfinding operation for the new agent
                 newAssigneePickupPath = self.AStar(currentAgent.currentNode, nextBestTask.pickupNode, 0, currentAgent.numID)
                 if newAssigneePickupPath == False:
                     self.simTaskManager.unassignAgentFromTask(nextBestTask.numID, currentAgent)
+                    nextBestTask.serviceAssignTime = None
                     return False
                 newAssigneeDropoffPath = self.AStar(nextBestTask.pickupNode, nextBestTask.dropoffNode, len(newAssigneePickupPath)-1, currentAgent.numID)
                 # Splice the paths
@@ -290,12 +292,12 @@ class TPTSTasker:
         if currentAgent.pathfinder is not None:
             stayInPlace = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
             if stayInPlace == False:
-                print("Failed to stay in place.")
+                # print("Failed to stay in place.")
                 return False
             self.infoShareManager.handlePathPlanRequest(stayInPlace, currentAgent.numID)
             currentAgent.pathfinder.plannedPath = stayInPlace
             currentAgent.pathfinder.currentStep = 1
-            print(f"Agent{currentAgent.numID} planned: {stayInPlace}")
+            # print(f"Agent{currentAgent.numID} planned: {stayInPlace}")
             return True
         return False
 
@@ -368,6 +370,9 @@ class TPTSTasker:
     def handleAimlessAgent(self, currentAgent):
         # An agent is aimless if it does not have a target node (no task assigned)
         # In Token Passing, aimless agents need to make sure they are not on top of a task endpoint
+        if currentAgent.pathfinder.returnNextMove() is not None:
+            # Let the agent keep going
+            return
         if currentAgent.currentNode not in self.infoShareManager.V_endpoint:
             # print(f"Agent{currentAgent.numID} is not in an endpoint, finding nearest.")
             # Agent is not in an endpoint, needs to move to neareset one

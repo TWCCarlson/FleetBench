@@ -62,7 +62,7 @@ class simTaskManager:
         self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
         self.parent.parent.simulationWindow.simDataView.updateTaskTreeView()
 
-    def assignAgentToTask(self, taskID, agentRef):
+    def assignAgentToTask(self, taskID, agentRef, timeStamp=None):
         # Fetch task object
         task = self.taskList[taskID]
 
@@ -72,6 +72,8 @@ class simTaskManager:
         agentRef.targetNode = None
         task.assignee = agentRef
         task.taskStatus = "retrieving"
+        if timeStamp is not None:
+            task.serviceAssignTime = timeStamp
 
         # Update the treeView
         self.parent.parent.simulationWindow.simDataView.updateAgentTreeView()
@@ -194,6 +196,10 @@ class simTaskClass:
         self.timeLimit = kwargs.get("timeLimit", 0)
         self.assignee = kwargs.get("assignee", None)
         self.taskStatus = kwargs.get("taskStatus", "unassigned")
+        self.createTime = kwargs.get("timeStamp", 0)
+        self.serviceAssignTime = None
+        self.serviceStartTime = None
+        self.serviceCompleteTime = None
         # Allow passing positions (tuples) or nodes (strings)
         if kwargs.get("pickupPosition"):
             self.pickupPosition = kwargs.get("pickupPosition")      # Expects Tuple

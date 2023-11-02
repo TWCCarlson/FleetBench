@@ -29,6 +29,7 @@ from copy import deepcopy
 import sys
 import traceback
 import csv
+import os
 
 class simProcessor:
     def __init__(self, parent, simulationSettings):
@@ -194,14 +195,16 @@ class simProcessor:
             self.agentMovementManager = defaultAgentMover(self.simCanvasRef, self.simGraph, self.infoShareManager, self.simAgentManagerRef, self.simTaskManagerRef, self.simCanvasRef)
 
         # Simulation end state trigger values
+        self.tasksCompleted = 0
+        self.stepCompleted = 0
+        self.conflicts = 0
+        self.pathfindFailures = 0
         simEndTriggerData = simulationSettings["simulationEndConditions"]
         # pp.pprint(simulationSettings["simulationEndConditions"])
         endOnTaskCount = simEndTriggerData["simulationEndOnTaskCount"]
         endTaskCount = simEndTriggerData["simulationEndTaskCount"]
-        self.tasksCompleted = 0
         endOnStepCount = simEndTriggerData["simulationEndOnStepCount"]
         endStepCount = simEndTriggerData["simulationEndStepCount"]
-        self.stepCompleted = 0
         endOnSchedule = simEndTriggerData["simulationEndOnSchedule"]
         self.scheduleCompleted = False
         self.simEndTriggerSet = {
@@ -238,6 +241,7 @@ class simProcessor:
             agent.pathfinder = self.agentActionAlgorithm(agentID, self.simCanvasRef, self.simGraph, agent.currentNode, None, self.agentActionConfig, self.infoShareManager, agent, self.simulationSettings)
 
         # Task generation strategy
+        fidID = ""
         if self.simulationSettings["tasksAreScheduled"]:
             # Disable generation
             self.simulationSettings["taskGenerationAsAvailableTrigger"] = "scheduled"
@@ -245,6 +249,7 @@ class simProcessor:
             self.simTaskManagerRef.purgeTaskList()
             # Load the schedule
             fid = self.simulationSettings["taskScheduleFile"]
+            fidID = str(os.path.basename(fid))
             with open(fid, 'r') as inp:
                 # Extract all the data
                 reader = csv.reader(inp)
@@ -256,6 +261,9 @@ class simProcessor:
         # pp.pprint(self.simGraph.nodes())
         # import networkx as nx
         # nx.Graph().edges
+        # print(f"{self.algorithmSelection}\n{fidID}")
+        trackerText = f"{self.algorithmSelection}\n{fidID}"
+        self.parent.parent.simulationWindow.simScoreView.scoreAlgorithmText.configure(text=trackerText)
 
     def simulateStep(self, stateID):
         """
@@ -430,10 +438,11 @@ class simProcessor:
                     pickupNode = task[0]
                     dropoffNode = task[1]
                     timeLimit = eval(task[2])
+                    creationTime = eval(task[3])
                     name = task[4]
                     # print(name)
                     self.simTaskManagerRef.createNewTask(pickupNode=pickupNode, 
-                        dropoffNode=dropoffNode, timeLimit=timeLimit, taskName=name)
+                        dropoffNode=dropoffNode, timeLimit=timeLimit, taskName=name, timeStamp=creationTime)
             # Pop the tasks
             for index in sorted(tasksToPop, reverse=True):
                 self.taskSchedule.pop(index)
@@ -447,9 +456,9 @@ class simProcessor:
             # print(f"Agent {self.currentAgent.ID} needs a new task.")
             # self.generateTask()
             # print("=============================================")
-            taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent)
-            # print(f"\t {self.currentAgent.numID} wound up with:{taskSelect}")
-            if type(taskSelect) is not int:
+            taskSelect = self.simulationTasker.selectTaskForAgent(self.currentAgent, timeStamp=self.stepCompleted)
+            # print(f"\t {self.currentAgent.numID} wound up with:{taskSelect} on T{self.stepCompleted}")
+            if type(taskSelect) is not int and taskSelect is not True:
                 # If there are no tasks meeting the criterion, check if a task can be generated
                 if self.simulationSettings["taskGenerationAsAvailableTrigger"] == "ondemand":
                     # print(f"Need to generate new task for agent {self.currentAgent.ID}")
@@ -511,7 +520,7 @@ class simProcessor:
         self.persistRenders = False
         # Agent should be able to interact with the task
         # print(f"Agent {self.currentAgent.numID} interacting at {self.currentAgent.currentNode}")
-        interactionResult = self.currentAgent.taskInteraction(self.currentAgent.currentNode)
+        interactionResult = self.currentAgent.taskInteraction(self.currentAgent.currentNode, self.stepCompleted)
         if interactionResult == "completed":
             # If the task was finshed, count the completion
             self.tasksCompleted = self.tasksCompleted + 1
@@ -545,7 +554,7 @@ class simProcessor:
             # Agent doesn't currently have a target
             # agentTargetNode = self.currentAgent.currentNode
             agentTargetNode = self.simulationTasker.handleAimlessAgent(self.currentAgent)
-            print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
+            # print(f"{self.currentAgent.ID} has target: {agentTargetNode}")
             # self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, self.currentAgent.currentNode, self.agentActionAlgorithm, self.infoShareManager)
         if self.currentAgent.pathfinder is None or self.currentAgent.pathfinder.invalid == True:
             # or self.currentAgent.pathfinder.targetNode != agentTargetNode
@@ -571,11 +580,12 @@ class simProcessor:
                 self.requestedStateID = "checkAgentQueue"
             else:
                 # print("action invalid")
+                self.conflicts = self.conflicts + 1
                 self.requestedStateID = "agentPlanMove"
             return
         else:
             # If the agent does not have a complete path, it needs to find one
-            # print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
+            print(f"Agent {self.currentAgent.ID} needs to find a path from {self.currentAgent.currentNode}->{agentTargetNode}")
             self.currentAgent.pathfinder = self.agentActionAlgorithm(self.currentAgent.numID, self.simCanvasRef, self.simGraph, self.currentAgent.currentNode, agentTargetNode, self.agentActionConfig, self.infoShareManager, self.currentAgent, self.simulationSettings)
             self.requestedStateID = "agentPathfind"
             return
@@ -586,10 +596,15 @@ class simProcessor:
         if self.agentCollisionBehavior == "Respected":
             conflicts = self.agentMovementManager.checkAgentCollisions()
             # print(f"Conflicts: {conflicts}")
-            if conflicts is not None:
+            if isinstance(conflicts, dict):
+                # Did not resolve, do new planning
+                self.conflicts = self.conflicts + 1
                 self.agentQueue = conflicts[1]
                 self.requestedStateID = "selectAgent"
                 return
+            elif isinstance(conflicts, int):
+                # Just report the number of conflicts that needed to be resolved
+                self.conflicts = self.conflicts + conflicts
         self.requestedStateID = "endSimStep"
             
     def agentPathfind(self):
@@ -614,6 +629,7 @@ class simProcessor:
             self.requestedStateID = "agentPlanMove"
             return
         elif pathStatus == "wait":
+            self.pathfindFailures = self.pathfindFailures + 1
             # print(f"\t...Agent could not find path due to obstructions, wait for cleared path.")
             # self.simCanvasRef.requestRender("highlight", "clear", {})
             # self.simCanvasRef.requestRender("text", "clear", {})
@@ -674,9 +690,56 @@ class simProcessor:
                 else:
                     pass
                     # print(f"\t{conditionType} not met: {currentValue} vs {triggerValue}")
-        # print("========")
-        # if the simulation hasnt reached its "objective", do another step
         targetLabelText.set(self.stepCompleted + 1)
+
+        ### Update the score readout
+        # Task completions
+        taskCompletedLabelText = self.parent.parent.simulationWindow.simScoreView.taskCompletionValue
+        taskCompletedLabelText.set(self.tasksCompleted)
+
+        # Service time
+        completedTasks = [task for task in self.simTaskManagerRef.taskList.values() if task.taskStatus == "completed"]
+        if len(completedTasks) > 0:
+            taskRunTimes = []
+            taskServiceTimes = []
+            taskLifeTimes = []
+            taskServiceabilityRatings = []
+            taskMinimumTimes = []
+            for task in completedTasks:
+                taskRunTime = task.serviceCompleteTime - task.serviceStartTime
+                taskRunTimes.append(taskRunTime)
+                taskServiceTime = task.serviceCompleteTime - task.serviceAssignTime
+                taskServiceTimes.append(taskServiceTime)
+                taskLifeTime = task.serviceCompleteTime - task.createTime
+                taskLifeTimes.append(taskLifeTime)
+                taskServiceability = task.serviceStartTime - task.serviceAssignTime
+                taskServiceabilityRatings.append(taskServiceability)
+                taskMinimumTime = task.optimalServiceTime
+                taskMinimumTimes.append(taskMinimumTime)
+
+            # Calculate the means
+            meanRunTime = sum(taskRunTimes)/len(taskRunTimes)
+            meanServiceTime = sum(taskServiceTimes)/len(taskServiceTimes)
+            meanLifeTime = sum(taskLifeTimes)/len(taskLifeTimes)
+            meanTaskServiceability = sum(taskServiceabilityRatings)/len(taskServiceabilityRatings)
+            meanMinimumTime = sum(taskMinimumTimes)/len(taskMinimumTimes)
+
+            # Update displays
+            self.parent.parent.simulationWindow.simScoreView.serviceTimeValue.set(round(meanServiceTime, 2))
+            self.parent.parent.simulationWindow.simScoreView.normServiceTimeValue.set(round(meanServiceTime-meanMinimumTime, 2))
+            self.parent.parent.simulationWindow.simScoreView.runTimeValue.set(round(meanRunTime, 2))
+            self.parent.parent.simulationWindow.simScoreView.normrunTimeValue.set(round(meanRunTime-meanMinimumTime, 2))
+            self.parent.parent.simulationWindow.simScoreView.lifeTimeValue.set(round(meanLifeTime, 2))
+            self.parent.parent.simulationWindow.simScoreView.serviceabilityValue.set(round(meanTaskServiceability, 2))
+
+        # Conflict count
+        conflictCountLabelText = self.parent.parent.simulationWindow.simScoreView.conflictCountValue
+        conflictCountLabelText.set(self.conflicts)
+
+        # Pathfind failures
+        pathfindFailureCountText = self.parent.parent.simulationWindow.simScoreView.pathfindFailCountValue
+        pathfindFailureCountText.set(self.pathfindFailures)
+
         # print(stepCompleted)
         if self.infoShareManager is not None:
             print(self.stepCompleted+1)
@@ -703,7 +766,7 @@ class simProcessor:
         # Kwargs for generating a task
         # Packaged taskData: {'name': 'task1', 'pickupPosition': (0, 1), 'dropoffPosition': (4, 8), 'timeLimit': 0, 'assignee': 0}
         # name is optional, no need to generate one
-        newTaskID = self.simulationTasker.generateTask()
+        newTaskID = self.simulationTasker.generateTask(self.stepCompleted)
         # print(f"\tGenerated new task: {newTaskID}")
         # pickupNodes = self.simulationSettings["taskNodeAvailableDict"]["pickup"]
         # dropoffNodes = self.simulationSettings["taskNodeAvailableDict"]["dropoff"]

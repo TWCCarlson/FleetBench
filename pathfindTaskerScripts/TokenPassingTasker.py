@@ -25,7 +25,7 @@ class TokenPassingTasker:
     def processNodeList(self):
         pass
 
-    def generateTask(self):
+    def generateTask(self, timeStamp=0):
         pickupNode = random.choice(list(self.pickupNodes.keys()))
         depositNode = random.choice(list(self.depositNodes.keys()))
         timeLimit = 0
@@ -33,7 +33,8 @@ class TokenPassingTasker:
         taskStatus = "unassigned"
 
         newTaskID = self.simTaskManager.createNewTask(pickupNode=pickupNode, 
-            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus)
+            dropoffNode=depositNode, timeLimit=timeLimit, assignee=assignee, taskStatus=taskStatus,
+            timeStamp=timeStamp)
         return newTaskID
     
     def AStar(self, sourceNode, targetNode, startTime, agentID, ignoredAgent=None):
@@ -100,7 +101,7 @@ class TokenPassingTasker:
                     fScore[(neighborNode, timeDepth+1)] = node_fScore
         return False
 
-    def selectTaskForAgent(self, currentAgent):
+    def selectTaskForAgent(self, currentAgent, timeStamp=0):
         validTasks = []
         claimedEndpoints = []
         # The list of claimed endpoints is equivalent to the POIs for tasks that are not unassigned
@@ -146,7 +147,7 @@ class TokenPassingTasker:
                 bestTask = task
 
         # print(f"\tAssigned {bestTask.numID} to {currentAgent.ID}")
-        self.simTaskManager.assignAgentToTask(bestTask.numID, currentAgent)
+        self.simTaskManager.assignAgentToTask(bestTask.numID, currentAgent, timeStamp)
         self.canvasRef.requestRender("highlight", "new", {"targetNodeID": bestTask.pickupPosition,
             "highlightType": "pickupHighlight", "multi": False, "highlightTags": ["task"+str(bestTask.numID)+"Highlight"]})
         self.canvasRef.requestRender("highlight", "new", {"targetNodeID": bestTask.dropoffPosition,
@@ -156,6 +157,9 @@ class TokenPassingTasker:
     def handleAimlessAgent(self, currentAgent):
         # An agent is aimless if it does not have a target node (no task assigned)
         # In Token Passing, aimless agents need to make sure they are not on top of a task endpoint
+        if currentAgent.pathfinder.returnNextMove() is not None:
+            # Let the agent keep going
+            return
         if currentAgent.currentNode not in self.infoShareManager.V_endpoint:
             # print(f"Agent{currentAgent.numID} is not in an endpoint, finding nearest.")
             # Agent is not in an endpoint, needs to move to neareset one

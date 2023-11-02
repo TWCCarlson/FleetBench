@@ -172,6 +172,7 @@ class simulationManager:
         self.simulationWindow.simControlPanel.buildReferences()
         self.simulationWindow.simDataView.buildReferences()
         self.simulationWindow.simInfoBox.simInfoBoxFrame.buildReferences()
+        self.simulationWindow.simScoreView.buildReferences()
         self.simulationProcess.buildReferences()
 
 def initLogging():

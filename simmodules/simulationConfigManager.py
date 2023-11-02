@@ -362,11 +362,11 @@ class simulationConfigManager(tk.Toplevel):
         self.taskScheduleDisplayScrollFrame.grid(row=2, column=0, sticky="news")
 
         graph = self.parent.mapData.mapGraph
-        print("Displaying task schedule")
-        pp.pprint(csvData[0])
+        # print("Displaying task schedule")
+        # pp.pprint(csvData[0])
         # Column headers
         for i, col in enumerate(csvData[0]):
-            print(col)
+            # print(col)
             tk.Label(self.taskScheduleDisplayHeaderFrame, text=col).grid(row=0, column=i, sticky=tk.W+tk.E)
             self.taskScheduleDisplayHeaderFrame.columnconfigure(i, weight=1)
             self.taskScheduleDisplayFrame.columnconfigure(i, weight=1)
