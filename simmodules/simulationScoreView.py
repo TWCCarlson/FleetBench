@@ -42,7 +42,7 @@ class simScoreView(tk.Frame):
         self.flatStatsFrame = tk.Frame(self)
         self.flatStatsFrame.grid(row=1, column=0, sticky="ew", columnspan=2)
         self.separator = ttk.Separator(self, orient="horizontal")
-        self.separator.grid(row=2, column=0, columnspan=50)
+        self.separator.grid(row=2, column=0, columnspan=50, sticky="ew")
         # Table items
         self.timeTableNameHeader = tk.Label(self, text="Completed Task Stats . . .", font=(tkfont.nametofont("TkDefaultFont"), 8, "bold"))
         self.timeTableNameHeader.grid(row=3, column=0, sticky=tk.W+tk.E)

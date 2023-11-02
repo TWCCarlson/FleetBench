@@ -38,8 +38,11 @@ class HCAstarMover:
         vertexDict, edgeDict = self.comprehendAgentMotions()
         hasConflict = self.checkForConflicts(vertexDict, edgeDict)
         conflictCount = 0
+        if hasConflict:
+            conflictCount = 1
+        else:
+            conflictCount = 0
         while hasConflict:
-            conflictCount = conflictCount + 1 
             # If there is a conflict, cycle the resolver until there isn't
             vertexDict, edgeDict = self.comprehendAgentMotions()
             hasConflict = self.checkForConflicts(vertexDict, edgeDict)
@@ -56,6 +59,7 @@ class HCAstarMover:
 
         # Reset the agent motion queue
         self.agentMotionDict = {}
+        return conflictCount
 
     def comprehendAgentMotions(self):
         vertexDict = {}

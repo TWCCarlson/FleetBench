@@ -38,11 +38,13 @@ class defaultAgentMover:
         # print(self.agentMotionDict)
         # print(">>>Conflict resolved, executing moves.")
         if conflicts is not None:
+            collisionCount = 0
             # Reset pathfinders to force a replan
             for agent in conflicts[1]:
                 self.agentManager.agentList[agent].pathfinder.__reset__()
             return conflicts
         else:
+            collisionCount = 1
             for agent in self.agentPriorityList:
                 currentAgent = self.agentManager.agentList[agent]
                 self.simCanvasRef.requestRender("agent", "move", {"agentNumID": currentAgent.numID, 
@@ -52,6 +54,7 @@ class defaultAgentMover:
 
         # Reset the agent motion queue
         self.agentMotionDict = {}
+        return collisionCount
 
     def comprehendAgentMotions(self):
         vertexDict = {}

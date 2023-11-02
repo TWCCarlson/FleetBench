@@ -37,9 +37,11 @@ class CAstarMover:
         # Check for conflicts
         vertexDict, edgeDict = self.comprehendAgentMotions()
         hasConflict = self.checkForConflicts(vertexDict, edgeDict)
-        conflictCount = 0
+        if hasConflict:
+            conflictCount = 1
+        else:
+            conflictCount = 0
         while hasConflict:
-            conflictCount = conflictCount + 1 
             # If there is a conflict, cycle the resolver until there isn't
             vertexDict, edgeDict = self.comprehendAgentMotions()
             hasConflict = self.checkForConflicts(vertexDict, edgeDict)
