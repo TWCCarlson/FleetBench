@@ -251,6 +251,19 @@ class mainCanvas(tk.Canvas):
         objs = self.find_withtag("agent" + str(agentNumID))
         for obj in objs:
             self.move(obj, targetNodeCanvasPosX-sourceNodeCanvasPosX, targetNodeCanvasPosY-sourceNodeCanvasPosY)
+        # Recolor the window
+        nodeTypeColorMap = {
+            "edge": self.appearanceValues.openNodeColor,
+            "charge": self.appearanceValues.chargeNodeColor,
+            "deposit": self.appearanceValues.depositNodeColor,
+            "pickup": self.appearanceValues.pickupNodeColor,
+            "rest": self.appearanceValues.restNodeColor
+        }
+        # Get the agent's node type->color
+        fill = nodeTypeColorMap[self.graphRef.nodes[str(targetNodeID)]["type"]]
+        objs = self.find_withtag(f"{'agent' + str(agentNumID)} && agentTileWindow")
+        for obj in objs:
+            self.itemconfigure(obj, fill=fill)
 
     def rotateAgentObject(self, renderData):
         agentNumID = renderData["agentNumID"]
