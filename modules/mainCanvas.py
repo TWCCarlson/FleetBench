@@ -196,6 +196,10 @@ class mainCanvas(tk.Canvas):
             tk.CENTER: []
         }
 
+        # Planned Move objects
+        self.movePlanObjects = []
+        self.movePlanObjectStates = []
+
     def requestRender(self, renderType, renderAction, renderData):
         # Maintains a list of things to do on the next render step
         acceptedRenderTypes = {
@@ -226,6 +230,12 @@ class mainCanvas(tk.Canvas):
             "canvas": {
                 "clear": self.clearCanvasObjects,
                 "render": self.renderCanvasObjects
+            },
+            "movePlan": {
+                "new": self.newMovePlanObject,
+                "move": self.moveMovePlanObject,
+                "delete": self.deleteMovePlanObject,
+                "clear": self.clearMovePlanObjects
             }
         }
         if renderType in acceptedRenderTypes:
@@ -562,6 +572,31 @@ class mainCanvas(tk.Canvas):
             if list:
                 for i, obj in enumerate(list):
                     self.textObjectStates[textAnchor][i] = False
+
+    def newMovePlanObject(self, renderData):
+        sourcePos = renderData["source"]
+        targetPos = renderData["target"]
+        color = renderData.get("color", None) #optional
+        agent = renderData.get("agent", None) #optional
+
+        try:
+            objectIndex = self.movePlanObjectStates.index(False)
+            # If an object is found...
+            movePlanObject = self.movePlanObjects[objectIndex]
+            self.shiftMovePlanObjects(sourcePos, targetPos)
+        except ValueError:
+            # If there are no free objects, then a new one needs to be created
+            self.renderMovePlan(sourcePos, targetPos, color, agent)
+        pass
+
+    def moveMovePlanObject(self):
+        pass
+    
+    def deleteMovePlanObject(self):
+        pass
+
+    def clearMovePlanObjects(self):
+        pass
 
     def clearCanvasObjects(self, *args):
         self.delete("all")
@@ -1101,3 +1136,18 @@ class mainCanvas(tk.Canvas):
         index = len(self.canvasLineObjects)
         self.canvasLineObjects.insert(index, objID)
         self.canvasLineObjectStates.insert(index, True)
+
+    def renderMovePlan(self, source, target, color=None, agent=None):
+
+        # Style defaults
+        if color is None:
+            color = self.appearanceValues.movePlanDefaultColor
+        width = self.appearanceValues.agent
+
+        # Generate tags
+        tags = ["movePlan", agent, f"{source}->{target}"]
+
+        # Render the polygon showing the plan
+        sourceNode = eval(source)
+        targetNode = eval(target)
+        

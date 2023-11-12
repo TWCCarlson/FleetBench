@@ -54,6 +54,7 @@ class appearanceValues():
         self.defaultTextColor = "white"
         self.canvasArrowDefaultColor = "white"
         self.canvasArrowDefaultWidth = 3
+        self.movePlanDefaultColor = "cyan"
 
         """
             Editor window style
