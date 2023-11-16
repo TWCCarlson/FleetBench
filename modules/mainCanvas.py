@@ -129,6 +129,50 @@ class mainCanvas(tk.Canvas):
 
         # self.requestRender("agent", "clear", {})
         # self.requestRender("agent", "delete", {"agentNumID": 1})
+        # self.requestRender("agent", "clear", {})
+        # self.requestRender("agent", "new", {"agentNumID": 0, "position": (1, 2), "color": "salmon"})
+        # self.requestRender("agent", "new", {"agentNumID": 1, "position": (2, 2), "color": "#1a57ba"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1,2),(1.5,2)], "color": "black", "width": 7})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1,2),(1.5,2)], "color": "pink"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(2,2),(1.5,2)], "color": "black", "width": 7})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(2,2),(1.5,2)], "color": "cyan"})
+
+        # self.requestRender("agent", "clear", {})
+        # self.requestRender("agent", "new", {"agentNumID": 0, "position": (0, 0), "color": "#1a57ba"})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(4,3)], "color": "black", "width":8})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(4,3)], "color": "orange"})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(0,3),(4,3)], "color": "black", "width":7})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(0,3),(4,3)], "color": "cyan"})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(1,0),(4,3)], "color": "black", "width":7})
+        # self.requestRender("canvasLine", "new", {"lineType": "euclidean", "nodePath":[(0,0),(1,0),(4,3)], "color": "red"})
+        
+        # self.requestRender("agent", "clear", {})
+        # self.requestRender("agent", "new", {"agentNumID": 0, "position": (2, 2), "color": "salmon"})
+        # self.requestRender("agent", "new", {"agentNumID": 1, "position": (3, 2), "color": "#1a57ba"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1, 2), (4,2)], "color": "black", "width":7})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1, 2), (4,2)], "color": "pink"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(3, 2), (2,2), (2,0)], "color": "black", "width":7})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(3, 2), (2,2), (2,0)], "color": "cyan"})
+
+
+        
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1, 2), (1.5, 2)], "color": "pink"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (2, 3), (3, 3), (4, 3)], "color": "cyan"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(0, 0), (4, 3)], "color": "white"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(0, 0), (1, 0), (2, 1), (3, 2), (4, 3)], "color": "red"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1, 2), (2, 2)], "color": "pink", "width": "9"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(2, 2), (1, 2)], "color": "cyan"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(1, 2), (2, 2), (3, 2), (4, 2)], "color": "pink"})
+        # self.requestRender("canvasLine", "new", {"lineType": "vis", "nodePath": [(3, 2), (3, 1), (2, 1), (2, 0)], "color": "cyan"})
+        # self.requestRender("text", "new", {"position": (0, 0), "text": "(0,0)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (1, 0), "text": "(1,0)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (2, 0), "text": "(2,0)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (1, 1), "text": "(1,1)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (0, 2), "text": "(0,2)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (1, 2), "text": "(1,2)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+        # self.requestRender("text", "new", {"position": (2, 2), "text": "(2,2)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
+
+        
         self.handleRenderQueue()
 
     def buildRenderManager(self):
@@ -305,7 +349,11 @@ class mainCanvas(tk.Canvas):
         # Create a new agent, exposing style options
         agentPos = renderData["position"] # req'd
         agentNumID = renderData["agentNumID"] # req'd
-        defaultColor = self.agentManager.agentList[agentNumID].renderColor
+        try:
+            defaultColor = self.agentManager.agentList[agentNumID].renderColor
+        except KeyError:
+            # Arbitrary visual object, not tied to an agent
+            pass
         agentColor = renderData.get("color", defaultColor) #optional
         agentOrientation = renderData.get("orientation", None) #optional
 
@@ -332,6 +380,8 @@ class mainCanvas(tk.Canvas):
         # Adjust the agent orientation, which is a line
         # Point transform dict
         self.itemconfigure(orient, state=tk.NORMAL)
+        if agentOrientation is None:
+            agentOrientation = "N"
         indicatorAdjustment = self.directionMap[agentOrientation]
         # Move the orientation indicator
         x1 = newTileCoords[0]
@@ -1116,10 +1166,9 @@ class mainCanvas(tk.Canvas):
         for i, node in enumerate(nodePath):
             posCanvasX, posCanvasY = self.nodeToCanvasTile(node)
             convertedNodePath.append((posCanvasX, posCanvasY))
-
         # If there are fewer nodes than 2 in the line, what is being asked for is not a line
         # Reject the request
-        if len(convertedNodePath) < 4:
+        if len(convertedNodePath) < 2:
             return
 
         # Style settings

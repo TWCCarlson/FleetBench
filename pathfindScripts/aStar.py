@@ -209,7 +209,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore       
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    node_fScore = est_gScore + self.heuristicFunc(neighborNode, self.targetNode) * self.heuristicCoefficient
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode))
@@ -241,7 +241,8 @@ class aStarPathfinder:
                 # Reverse the path to get the route from source to target
                 path.reverse()
                 self.plannedPath = path
-                self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind"})
+                self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind", "color": "orange", "width":"3"})
+                # self.mapCanvas.requestRender("canvasLine", "new", {"nodePath": self.plannedPath, "lineType": "pathfind", "width": "7", "color": "black"})
                 # self.mapCanvas.handleRenderQueue()
                 return True
 
@@ -261,7 +262,7 @@ class aStarPathfinder:
                     # Record its new gScore
                     self.gScore[neighborNode] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    hScore = self.heuristicFunc(neighborNode, self.targetNode) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it

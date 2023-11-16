@@ -27,7 +27,11 @@ class WHCAstarMover:
         self.agentPriorityList = []
     
     def submitAgentAction(self, agent, desiredMove):
-        self.agentPriorityList.append(agent.numID)
+        # print(f"\tSubmits {agent}:{desiredMove}")
+        # print(f"Prio: {self.agentPriorityList}")
+        # print(agent not in self.agentPriorityList)
+        if agent.numID not in self.agentPriorityList:
+            self.agentPriorityList.append(agent.numID)
         self.agentMotionDict[agent.numID] = desiredMove
         
     def checkAgentCollisions(self):
@@ -35,16 +39,18 @@ class WHCAstarMover:
         # print(self.agentMotionDict)
 
         # Check for conflicts
+        # print(f"Prio: {self.agentPriorityList}")
         vertexDict, edgeDict = self.comprehendAgentMotions()
         hasConflict = self.checkForConflicts(vertexDict, edgeDict)
         if hasConflict:
             conflictCount = 1
+            return {"agents": hasConflict}
         else:
             conflictCount = 0
-        while hasConflict:
-            # If there is a conflict, cycle the resolver until there isn't
-            vertexDict, edgeDict = self.comprehendAgentMotions()
-            hasConflict = self.checkForConflicts(vertexDict, edgeDict)
+        # while hasConflict:
+        #     # If there is a conflict, cycle the resolver until there isn't
+        #     vertexDict, edgeDict = self.comprehendAgentMotions()
+        #     hasConflict = self.checkForConflicts(vertexDict, edgeDict)
         # print(self.agentMotionDict)
         # print(">>>Conflict resolved, executing moves.")
 
@@ -111,7 +117,7 @@ class WHCAstarMover:
     def checkForConflicts(self, vertexDict, edgeDict):
         # print(f"V:{vertexDict}")
         # print(f"E:{edgeDict}")
-
+        # print(f"Prio: {self.agentPriorityList}")
         # Resolution preference is given to edge conflicts
         for edge, agents in edgeDict.items():
             if len(agents) > 1:
@@ -119,7 +125,7 @@ class WHCAstarMover:
                 print("EDGE CONFLICT")
                 self.resolveEdgeConflict(agents[0], agents[1])
                 # print(f"New motions: {self.agentMotionDict}")
-                return True
+                return agents
 
         for node, agents in vertexDict.items():
             if len(agents) > 1:
@@ -127,7 +133,7 @@ class WHCAstarMover:
                 print("VERTEX CONFLICT")
                 self.resolveNodeConflict(agents)
                 # print(f"New motions: {self.agentMotionDict}")
-                return True
+                return agents
         return False
 
     def resolveEdgeConflict(self, agentOne, agentTwo):
@@ -182,7 +188,7 @@ class WHCAstarMover:
         # Node conflicts resolve via priority order
         for agentID in self.agentPriorityList:
             if agentID in agentList:
-                # Found highest priority agent
+                # Found highest priority agent in the conflict
                 plannedPath = list(self.agentMotionDict[agentID])
                 deprioAgent = agentList.pop(agentList.index(agentID))
                 deprioAgent = self.agentManager.agentList[deprioAgent]
@@ -191,7 +197,7 @@ class WHCAstarMover:
         agentList.reverse()
         for agent in agentList:
             # print(f"{agent} experiencing forced wait due to priority")
-            self.agentMustWait(agent)
+            # self.agentMustWait(agent)
             prioAgent = self.agentManager.agentList[agent]
             # Priority order needs shuffling in order to tie break and avoid deadlock
             self.swapAgentPriority(prioAgent, deprioAgent)

@@ -1,0 +1,998 @@
+[
+    {
+        "mapDimensions": {
+            "Xdim": 10,
+            "Ydim": 10
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 0,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 0,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 0,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 0,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 0,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 1,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 2,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 3,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 4,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 5,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositSWE.png",
+        "nodeStyleID": 41,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 6,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupNWE.png",
+        "nodeStyleID": 54,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\void.png",
+        "nodeStyleID": 75,
+        "nodeType": "void",
+        "nodeEdges": {
+            "N": 0,
+            "W": 0,
+            "S": 0,
+            "E": 0
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\33_pickupSWE.png",
+        "nodeStyleID": 56,
+        "nodeType": "pickup",
+        "nodeEdges": {
+            "N": 0,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 7,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\23_depositNWE.png",
+        "nodeStyleID": 39,
+        "nodeType": "deposit",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 0,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 0
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 8,
+            "Y": 6
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\04_edgeNSWE.png",
+        "nodeStyleID": 14,
+        "nodeType": "edge",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 9,
+            "Y": 1
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 9,
+            "Y": 2
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 9,
+            "Y": 3
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 9,
+            "Y": 4
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    },
+    {
+        "nodePosition": {
+            "X": 9,
+            "Y": 5
+        },
+        "nodeStylePath": "x:\\GitHub\\GraphRendering\\GUI_items\\tileSelectorDefaultImages\\44_restNSWE.png",
+        "nodeStyleID": 74,
+        "nodeType": "rest",
+        "nodeEdges": {
+            "N": 1,
+            "W": 1,
+            "S": 1,
+            "E": 1
+        }
+    }
+]

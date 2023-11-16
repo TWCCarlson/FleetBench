@@ -223,7 +223,7 @@ class CAstarPathfinder:
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore       
                     # Calculate the fScore for the neighbor node
-                    node_fScore = est_gScore + self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    node_fScore = est_gScore + self.heuristicFunc(neighborNode, self.targetNode) * self.heuristicCoefficient
                     # If the node isn't already in the openSet, add it
                     if neighborNode not in self.fScore:
                         heappush(self.openSet, (node_fScore, next(self.counter), neighborNode, timeDepth+1))
@@ -284,7 +284,7 @@ class CAstarPathfinder:
                     # Record its new gScore
                     self.gScore[(neighborNode, timeDepth+1)] = est_gScore
                     # Calculate nodes estimated distance from the goal
-                    hScore = self.heuristicFunc(currentNode, self.targetNode) * self.heuristicCoefficient
+                    hScore = self.heuristicFunc(neighborNode, self.targetNode) * self.heuristicCoefficient
                     # Calculate the fScore for the neighbor node
                     node_fScore = est_gScore + hScore
                     # If the node isn't already in the openSet, add it

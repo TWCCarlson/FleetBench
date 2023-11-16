@@ -11,9 +11,11 @@ class appearanceValues():
         self.openNodeSizeRatio = 0.1
         self.chargeNodeColor = "pink"
         self.chargeNodeSizeRatio = 0.28
-        self.depositNodeColor = "light green"
+        # self.depositNodeColor = "light green"
+        self.depositNodeColor = "#4bad3e"
         self.depositNodeSizeRatio = 0.28
-        self.pickupNodeColor = "light blue"
+        # self.pickupNodeColor = "light blue"
+        self.pickupNodeColor = "#1a57ba"
         self.pickupNodeSizeRatio = 0.28
         self.restNodeColor = "brown"
         self.restNodeSizeRatio = 0.28
@@ -80,7 +82,8 @@ class appearanceValues():
         # Mainview style
         self.mainViewHeight = screen_height - self.infoBoxHeight - window_unusable
         self.mainViewWidth = 0.60 * screen_width
-        self.canvasBackgroundColor = "light gray"
+        self.canvasBackgroundColor = "white"
+        # self.canvasBackgroundColor = "light gray"
         self.canvasDefaultWidth = 2000
         self.canvasDefaultHeight = 2000
         self.canvasTileSize = 48

@@ -31,8 +31,8 @@ class defaultAgentMover:
         self.agentMotionDict[agent.numID] = desiredMove
 
     def checkAgentCollisions(self):
-        # print("CHECKING AGENT COLLISIONS . . .")
-        # print(self.agentMotionDict)
+        print("CHECKING AGENT COLLISIONS . . .")
+        print(self.agentMotionDict)
         vertexDict, edgeDict = self.comprehendAgentMotions()
         conflicts = self.checkForConflicts(vertexDict, edgeDict)
         # print(self.agentMotionDict)

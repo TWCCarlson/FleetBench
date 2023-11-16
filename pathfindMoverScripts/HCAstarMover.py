@@ -27,7 +27,8 @@ class HCAstarMover:
         self.agentPriorityList = []
     
     def submitAgentAction(self, agent, desiredMove):
-        self.agentPriorityList.append(agent.numID)
+        if agent.numID not in self.agentPriorityList:
+            self.agentPriorityList.append(agent.numID)
         self.agentMotionDict[agent.numID] = desiredMove
         
     def checkAgentCollisions(self):
@@ -40,12 +41,13 @@ class HCAstarMover:
         conflictCount = 0
         if hasConflict:
             conflictCount = 1
+            return {"agents": hasConflict}
         else:
             conflictCount = 0
-        while hasConflict:
-            # If there is a conflict, cycle the resolver until there isn't
-            vertexDict, edgeDict = self.comprehendAgentMotions()
-            hasConflict = self.checkForConflicts(vertexDict, edgeDict)
+        # while hasConflict:
+        #     # If there is a conflict, cycle the resolver until there isn't
+        #     vertexDict, edgeDict = self.comprehendAgentMotions()
+        #     hasConflict = self.checkForConflicts(vertexDict, edgeDict)
         # print(self.agentMotionDict)
         # print(">>>Conflict resolved, executing moves.")
 
@@ -120,7 +122,7 @@ class HCAstarMover:
                 # print("EDGE CONFLICT")
                 self.resolveEdgeConflict(agents[0], agents[1])
                 # print(f"New motions: {self.agentMotionDict}")
-                return True
+                return agents
 
         for node, agents in vertexDict.items():
             if len(agents) > 1:
@@ -128,7 +130,7 @@ class HCAstarMover:
                 # print("VERTEX CONFLICT")
                 self.resolveNodeConflict(agents)
                 # print(f"New motions: {self.agentMotionDict}")
-                return True
+                return agents
         return False
 
     def resolveEdgeConflict(self, agentOne, agentTwo):
@@ -192,7 +194,7 @@ class HCAstarMover:
         agentList.reverse()
         for agent in agentList:
             # print(f"{agent} experiencing forced wait due to priority")
-            self.agentMustWait(agent)
+            # self.agentMustWait(agent)
             prioAgent = self.agentManager.agentList[agent]
             # Priority order needs shuffling in order to tie break and avoid deadlock
             self.swapAgentPriority(prioAgent, deprioAgent)

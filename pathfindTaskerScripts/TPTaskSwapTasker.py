@@ -41,7 +41,7 @@ class TPTSTasker:
         return newTaskID
     
     def selectTaskForAgent(self, currentAgent, availableTaskSet=None, timeStamp=0):
-        print(f"Fetching new task for agent{currentAgent.numID}")
+        # print(f"Fetching new task for agent{currentAgent.numID}")
         validTasks = []
         claimedEndpoints = []
         # The list of claimed endpoints is equivalent to the POIs for tasks that are not unassigned
@@ -79,7 +79,7 @@ class TPTSTasker:
             # print(f"=={poppedTask} removed.")
             occupied = False
             # Verify whether the task endpoints are available
-            # print(f"Evaluating task {nextBestTask.numID}")
+            # print(f"{currentAgent.numID}:Evaluating task {nextBestTask.numID}")
             # if nextBestTaskID == 98:
             #     print(f"\t{self.infoShareManager.reservedPaths.items()}")
             for agent, path in self.infoShareManager.reservedPaths.items():
@@ -101,6 +101,7 @@ class TPTSTasker:
                 continue
             # print(f"\tTask {nextBestTask.numID} is valid, checking optimality...")
             if nextBestTask.assignee is not None:
+                # print(f"\tRacing agent {nextBestTask.assignee.numID}")
                 # Instance the old data in case it needs to be restored
                 prevAssignee = nextBestTask.assignee
                 prevAssigneePath = prevAssignee.pathfinder.plannedPath
@@ -160,12 +161,15 @@ class TPTSTasker:
                     # The replaced agent now needs a new task
                     # print(f">>> Stole task from {prevAssignee.numID}, seeking replacement task...")
                     # print(f"\t...{availableTaskSet}")
-                    if self.selectTaskForAgent(prevAssignee, availableTaskSet=deepcopy(availableTaskSet)):
+                    # if self.selectTaskForAgent(prevAssignee, availableTaskSet=deepcopy(availableTaskSet)):
+                    #     print(f"<<< gave {prevAssignee.numID} something to do :)")
+                    #     return nextBestTask.numID
+                    if self.selectTaskForAgent(prevAssignee, availableTaskSet=None) is not False:
                         # print(f"<<< gave {prevAssignee.numID} something to do :)")
                         return nextBestTask.numID
                     else:
                         # It was invalid because of something else down the line (replaced agent couldn't path to safety)
-                        # print(f"<<< couldn't find a task :(")
+                        # print(f"<<< couldn't find a task for {prevAssignee.numID} :(")
                         self.simTaskManager.unassignAgentFromTask(nextBestTask.numID, currentAgent)
                         self.simTaskManager.assignAgentToTask(nextBestTask.numID, prevAssignee)
                         currentAgent.pathfinder.__reset__()
@@ -194,6 +198,7 @@ class TPTSTasker:
                 # Complete the pathfinding operation for the new agent
                 newAssigneePickupPath = self.AStar(currentAgent.currentNode, nextBestTask.pickupNode, 0, currentAgent.numID)
                 if newAssigneePickupPath == False:
+                    # print(f"{currentAgent.numID}: couldn't complete a path to the task...")
                     self.simTaskManager.unassignAgentFromTask(nextBestTask.numID, currentAgent)
                     nextBestTask.serviceAssignTime = None
                     return False

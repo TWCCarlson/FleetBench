@@ -19,7 +19,7 @@ class agentManager:
         self.currentAgent = []
         logging.debug("Class 'agentManager' initialized.")
 
-        self.colorList = [
+        self.colorList = [ "orange", "pink",
             '#dc143c', '#0000ff', '#ff00ff', '#1e90ff', '#90ee90', '#ff1493', '#7b68ee', '#ee82ee', '#ffc0cb',
             '#696969', "#7f0000", '#006400', '#808000', '#483d8b', '#008b8b', '#4682b4', '#000080', '#d2691e', '#9acd32',
             '#8b008b', '#b03060', '#ff4500', '#ffa500', '#ffff00', '#deb887', '#40e0d0', '#00ff00', '#8a2be2', '#00ff7f',

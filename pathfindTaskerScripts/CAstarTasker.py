@@ -113,6 +113,13 @@ class CAstarTasker:
         # Default behavior for agents with no objective is to wait in place
         # It is the job of the algorithm to deal with agents when they cannot
         # currentAgent.pathfinder.__reset__()
-        currentAgent.pathfinder.plannedPath = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
-        currentAgent.pathfinder.currentStep = 1
-        return currentAgent.currentNode
+        # currentAgent.pathfinder.plannedPath = self.AStar(currentAgent.currentNode, currentAgent.currentNode, 0, currentAgent.numID)
+        # currentAgent.pathfinder.currentStep = 1
+        # return currentAgent.currentNode
+        targetNode = random.choice([node[0] for node in self.graphRef.nodes(data=True) if node[1]["type"] in ["rest", "charge"]])
+
+        # print(targetNode)
+        currentAgent.targetNode = targetNode
+        currentAgent.pathfinder.targetNode = targetNode
+        currentAgent.pathfinder.__reset__()
+        return targetNode

@@ -151,6 +151,7 @@ class fileCommands(tk.Menu):
         logging.info("Loaded new random generator engine state.")
 
         # Render the new data on the canvas graph
+        print(self.parent.parent.agentManager.agentList)
         self.parent.parent.agentManager.pushDataToCanvas()
         self.parent.parent.mainView.mainCanvas.delete("all")
         self.parent.parent.mainView.mainCanvas.renderGraphState()

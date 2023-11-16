@@ -127,8 +127,10 @@ class App(tk.Tk):
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/task_swap_test")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/corridor_with_rests")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_task")
-        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_path2_problem")
-
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_path2_problem")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/5by5_figure")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/shelving_figure")
+        self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/case_3")
 
         # self.after()
         sys.setrecursionlimit(100)

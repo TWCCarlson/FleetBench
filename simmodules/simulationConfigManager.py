@@ -231,7 +231,7 @@ class simulationConfigManager(tk.Toplevel):
         self.endSimOnTaskCount = tk.BooleanVar()
         self.endSimOnTaskCount.set(False)
         self.endSimTaskCount = tk.IntVar()
-        self.endSimTaskCount.set(0)
+        self.endSimTaskCount.set(1)
         self.triggerSimEndOnTaskCountCheckbutton = tk.Checkbutton(self.simulationEndFrame, 
             text="Simulation ends after number of task completions", variable=self.endSimOnTaskCount, 
             onvalue=True, offvalue=False)
@@ -253,7 +253,7 @@ class simulationConfigManager(tk.Toplevel):
         self.endSimOnStepCount = tk.BooleanVar()
         self.endSimOnStepCount.set(False)
         self.endSimStepCount = tk.IntVar()
-        self.endSimStepCount.set(0)
+        self.endSimStepCount.set(1)
         self.triggerSimEndOnStepCountCheckbutton = tk.Checkbutton(self.simulationEndFrame,
             text="Simulation ends after number of steps completed", variable=self.endSimOnStepCount,
             onvalue=True, offvalue=False)
@@ -477,7 +477,7 @@ class simulationConfigManager(tk.Toplevel):
         self.taskGenerationReturnButton.grid(row=3, column=1)
         
     def generateTaskSchedule(self):
-        fid = filedialog.asksaveasfilename(initialfile="Untitled", filetypes=[("CSV", "*.csv")])
+        fid = filedialog.asksaveasfilename(initialfile="Untitled.csv", filetypes=[("CSV", "*.csv"), ("Any", "*.*")])
         batchCount = itertools.count()
         taskCount = itertools.count()
         currentStep = next(batchCount)
@@ -494,7 +494,7 @@ class simulationConfigManager(tk.Toplevel):
             # pp.pprint(nodeWeights)
             while currentStep*tasksGenEvery < scheduleLength:
                 # Generate another batch of tasks
-                for i in range(1, tasksPerBatch):
+                for i in range(1, tasksPerBatch+1):
                     taskPickupNode = random.choices(population=nodeAvailability[0], weights=nodeWeights[0], k=1)[0]
                     taskDropoffNode = random.choices(population=nodeAvailability[1], weights=nodeWeights[1], k=1)[0]
                     taskTimeLimit = 0
