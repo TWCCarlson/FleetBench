@@ -378,9 +378,9 @@ class simProcessor:
         targetLabelText = self.parent.parent.simulationWindow.simStepView.simStepCountTextValue
         stepID = targetLabelText.get()
         if stepID % self.SIMULATION_STATE_SAVE_INCREMENT == 0:
-            pass
-            # print(f"Saved simulation state for step {stepID}")
-            # self.stateHistoryManager.copyCurrentState(stepID)
+            # pass
+            print(f"Saved simulation state for step {stepID}")
+            self.stateHistoryManager.copyCurrentState(stepID)
         # The list of agents needs to be reset for this step
         # print(f"Creating a new list of agents for step {stepID}")
 
