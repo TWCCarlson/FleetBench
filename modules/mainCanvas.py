@@ -127,6 +127,8 @@ class mainCanvas(tk.Canvas):
         self.setAllLayersVisible()
         self.traceLayerVisibility()
 
+
+        # Arbitrary renders used for figure generation in thesis
         # self.requestRender("agent", "clear", {})
         # self.requestRender("agent", "delete", {"agentNumID": 1})
         # self.requestRender("agent", "clear", {})
@@ -172,7 +174,16 @@ class mainCanvas(tk.Canvas):
         # self.requestRender("text", "new", {"position": (1, 2), "text": "(1,2)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
         # self.requestRender("text", "new", {"position": (2, 2), "text": "(2,2)", "textType":"temp", "anchor":tk.NW, "textColor":"purple"})
 
+        # self.requestRender("highlight", "new", {"targetNodeID": (0, 0), "highlightType": "miscHighlight", "multi": True, "color": "red"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (1, 0), "highlightType": "miscHighlight", "multi": True, "color": "orange"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (2, 0), "highlightType": "miscHighlight", "multi": True, "color": "yellow"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (3, 0), "highlightType": "miscHighlight", "multi": True, "color": "green"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (4, 0), "highlightType": "miscHighlight", "multi": True, "color": "blue"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (5, 0), "highlightType": "miscHighlight", "multi": True, "color": "indigo"})
+        # self.requestRender("highlight", "new", {"targetNodeID": (6, 0), "highlightType": "miscHighlight", "multi": True, "color": "violet"})
         
+        # self.requestRender("text", "new", {"position": (0,0), "text": f" FB", "textType": "pathfind", "anchor": "nw", "textColor": "black"})
+
         self.handleRenderQueue()
 
     def buildRenderManager(self):
@@ -295,9 +306,9 @@ class mainCanvas(tk.Canvas):
     def moveAgentObject(self, renderData):
         # LEGACY, still working
         # Get tag, source, target nodes
-        agentNumID = renderData["agentNumID"]
-        sourceNodeID = renderData["sourceNodeID"]
-        targetNodeID = renderData["targetNodeID"]
+        agentNumID = renderData["agentNumID"] #req'd
+        sourceNodeID = renderData["sourceNodeID"] #req'd
+        targetNodeID = renderData["targetNodeID"] #req'd
         # Convert to canvas coordinates
         sourceNodeCanvasPosX, sourceNodeCanvasPosY = self.nodeToCanvasTile(sourceNodeID)
         targetNodeCanvasPosX, targetNodeCanvasPosY = self.nodeToCanvasTile(targetNodeID)
