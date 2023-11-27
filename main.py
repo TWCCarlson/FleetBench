@@ -113,24 +113,17 @@ class App(tk.Tk):
         self.mainView.mainCanvas.initialRender()
 
         # Debug session load
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/random_test_manytask")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/oneagent_onetask_assigned")
-        
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/oneagent_onetask")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/sapf_with_blockers")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/corridor")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/mapf_many_agents")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/tokenpass_manytask")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/tokenpass_blockedtask")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_agent")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/task_swap_test")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_task")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/corridor_with_rests")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_many_task")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/reshelving_path2_problem")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/5by5_figure")
         # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/shelving_figure")
-        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/case_2")
+        # self.commandBar.fileCommand.openSession(fid="X:/GitHub/RoboWarehousingSim/save_files/case_1")
 
         # self.after()
         sys.setrecursionlimit(100)
