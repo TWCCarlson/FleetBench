@@ -1,0 +1,158 @@
+[
+    {
+        "labelText": "Pathfinding Algorithm",
+        "elementType": "optionMenu",
+        "elementDefault": "Single-agent A*",
+        "optionValue": self.algorithmChoice,
+        "elementData": {
+            "Single-agent A*": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.SAPFAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.SAPFAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "Multi-Agent A* (LRA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFLRAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFLRAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "Multi-Agent Cooperative A* (CA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "Hierarchical A* with RRA* (HCA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFHCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFHCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "Windowed HCA* (WHCA*)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Dijkstra",
+                    "optionValue": self.MAPFWHCAstarHeuristic,
+                    "elementData": {
+                        "Dijkstra": None,
+                        "Manhattan": None,
+                        "Euclidean": None,
+                        "Approx. Euclidean": None
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFWHCAstarHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                },
+                {
+                    "labelText": "Search Window Depth",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 5,
+                    "optionValue": self.MAPFWHCAstarWindowSize,
+                    "elementData": (1, 100, 1)
+                }
+            ],
+            "Token Passing with A* (TP)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Manhattan",
+                    "optionValue": self.MAPFTPHeuristic,
+                    "elementData": {
+                        "Manhattan": None,
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPFTPHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+            "TP with Task Swaps (TPTS)": [
+                {
+                    "labelText": "Heuristic",
+                    "elementType": "optionMenu",
+                    "elementDefault": "Manhattan",
+                    "optionValue": self.MAPDTPTSHeuristic,
+                    "elementData": {
+                        "Manhattan": None,
+                    }
+                },
+                {
+                    "labelText": "Heuristic Relaxation Coefficient",
+                    "elementType": "numericSpinbox",
+                    "elementDefault": 1,
+                    "optionValue": self.MAPDTPTSHeuristicCoefficient,
+                    "elementData": (1, 50, 1)
+                }
+            ],
+        }
+    }
+]
