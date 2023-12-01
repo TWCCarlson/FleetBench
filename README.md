@@ -10,6 +10,8 @@ When ready, click the simulation configuration button in the top right, and conf
 
 Documentation is found in the `main` branch under `Thesis/Chapter Drafts/Main Body`. Look at the Appendix chapters.
 
-An executable that comes with the files used to generate all the test cases in thesis is provided in the `installer` branch.
+An executable that comes with the files used to generate all the test cases in thesis is provided in the `installer` branch of the repository.
+
+Errors generate a `logfile.log` using Python's `logging` library. The logging is incomplete.
 
 This is effectively a prototype, and would benefit greatly from more work.
