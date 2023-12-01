@@ -256,7 +256,7 @@ class simProcessor:
                 self.taskSchedule = list(reader)
                 # Ignore the first row of the schedule
                 self.taskSchedule.pop(0)
-                pp.pprint(self.taskSchedule)
+                # pp.pprint(self.taskSchedule)
         # pp.pprint(self.simGraph.edges('(1, 0)'))
         # pp.pprint(self.simGraph.nodes())
         # import networkx as nx
