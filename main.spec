@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('.\\simmodules\\simalgorithmmenuconfig.txt', '.\\simmodules'), ('.\\simmodules\\simagentmenuconfig.txt', '.\\simmodules'), ('.\\simmodules\\simdisplaymenuconfig.txt', '.\\simmodules')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

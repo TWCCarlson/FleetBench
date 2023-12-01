@@ -20,6 +20,7 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from pathlib import Path
+import os
 
 class simulationConfigManager(tk.Toplevel):
     # Window for managing the state of the simulation configuration
@@ -147,8 +148,8 @@ class simulationConfigManager(tk.Toplevel):
 
         # UI Definition Dict
         # Sorcery
-        cwd = Path(__file__).parent
-        filePath = (cwd / 'simalgorithmmenuconfig.txt').resolve()
+        cwd = os.path.dirname(__file__)
+        filePath = os.path.abspath(os.path.join(cwd, 'simalgorithmmenuconfig.txt'))
         self.algorithmOptionSet = eval(open(filePath, "r").read())
 
         # Build option menu from config file

@@ -192,7 +192,7 @@ def initLogging():
     logLevel = logging.ERROR
     # logLevel = logging.CRITICAL
 
-    logging.basicConfig(filename='example.log', 
+    logging.basicConfig(filename='logfile.log', 
         encoding='utf-8', 
         level=logLevel, 
         format='[{asctime}.{msecs:0<3.0f}][{levelname:^8s}][\'{module}\'][{lineno:>4n}:{funcName}] {message}',

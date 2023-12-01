@@ -16,71 +16,71 @@
         "optionValue": self.agentChargeLimitationValue,
         "elementData": {
             "Ignored / Unlimited": None,
-            "Limited": [
-                {
-                    "labelText": "Agent Charge Capacity:",
-                    "elementType": "numericSpinbox",
-                    "elementDefault": None,
-                    "optionValue": self.agentLimitedChargeCapacityValue,
-                    "gridLoc": "auto",
-                    "elementData": SPINBOX_DEFAULT_RANGE
-                },
-                {
-                    "labelText": "Cost Determ. Method",
-                    "elementType": "optionMenu",
-                    "elementDefault": "Fixed per sim. step",
-                    "optionValue": self.agentLimitedChargeCostStyleValue,
-                    "gridLoc": "auto",
-                    "elementData":{
-                        "Fixed per sim. step": [
-                            {
-                                "labelText": "Cost Per Sim. Step:",
-                                "elementType": "numericSpinbox",
-                                "elementDefault": None,
-                                "optionValue": self.agentLimitedChargeStepCostValue,
-                                "gridLoc": "auto",
-                                "elementData": SPINBOX_DEFAULT_RANGE
-                            }
-                        ],
-                        "Fixed per action taken": [
-                            {
-                                "labelText": "Cost Per Action:",
-                                "elementType": "numericSpinbox",
-                                "elementDefault": None,
-                                "optionValue": self.agentLimitedChargeActionCostValue,
-                                "gridLoc": "auto",
-                                "elementData": SPINBOX_DEFAULT_RANGE
-                            }
-                        ],
-                        "Custom": [
-                            {
-                                "labelText": "Cost Per Move:",
-                                "elementType": "numericSpinbox",
-                                "elementDefault": None,
-                                "optionValue": self.agentLimitedChargeMovementCostValue,
-                                "gridLoc": "auto",
-                                "elementData": SPINBOX_DEFAULT_RANGE
-                            },
-                            {
-                                "labelText": "Cost Per Pickup:",
-                                "elementType": "numericSpinbox",
-                                "elementDefault": None,
-                                "optionValue": self.agentLimitedChargePickupCostValue,
-                                "gridLoc": "auto",
-                                "elementData": SPINBOX_DEFAULT_RANGE
-                            },
-                            {
-                                "labelText": "Cost Per Dropoff:",
-                                "elementType": "numericSpinbox",
-                                "elementDefault": None,
-                                "optionValue": self.agentLimitedChargeDropoffCostValue,
-                                "gridLoc": "auto",
-                                "elementData": SPINBOX_DEFAULT_RANGE
-                            }
-                        ]
-                    }
-                }
-            ]
+            # "Limited": [
+            #     {
+            #         "labelText": "Agent Charge Capacity:",
+            #         "elementType": "numericSpinbox",
+            #         "elementDefault": None,
+            #         "optionValue": self.agentLimitedChargeCapacityValue,
+            #         "gridLoc": "auto",
+            #         "elementData": SPINBOX_DEFAULT_RANGE
+            #     },
+            #     {
+            #         "labelText": "Cost Determ. Method",
+            #         "elementType": "optionMenu",
+            #         "elementDefault": "Fixed per sim. step",
+            #         "optionValue": self.agentLimitedChargeCostStyleValue,
+            #         "gridLoc": "auto",
+            #         "elementData":{
+            #             "Fixed per sim. step": [
+            #                 {
+            #                     "labelText": "Cost Per Sim. Step:",
+            #                     "elementType": "numericSpinbox",
+            #                     "elementDefault": None,
+            #                     "optionValue": self.agentLimitedChargeStepCostValue,
+            #                     "gridLoc": "auto",
+            #                     "elementData": SPINBOX_DEFAULT_RANGE
+            #                 }
+            #             ],
+            #             "Fixed per action taken": [
+            #                 {
+            #                     "labelText": "Cost Per Action:",
+            #                     "elementType": "numericSpinbox",
+            #                     "elementDefault": None,
+            #                     "optionValue": self.agentLimitedChargeActionCostValue,
+            #                     "gridLoc": "auto",
+            #                     "elementData": SPINBOX_DEFAULT_RANGE
+            #                 }
+            #             ],
+            #             "Custom": [
+            #                 {
+            #                     "labelText": "Cost Per Move:",
+            #                     "elementType": "numericSpinbox",
+            #                     "elementDefault": None,
+            #                     "optionValue": self.agentLimitedChargeMovementCostValue,
+            #                     "gridLoc": "auto",
+            #                     "elementData": SPINBOX_DEFAULT_RANGE
+            #                 },
+            #                 {
+            #                     "labelText": "Cost Per Pickup:",
+            #                     "elementType": "numericSpinbox",
+            #                     "elementDefault": None,
+            #                     "optionValue": self.agentLimitedChargePickupCostValue,
+            #                     "gridLoc": "auto",
+            #                     "elementData": SPINBOX_DEFAULT_RANGE
+            #                 },
+            #                 {
+            #                     "labelText": "Cost Per Dropoff:",
+            #                     "elementType": "numericSpinbox",
+            #                     "elementDefault": None,
+            #                     "optionValue": self.agentLimitedChargeDropoffCostValue,
+            #                     "gridLoc": "auto",
+            #                     "elementData": SPINBOX_DEFAULT_RANGE
+            #                 }
+            #             ]
+            #         }
+            #     }
+            # ]
         }
     },
     {
@@ -91,41 +91,41 @@
         "gridLoc": "auto",
         "elementData": {
             "Problem-free operation": None,
-            "Fixed-rate maintenance schedule": [
-                {
-                    "labelText": "Sim. steps per incident",
-                    "elementType": "numericSpinbox",
-                    "elementDefault": None,
-                    "optionValue": self.agentBreakdownFixedRateValue,
-                    "gridLoc": "auto",
-                    "elementData": SPINBOX_DEFAULT_RANGE
-                }
-            ],
-            "Fixed chance of failure per sim. step": [
-                {
-                    "labelText": "Chance of incident per sim. step\n(Out of 100,000)",
-                    "elementType": "numericSpinbox",
-                    "elementDefault": None,
-                    "optionValue": self.agentBreakdownChancePerStepValue,
-                    "gridLoc": "auto",
-                    "elementData": SPINBOX_DEFAULT_RANGE
-                },
-                {
-                    "labelText": "Agent Breakdown Odds Descriptive Text",
-                    "elementType": "descriptiveTracedText",
-                    "elementDefault": None,
-                    "optionValue": self.agentBreakdownChancePerStepValue,
-                    "gridLoc": "auto",
-                    "elementData": [
-                        {"formula": "(1-(1-float(currentValue)/100000)**5)*100",
-                            "string": ["f\"The odds of an incident occurring in 5 steps is {calcValue:3.5f}%\""]},
-                        {"formula": "(1-(1-float(currentValue)/100000)**20)*100",
-                            "string": ["f\"The odds of an incident occurring in 20 steps is {calcValue:3.5f}%\""]},
-                        {"formula": "(1-(1-float(currentValue)/100000)**100)*100",
-                            "string": ["f\"The odds of an incident occurring in 100 steps is {calcValue:3.5f}%\""]}
-                    ]
-                }
-            ]
+            # "Fixed-rate maintenance schedule": [
+            #     {
+            #         "labelText": "Sim. steps per incident",
+            #         "elementType": "numericSpinbox",
+            #         "elementDefault": None,
+            #         "optionValue": self.agentBreakdownFixedRateValue,
+            #         "gridLoc": "auto",
+            #         "elementData": SPINBOX_DEFAULT_RANGE
+            #     }
+            # ],
+            # "Fixed chance of failure per sim. step": [
+            #     {
+            #         "labelText": "Chance of incident per sim. step\n(Out of 100,000)",
+            #         "elementType": "numericSpinbox",
+            #         "elementDefault": None,
+            #         "optionValue": self.agentBreakdownChancePerStepValue,
+            #         "gridLoc": "auto",
+            #         "elementData": SPINBOX_DEFAULT_RANGE
+            #     },
+            #     {
+            #         "labelText": "Agent Breakdown Odds Descriptive Text",
+            #         "elementType": "descriptiveTracedText",
+            #         "elementDefault": None,
+            #         "optionValue": self.agentBreakdownChancePerStepValue,
+            #         "gridLoc": "auto",
+            #         "elementData": [
+            #             {"formula": "(1-(1-float(currentValue)/100000)**5)*100",
+            #                 "string": ["f\"The odds of an incident occurring in 5 steps is {calcValue:3.5f}%\""]},
+            #             {"formula": "(1-(1-float(currentValue)/100000)**20)*100",
+            #                 "string": ["f\"The odds of an incident occurring in 20 steps is {calcValue:3.5f}%\""]},
+            #             {"formula": "(1-(1-float(currentValue)/100000)**100)*100",
+            #                 "string": ["f\"The odds of an incident occurring in 100 steps is {calcValue:3.5f}%\""]}
+            #         ]
+            #     }
+            # ]
         }
     },
     {
@@ -136,7 +136,7 @@
         "gridLoc": "auto",
         "elementData": {
             "As given in Simulation Edit Window": None,
-            "Home Tiles (automatic assignment)": None
+            # "Home Tiles (automatic assignment)": None
         }
     },
     {
@@ -147,7 +147,7 @@
         "gridLoc": "auto",
         "elementData": {
             "No cost for rotation": None,
-            "Rotation requires step": None
+            # "Rotation requires step": None
         }
     },
     {
